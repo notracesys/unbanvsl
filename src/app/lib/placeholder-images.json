@@ -1,0 +1,17 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "hero-laptop",
+      "description": "A modern laptop showing a Google Drive interface with organized study folders",
+      "imageUrl": "https://picsum.photos/seed/drive-study/1200/800",
+      "imageHint": "laptop google drive"
+    },
+    {
+      "id": "student-profile",
+      "description": "Profile picture for student testimonial",
+      "imageUrl": "https://picsum.photos/seed/student1/100/100",
+      "imageHint": "student portrait"
+    }
+  ]
+}
