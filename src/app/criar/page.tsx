@@ -362,12 +362,12 @@ export default function CriarPagina() {
         Mais de 100 mil pessoas já emocionaram seu amor hoje ✨
       </div>
 
-      {/* Botão de Preview Flutuante Fixo (Segue o scroll) */}
+      {/* Botão de Preview Flutuante Fixo (Segue o scroll) - Subido um pouco mais */}
       {phase !== 'sucesso' && (
         <Button 
           variant="ghost" 
           size="sm" 
-          className="fixed top-20 right-6 z-[130] text-[10px] uppercase font-bold tracking-widest text-primary bg-white/90 hover:bg-white rounded-full px-4 h-9 gap-2 transition-all hover:scale-105 pink-glow shadow-xl backdrop-blur-md border border-primary/10"
+          className="fixed top-14 right-6 z-[130] text-[10px] uppercase font-bold tracking-widest text-primary bg-white/90 hover:bg-white rounded-full px-4 h-9 gap-2 transition-all hover:scale-105 pink-glow shadow-xl backdrop-blur-md border border-primary/10"
           onClick={() => setIsPreviewOpen(true)}
         >
           <div className="absolute inset-0 bg-primary/5 animate-pulse rounded-full" />
@@ -422,7 +422,7 @@ export default function CriarPagina() {
           key={`content-body-${phase}-${wizardStep}`}
           className={cn(
             "w-full px-6 py-4 transition-all duration-1000 flex-1",
-            showContent ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8 pointer-events-none"
+            showContent ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8 pointer-events-none blur-sm"
           )}
         >
           {phase === 'dados' && (
