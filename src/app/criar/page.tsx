@@ -810,27 +810,55 @@ export default function CriarPagina() {
 
               {wizardStep === 3 && (
                 <div className="space-y-8">
-                  {/* Spotify Cover Preview Section */}
+                  {/* Real-time Spotify Mockup Preview */}
                   <div className="flex flex-col items-center space-y-4">
                     <span className="text-[10px] uppercase font-bold text-primary tracking-[0.2em]">Capa do seu Presente</span>
-                    <div className="w-full max-w-[240px] aspect-square rounded-[2rem] overflow-hidden shadow-2xl relative border-4 border-white group">
-                      <img 
-                        src={data.photos[0] || 'https://picsum.photos/seed/love/600/600'} 
-                        className="w-full h-full object-cover" 
-                        alt="Preview da Capa" 
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
-                      <div className="absolute bottom-4 left-0 w-full text-center px-4">
-                        <p className="text-white text-[10px] font-black uppercase tracking-widest truncate">
-                          {data.music?.title || "Sua Música"}
+                    <div className="w-full max-w-[280px] bg-white rounded-[3rem] p-6 shadow-2xl border border-primary/5 space-y-5 animate-in zoom-in duration-500">
+                      <div className="w-full aspect-square rounded-[2rem] overflow-hidden shadow-xl relative border-2 border-white group">
+                        <img 
+                          src={data.photos[0] || 'https://picsum.photos/seed/love/600/600'} 
+                          className="w-full h-full object-cover" 
+                          alt="Preview da Capa" 
+                        />
+                        <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
+                           <div className="w-14 h-14 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-lg">
+                              <Play className="w-6 h-6 text-primary fill-current ml-1" />
+                           </div>
+                        </div>
+                        {!data.photos[0] && (
+                          <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted/20">
+                            <ImageIcon className="w-8 h-8 text-primary/40" />
+                            <span className="text-[8px] font-bold uppercase mt-2 text-primary/40">Aguardando foto</span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="text-center space-y-1">
+                        <h4 className="text-sm font-black text-foreground truncate uppercase italic tracking-tighter">
+                          {data.music?.title || "Título da Música"}
+                        </h4>
+                        <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest truncate">
+                          {data.music?.artist || "Artista da Música"}
                         </p>
                       </div>
-                      {!data.photos[0] && (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted/20">
-                          <ImageIcon className="w-8 h-8 text-primary/40" />
-                          <span className="text-[8px] font-bold uppercase mt-2 text-primary/40">Aguardando foto</span>
+
+                      <div className="space-y-2 px-2">
+                        <div className="h-1 w-full bg-primary/10 rounded-full overflow-hidden">
+                          <div className="h-full bg-primary w-[35%]" />
                         </div>
-                      )}
+                        <div className="flex justify-between text-[7px] font-bold text-muted-foreground/50 tracking-widest">
+                          <span>0:45</span>
+                          <span>3:12</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-center gap-6 pb-2">
+                         <SkipBack className="w-4 h-4 text-foreground/40" />
+                         <div className="w-10 h-10 rounded-full bg-primary/5 flex items-center justify-center">
+                            <Play className="w-4 h-4 text-primary fill-current ml-0.5" />
+                         </div>
+                         <SkipForward className="w-4 h-4 text-foreground/40" />
+                      </div>
                     </div>
                   </div>
 
