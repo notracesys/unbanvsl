@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
@@ -233,7 +234,6 @@ export default function CriarPagina() {
         photos: [...prev.photos, ...newPhotos].slice(0, 10)
       }));
     }
-    // Reset input value to allow uploading same file again
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -357,33 +357,33 @@ export default function CriarPagina() {
         onLoadedMetadata={onLoadedMetadata}
       />
       
-      <div className="w-full bg-primary py-2.5 px-6 text-center text-[10px] font-bold text-white uppercase tracking-[0.1em] z-[110] shadow-sm">
+      <div className="w-full bg-primary py-2.5 px-6 text-center text-[10px] font-bold text-white uppercase tracking-[0.1em] z-[110] shadow-sm relative">
         Mais de 100 mil pessoas já emocionaram seu amor hoje ✨
       </div>
 
-      <main className="flex-1 w-full max-w-lg mx-auto flex flex-col items-center pb-32">
-        <div className="w-full px-8 pt-6 flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={handleBack} className="rounded-full -ml-4 hover:bg-primary/5">
-            <ArrowLeft className="w-5 h-5 text-primary" />
-          </Button>
-          <div className="flex-1 h-1.5 bg-primary/10 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-primary transition-all duration-1000 ease-in-out rounded-full" 
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-          {phase !== 'sucesso' && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="text-[10px] uppercase font-bold tracking-widest text-primary hover:bg-primary/5 gap-2"
-              onClick={() => setIsPreviewOpen(true)}
-            >
-              <Eye className="w-3.5 h-3.5" /> Preview
-            </Button>
-          )}
+      <header className="sticky top-0 w-full bg-white/95 backdrop-blur-md z-[105] border-b border-primary/5 shadow-sm px-6 py-4 flex items-center gap-4">
+        <Button variant="ghost" size="icon" onClick={handleBack} className="rounded-full hover:bg-primary/5 shrink-0">
+          <ArrowLeft className="w-5 h-5 text-primary" />
+        </Button>
+        <div className="flex-1 h-1.5 bg-primary/10 rounded-full overflow-hidden">
+          <div 
+            className="h-full bg-primary transition-all duration-1000 ease-in-out rounded-full" 
+            style={{ width: `${progress}%` }}
+          />
         </div>
+        {phase !== 'sucesso' && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-[10px] uppercase font-bold tracking-widest text-primary bg-primary/5 hover:bg-primary/10 rounded-full px-4 h-9 gap-2 transition-all hover:scale-105 pink-glow group"
+            onClick={() => setIsPreviewOpen(true)}
+          >
+            <Eye className="w-3.5 h-3.5 group-hover:animate-pulse" /> Preview
+          </Button>
+        )}
+      </header>
 
+      <main className="flex-1 w-full max-w-lg mx-auto flex flex-col items-center pb-32">
         <div 
           key={`assistant-header-${phase}-${wizardStep}`}
           className="mt-10 mb-6 flex flex-col items-center px-6 w-full"
@@ -700,10 +700,10 @@ export default function CriarPagina() {
         </div>
 
         {phase !== 'sucesso' && showContent && (
-          <div className="fixed bottom-0 left-0 w-full p-8 bg-gradient-to-t from-background to-transparent z-[100] animate-in fade-in slide-in-from-bottom-6 duration-700">
+          <div className="fixed bottom-0 left-0 w-full p-8 bg-gradient-to-t from-background to-transparent z-[100] animate-in fade-in slide-in-from-bottom-6 duration-700 pointer-events-none">
             <Button 
               size="lg" 
-              className="w-full h-16 bg-primary hover:bg-primary/90 text-lg font-bold rounded-full max-w-lg mx-auto flex items-center justify-center gap-3 pink-glow"
+              className="w-full h-16 bg-primary hover:bg-primary/90 text-lg font-bold rounded-full max-w-lg mx-auto flex items-center justify-center gap-3 pink-glow pointer-events-auto"
               onClick={handleNext}
               disabled={
                 (phase === 'dados' && !(data.creatorName && data.partnerName && data.startDate))
