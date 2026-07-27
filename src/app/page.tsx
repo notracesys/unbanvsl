@@ -11,13 +11,15 @@ import {
   Zap,
   Gift
 } from "lucide-react";
-import { GlassCard } from "@/components/ui/glass-card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import Link from "next/link";
+import { FloatingHearts } from "@/components/ui/floating-hearts";
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground">
+    <div className="flex flex-col min-h-screen bg-background text-foreground relative">
+      <FloatingHearts />
+      
       {/* Header */}
       <header className="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-md border-b border-primary/5">
         <div className="container mx-auto px-4 h-20 flex items-center justify-between">
@@ -33,7 +35,7 @@ export default function Home() {
         </div>
       </header>
 
-      <main>
+      <main className="relative z-10">
         <HeroLP />
 
         {/* Como Funciona */}
@@ -139,7 +141,7 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="py-16 border-t border-primary/5 bg-white">
+      <footer className="py-16 border-t border-primary/5 bg-white relative z-10">
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center gap-2 mb-6">
             <Heart className="text-primary fill-current w-6 h-6" />
