@@ -18,25 +18,16 @@ import {
   Pause,
   Eye,
   X,
-  ShieldCheck,
   CheckCircle2,
   Crown,
-  CreditCard,
-  QrCode,
-  Copy,
-  ChevronRight,
-  History,
-  Star,
-  Gamepad2,
-  MapPin,
   Gift,
-  Ticket
+  Ticket,
+  QrCode
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { GlassCard } from '@/components/ui/glass-card';
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { differenceInSeconds } from 'date-fns';
 import { 
@@ -46,7 +37,6 @@ import {
   DialogTitle, 
   DialogDescription 
 } from '@/components/ui/dialog';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Slider } from '@/components/ui/slider';
 
 // --- Types ---
@@ -111,11 +101,20 @@ export default function CriarPagina() {
     years: 0, months: 0, days: 0, hours: 0, minutes: 0, seconds: 0
   });
 
-  // Animation effect for assistant text
+  // Animation effect for assistant text vs content
   useEffect(() => {
     setShowContent(false);
-    const timer = setTimeout(() => setShowContent(true), 800);
+    // Delay para o conteúdo aparecer após o balão de fala
+    const timer = setTimeout(() => setShowContent(true), 1200);
     return () => clearTimeout(timer);
+  }, [phase, wizardStep]);
+
+  // Stop audio on step/phase change
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      setPlayingTrackUrl(null);
+    }
   }, [phase, wizardStep]);
 
   // Calculate time in real-time
@@ -170,14 +169,6 @@ export default function CriarPagina() {
 
     return () => clearTimeout(delayDebounceFn);
   }, [musicSearch]);
-
-  // Stop audio on step/phase change
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      setPlayingTrackUrl(null);
-    }
-  }, [phase, wizardStep]);
 
   const togglePlay = (track: MusicTrack) => {
     if (playingTrackUrl === track.previewUrl) {
@@ -272,10 +263,9 @@ export default function CriarPagina() {
         <p className="text-sm text-muted-foreground italic">Para: {data.partnerName || "Amor"}</p>
       </div>
 
-      {/* Bloco Música */}
-      <GlassCard className="p-4 rounded-3xl border-white/5 flex items-center gap-4 transition-all animate-in fade-in zoom-in-95">
+      <GlassCard className="p-4 rounded-3xl border-white/5 flex items-center gap-4">
         <div className={cn(
-          "w-14 h-14 bg-white/10 rounded-xl overflow-hidden shrink-0 shadow-inner flex items-center justify-center relative",
+          "w-14 h-14 bg-white/10 rounded-xl overflow-hidden shrink-0 flex items-center justify-center relative",
           playingTrackUrl && "animate-pulse"
         )}>
           {data.music?.cover ? (
@@ -293,10 +283,9 @@ export default function CriarPagina() {
         </div>
       </GlassCard>
 
-      {/* Bloco Fotos */}
-      <div className="aspect-square rounded-[2rem] bg-white/5 border border-white/5 overflow-hidden shadow-lg transition-all duration-500">
+      <div className="aspect-square rounded-[2rem] bg-white/5 border border-white/5 overflow-hidden shadow-lg">
         {data.photos[0] ? (
-          <img src={data.photos[0]} className="w-full h-full object-cover animate-in fade-in duration-700" alt="Casal" />
+          <img src={data.photos[0]} className="w-full h-full object-cover" alt="Casal" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-muted-foreground">
             <ImageIcon className="w-12 h-12 opacity-20" />
@@ -304,7 +293,6 @@ export default function CriarPagina() {
         )}
       </div>
 
-      {/* Bloco Tempo */}
       <div className="text-center space-y-4">
         <p className="text-xs uppercase font-bold tracking-widest text-primary">Nossa História</p>
         <div className="grid grid-cols-3 gap-3">
@@ -322,18 +310,11 @@ export default function CriarPagina() {
           </div>
         </div>
       </div>
-
-      {/* Bloco Mensagem */}
-      {data.message && (
-        <div className="glass p-6 rounded-3xl text-sm leading-relaxed text-muted-foreground italic border-white/5 shadow-sm text-center">
-          &quot;{data.message}&quot;
-        </div>
-      )}
     </div>
   );
 
   return (
-    <div className="min-h-screen flex flex-col bg-background selection:bg-primary/30 text-foreground">
+    <div className="min-h-screen flex flex-col bg-background selection:bg-primary/30 text-foreground overflow-x-hidden">
       <audio 
         ref={audioRef} 
         onEnded={() => setPlayingTrackUrl(null)}
@@ -341,13 +322,13 @@ export default function CriarPagina() {
         onLoadedMetadata={onLoadedMetadata}
       />
       
-      {/* Banner de Urgência Topo (Fiel à imagem) */}
+      {/* Banner de Urgência Topo */}
       <div className="w-full bg-primary py-2.5 px-6 text-center text-[11px] font-bold text-white uppercase tracking-tight z-[110]">
         Mais de 100 mil pessoas já emocionaram alguém que amam. Crie o seu presente em 5 minutos.
       </div>
 
-      <main className="flex-1 w-full max-w-lg mx-auto flex flex-col items-center">
-        {/* Barra de Progresso Arredondada */}
+      <main className="flex-1 w-full max-w-lg mx-auto flex flex-col items-center pb-32">
+        {/* Barra de Progresso */}
         <div className="w-full px-8 pt-6 flex items-center justify-between">
           <Button variant="ghost" size="icon" onClick={handleBack} className="rounded-full -ml-4 opacity-50">
             <ArrowLeft className="w-5 h-5" />
@@ -361,9 +342,12 @@ export default function CriarPagina() {
           <div className="w-10" />
         </div>
 
-        {/* Mascote Centralizado (Panda Style) */}
-        <div className="mt-8 mb-4 flex flex-col items-center animate-in fade-in duration-700">
-          <div className="w-32 h-32 rounded-full bg-white shadow-xl flex items-center justify-center overflow-hidden border-4 border-white">
+        {/* Mascote e Fala (Sempre animam ao trocar de etapa) */}
+        <div 
+          key={`assistant-header-${phase}-${wizardStep}`}
+          className="mt-8 mb-4 flex flex-col items-center px-6 w-full"
+        >
+          <div className="w-32 h-32 rounded-full bg-white shadow-xl flex items-center justify-center overflow-hidden border-4 border-white animate-in zoom-in duration-500">
             <img 
               src="https://picsum.photos/seed/panda-love/200/200" 
               alt="Mascote" 
@@ -371,8 +355,7 @@ export default function CriarPagina() {
             />
           </div>
           
-          {/* Balão de Fala do Mascote */}
-          <div className="mt-6 w-[90%] glass p-6 rounded-[2rem] shadow-2xl relative text-center border-white/10 animate-in slide-in-from-top-4 duration-500">
+          <div className="mt-6 w-full glass p-6 rounded-[2rem] shadow-2xl relative text-center border-white/10 animate-in slide-in-from-top-4 fade-in duration-700 delay-200">
             <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 glass rotate-45 border-l border-t border-white/5" />
             <p className="text-sm font-medium leading-relaxed text-foreground/80">
               {assistantMessage}
@@ -380,11 +363,14 @@ export default function CriarPagina() {
           </div>
         </div>
 
-        {/* Conteúdo da Etapa (Aparece após a fala) */}
-        <div className={cn(
-          "w-full px-6 py-6 transition-all duration-700 flex-1",
-          showContent ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-        )}>
+        {/* Conteúdo da Etapa (Staggered Animation) */}
+        <div 
+          key={`content-body-${phase}-${wizardStep}`}
+          className={cn(
+            "w-full px-6 py-6 transition-all duration-1000 flex-1",
+            showContent ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+          )}
+        >
           {phase === 'dados' && (
             <div className="space-y-4">
               <Input 
@@ -474,9 +460,6 @@ export default function CriarPagina() {
                             <p className="text-sm font-bold truncate">{m.title}</p>
                             <p className="text-xs text-muted-foreground truncate">{m.artist}</p>
                           </div>
-                          <Button variant="ghost" size="icon" className={cn("rounded-full", data.music?.previewUrl === m.previewUrl && "text-primary")} onClick={() => setData({...data, music: m})}>
-                            <Heart className={cn("w-5 h-5", data.music?.previewUrl === m.previewUrl && "fill-current")} />
-                          </Button>
                         </div>
                         {playingTrackUrl === m.previewUrl && (
                           <div className="mt-4 px-2 space-y-2">
@@ -516,9 +499,6 @@ export default function CriarPagina() {
                     value={data.message}
                     onChange={e => setData({...data, message: e.target.value})}
                   />
-                  <div className="flex justify-between items-center text-[10px] text-muted-foreground">
-                    <span>{data.message.length}/5000</span>
-                  </div>
                 </div>
               )}
 
@@ -568,7 +548,6 @@ export default function CriarPagina() {
 
           {phase === 'checkout' && (
             <div className="space-y-6">
-              {/* Resumo do Pedido (Fiel à imagem) */}
               <GlassCard className="p-8 border-white/5 bg-white/5 space-y-6 rounded-[2.5rem]">
                 <h3 className="text-lg font-bold text-foreground/90">Resumo do pedido</h3>
                 
@@ -578,9 +557,9 @@ export default function CriarPagina() {
                       <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center">
                         <Gift className="w-4 h-4 text-muted-foreground" />
                       </div>
-                      <span className="text-muted-foreground">Plano: Só Hoje (24h)</span>
+                      <span className="text-muted-foreground">Plano: {data.plan === 'lifetime' ? 'Vitalício' : 'Econômico'}</span>
                     </div>
-                    <span className="font-bold">R$ 19,90</span>
+                    <span className="font-bold">R$ {data.plan === 'lifetime' ? '27,97' : '19,90'}</span>
                   </div>
                   
                   <div className="flex justify-between items-center text-sm">
@@ -598,34 +577,26 @@ export default function CriarPagina() {
                 
                 <div className="flex justify-between items-center pt-2">
                   <span className="text-lg font-bold">Total:</span>
-                  <span className="text-2xl font-bold text-foreground">R$ 23,80</span>
+                  <span className="text-2xl font-bold text-foreground">R$ {(Number(data.plan === 'lifetime' ? '27.97' : '19.90') + 3.9).toFixed(2).replace('.', ',')}</span>
                 </div>
 
                 <Button variant="ghost" className="w-full text-xs gap-2 text-muted-foreground hover:text-primary transition-colors">
                   <Ticket className="w-3 h-3" /> Possui um cupom de desconto?
                 </Button>
 
-                {/* Box de Upsell Checkout */}
                 <div className="p-5 rounded-3xl bg-primary/5 border border-primary/10 flex items-center gap-4">
                   <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
                     <Crown className="w-5 h-5 text-primary" />
                   </div>
                   <div className="flex-1">
                     <p className="text-[11px] font-bold leading-tight">Faça seu presente durar <span className="text-primary">PARA SEMPRE</span></p>
-                    <p className="text-[9px] text-muted-foreground">Plano Vitalício com edições ilimitadas por apenas</p>
+                    <p className="text-[9px] text-muted-foreground">Plano Vitalício com edições ilimitadas</p>
                   </div>
                   <div className="text-right">
                     <span className="text-xs font-bold text-primary">+ R$ 10,00</span>
                   </div>
                 </div>
               </GlassCard>
-
-              {/* Botão flutuante de chat/ajuda (Estilo imagem) */}
-              <div className="fixed bottom-32 right-8 z-[120]">
-                <Button size="icon" className="w-14 h-14 rounded-full bg-primary/80 hover:bg-primary shadow-2xl pink-glow">
-                  <Sparkles className="w-6 h-6 text-white" />
-                </Button>
-              </div>
             </div>
           )}
 
@@ -642,8 +613,8 @@ export default function CriarPagina() {
         </div>
 
         {/* Botão de Navegação Rodapé Fixo */}
-        {phase !== 'sucesso' && (
-          <div className="fixed bottom-0 left-0 w-full p-6 bg-gradient-to-t from-background via-background to-transparent z-[100]">
+        {phase !== 'sucesso' && showContent && (
+          <div className="fixed bottom-0 left-0 w-full p-6 bg-gradient-to-t from-background via-background to-transparent z-[100] animate-in fade-in slide-in-from-bottom-4 duration-500">
             <Button 
               size="lg" 
               className="w-full h-16 bg-primary hover:bg-primary/90 pink-glow text-lg font-bold rounded-full max-w-lg mx-auto block"
@@ -659,7 +630,7 @@ export default function CriarPagina() {
         )}
       </main>
 
-      {/* Botão de Preview Flutuante (Lado Esquerdo oposto ao chat) */}
+      {/* Botão de Preview Flutuante */}
       {phase !== 'sucesso' && (
         <Button 
           variant="secondary" 
