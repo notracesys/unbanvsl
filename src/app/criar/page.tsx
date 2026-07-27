@@ -104,7 +104,7 @@ interface PageData {
   email: string;
 }
 
-// --- Preview Component (Extracted to avoid re-renders) ---
+// --- Preview Component ---
 const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: any }) => {
   const [previewOpened, setPreviewOpened] = useState(false);
   const [isStoryMode, setIsStoryMode] = useState(false);
@@ -112,15 +112,15 @@ const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: 
   if (!previewOpened) {
     return (
       <div 
-        className="w-full h-full bg-[#050505] flex flex-col items-center justify-center p-8 cursor-pointer relative overflow-hidden"
+        className="w-full h-full bg-[#FFF5F7] flex flex-col items-center justify-center p-8 cursor-pointer relative overflow-hidden"
         onClick={() => setPreviewOpened(true)}
       >
         <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent opacity-30" />
         <div className="relative group flex flex-col items-center">
-          <div className="w-48 h-36 bg-zinc-900 rounded-3xl border border-white/10 shadow-[0_0_50px_rgba(255,77,109,0.15)] flex items-center justify-center animate-bounce duration-[2000ms]">
+          <div className="w-48 h-36 bg-white rounded-3xl border border-primary/10 shadow-[0_20px_50px_rgba(255,77,109,0.15)] flex items-center justify-center animate-bounce duration-[2000ms]">
             <Heart className="w-16 h-16 text-primary fill-current animate-pulse" />
           </div>
-          <p className="mt-12 text-[11px] font-black uppercase tracking-[0.3em] text-white/40 animate-pulse text-center leading-relaxed">
+          <p className="mt-12 text-[11px] font-black uppercase tracking-[0.3em] text-primary/60 animate-pulse text-center leading-relaxed">
             Você recebeu um presente<br/>Toque para abrir
           </p>
         </div>
@@ -145,17 +145,18 @@ const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: 
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center relative">
           <img 
             src={data.photos[0] || 'https://picsum.photos/seed/love/600/900'} 
-            className="absolute inset-0 w-full h-full object-cover opacity-40 grayscale" 
+            className="absolute inset-0 w-full h-full object-cover opacity-60" 
             alt="Story BG" 
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/40" />
           <div className="relative z-10 space-y-6">
             <h2 className="text-5xl font-black text-white italic uppercase tracking-tighter leading-none">
-              Sua<br/>História<br/><span className="text-[#00FFFF]">Love Link</span>
+              Sua<br/>História<br/><span className="text-primary">Love Link</span>
             </h2>
-            <p className="text-[#00FFFF] text-[10px] font-bold tracking-[0.3em] uppercase">Mergulhe nas memórias</p>
+            <p className="text-primary text-[10px] font-bold tracking-[0.3em] uppercase">Mergulhe nas memórias</p>
           </div>
           <Button 
-            className="mt-12 w-64 h-16 bg-[#00FFFF] hover:bg-[#00FFFF]/90 text-black font-black text-lg rounded-full shadow-[0_0_30px_rgba(0,255,255,0.4)] animate-pulse"
+            className="mt-12 w-64 h-16 bg-primary hover:bg-primary/90 text-white font-black text-lg rounded-full shadow-[0_0_30px_rgba(255,77,109,0.4)] animate-pulse"
             onClick={() => setIsStoryMode(false)}
           >
             COMEÇAR STORY
@@ -172,65 +173,65 @@ const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: 
   }
 
   return (
-    <div className="w-full h-full bg-[#050505] overflow-y-auto no-scrollbar scroll-smooth">
+    <div className="w-full h-full bg-[#FFF5F7] overflow-y-auto no-scrollbar scroll-smooth">
       {/* Section 1: Music Player */}
-      <section className="min-h-full flex flex-col items-center justify-center p-8 space-y-8 bg-gradient-to-b from-[#0a0a0a] to-[#050505]">
-        <div className="w-72 aspect-square rounded-[2rem] overflow-hidden shadow-[0_30px_60px_-12px_rgba(0,0,0,0.8)] border border-white/5 relative group">
+      <section className="min-h-full flex flex-col items-center justify-center p-8 space-y-8 bg-gradient-to-b from-white to-[#FFF5F7]">
+        <div className="w-72 aspect-square rounded-[2rem] overflow-hidden shadow-[0_30px_60px_-12px_rgba(255,77,109,0.2)] border border-primary/5 relative group">
           <img 
             src={data.photos[0] || 'https://picsum.photos/seed/love/600/600'} 
             className="w-full h-full object-cover transition-transform duration-[10s] group-hover:scale-110" 
             alt="Capa" 
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-primary/20 to-transparent" />
         </div>
 
-        <div className="w-full space-y-1 text-left px-4">
-          <div className="flex items-center gap-2">
-            <h3 className="text-2xl font-black text-white truncate italic tracking-tighter">
+        <div className="w-full space-y-1 text-center px-4">
+          <div className="flex items-center justify-center gap-2">
+            <h3 className="text-2xl font-black text-foreground truncate italic tracking-tighter">
               {data.music?.title || "Sua Música Especial"}
             </h3>
-            <CheckCircle2 className="w-4 h-4 text-[#00FFFF] fill-[#00FFFF]/20" />
+            <CheckCircle2 className="w-4 h-4 text-primary fill-primary/10" />
           </div>
-          <p className="text-sm text-zinc-500 font-medium">
+          <p className="text-sm text-muted-foreground font-medium uppercase tracking-widest">
             {data.music?.artist || "Escolha seu artista favorito"}
           </p>
         </div>
 
         <div className="w-full px-4 space-y-4">
-          <div className="relative h-1 w-full bg-white/10 rounded-full overflow-hidden">
-            <div className="absolute left-0 top-0 h-full bg-[#00FFFF] w-[35%] shadow-[0_0_10px_#00FFFF]" />
+          <div className="relative h-1.5 w-full bg-primary/10 rounded-full overflow-hidden">
+            <div className="absolute left-0 top-0 h-full bg-primary w-[35%] shadow-[0_0_10px_rgba(255,77,109,0.3)]" />
           </div>
-          <div className="flex justify-between text-[10px] font-bold text-zinc-600 tracking-widest">
+          <div className="flex justify-between text-[10px] font-bold text-primary/40 tracking-widest uppercase">
             <span>1:14</span>
             <span>3:45</span>
           </div>
         </div>
 
         <div className="flex items-center justify-between w-full px-4 pt-2">
-          <Shuffle className="w-5 h-5 text-zinc-600" />
-          <SkipBack className="w-7 h-7 text-white fill-current" />
-          <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center shadow-xl shadow-white/5 hover:scale-105 transition-transform cursor-pointer">
-            <Play className="w-8 h-8 text-black fill-current ml-1" />
+          <Shuffle className="w-5 h-5 text-primary/30" />
+          <SkipBack className="w-7 h-7 text-primary fill-current" />
+          <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center shadow-xl shadow-primary/20 hover:scale-105 transition-transform cursor-pointer">
+            <Play className="w-8 h-8 text-white fill-current ml-1" />
           </div>
-          <SkipForward className="w-7 h-7 text-white fill-current" />
-          <Repeat className="w-5 h-5 text-zinc-600" />
+          <SkipForward className="w-7 h-7 text-primary fill-current" />
+          <Repeat className="w-5 h-5 text-primary/30" />
         </div>
 
         <div className="pt-8">
           <div className="flex flex-col items-center gap-2">
-            <div className="w-1 h-12 bg-gradient-to-b from-[#00FFFF] to-transparent rounded-full animate-bounce" />
-            <p className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-700">Role para continuar</p>
+            <div className="w-1 h-12 bg-gradient-to-b from-primary to-transparent rounded-full animate-bounce" />
+            <p className="text-[9px] font-black uppercase tracking-[0.4em] text-primary/40">Role para continuar</p>
           </div>
         </div>
       </section>
 
-      {/* Section 2: Counter Brutalist */}
-      <section className="min-h-full bg-black flex flex-col items-center justify-center p-8 py-20 space-y-12">
+      {/* Section 2: Counter Soft */}
+      <section className="min-h-full bg-white flex flex-col items-center justify-center p-8 py-20 space-y-12">
         <div className="text-center space-y-4 w-full">
-          <h2 className="text-4xl lg:text-5xl font-black text-white uppercase italic tracking-tighter leading-none break-words px-4">
+          <h2 className="text-4xl lg:text-5xl font-black text-primary uppercase italic tracking-tighter leading-none break-words px-4">
             {data.creatorName || "NOME"} & {data.partnerName || "AMOR"}
           </h2>
-          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-600">
+          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground">
             UM LAÇO ETERNO DESDE {data.startDate ? format(new Date(data.startDate), 'dd/MM/yyyy') : '...'}
           </p>
         </div>
@@ -244,45 +245,45 @@ const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: 
             { label: 'Minutos', value: timeTogether.minutes },
             { label: 'Segundos', value: timeTogether.seconds }
           ].map((t, i) => (
-            <div key={i} className="bg-zinc-900/50 border border-white/5 p-6 rounded-[2rem] text-center space-y-1 flex flex-col items-center justify-center backdrop-blur-sm">
-              <span className="text-4xl font-black text-white italic tracking-tighter">{t.value}</span>
-              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-600">{t.label}</span>
+            <div key={i} className="bg-[#FFF5F7] border border-primary/5 p-6 rounded-[2.5rem] text-center space-y-1 flex flex-col items-center justify-center shadow-sm">
+              <span className="text-4xl font-black text-primary italic tracking-tighter">{t.value}</span>
+              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-primary/40">{t.label}</span>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Section 3: Note of Love (Cyan Card) */}
-      <section className="min-h-full flex flex-col items-center justify-center p-8 bg-[#050505]">
-        <div className="bg-[#00FFFF] w-full p-10 rounded-[3rem] shadow-[0_40px_100px_-20px_rgba(0,255,255,0.3)] space-y-8 flex flex-col items-center text-center">
-          <div className="flex items-center gap-3 bg-black/10 px-4 py-2 rounded-full">
-            <MessageCircle className="w-5 h-5 text-black" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-black">Nota de Amor</span>
+      {/* Section 3: Note of Love (Pink Card) */}
+      <section className="min-h-full flex flex-col items-center justify-center p-8 bg-[#FFF5F7]">
+        <div className="bg-primary w-full p-10 rounded-[3rem] shadow-[0_40px_100px_-20px_rgba(255,77,109,0.3)] space-y-8 flex flex-col items-center text-center">
+          <div className="flex items-center gap-3 bg-white/10 px-4 py-2 rounded-full">
+            <MessageCircle className="w-5 h-5 text-white" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-white">Nota de Amor</span>
           </div>
           
-          <p className="text-2xl font-black text-black leading-tight tracking-tight uppercase italic line-clamp-4">
+          <p className="text-2xl font-black text-white leading-tight tracking-tight uppercase italic line-clamp-4">
             {data.message || "Sua mensagem especial aparecerá aqui para emocionar seu amor..."}
           </p>
 
-          <Button className="w-full h-16 bg-black hover:bg-black/90 text-white font-black rounded-full text-sm uppercase tracking-widest">
+          <Button className="w-full h-16 bg-white hover:bg-white/90 text-primary font-black rounded-full text-sm uppercase tracking-widest shadow-lg">
             LER MENSAGEM
           </Button>
         </div>
       </section>
 
-      {/* Section 4: Story Redirect */}
-      <section className="min-h-full flex flex-col items-center justify-center p-8 space-y-12 bg-black relative">
-        <div className="absolute inset-0 bg-gradient-to-t from-[#00FFFF]/10 to-transparent" />
+      {/* Section 4: Story Redirect Soft */}
+      <section className="min-h-full flex flex-col items-center justify-center p-8 space-y-12 bg-white relative">
+        <div className="absolute inset-0 bg-gradient-to-t from-primary/10 to-transparent" />
         <div className="relative z-10 text-center space-y-10">
           <div className="space-y-4">
-            <h2 className="text-5xl font-black text-white italic uppercase tracking-tighter leading-none">
-              Sua<br/>História<br/><span className="text-[#00FFFF]">Love Link</span>
+            <h2 className="text-5xl font-black text-foreground italic uppercase tracking-tighter leading-none">
+              Sua<br/>História<br/><span className="text-primary">Love Link</span>
             </h2>
-            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-600">Mergulhe nas memórias</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary/40">Mergulhe nas memórias</p>
           </div>
           
           <Button 
-            className="w-64 h-16 bg-[#00FFFF] hover:bg-[#00FFFF]/90 text-black font-black text-lg rounded-full shadow-[0_0_30px_rgba(0,255,255,0.4)] animate-pulse"
+            className="w-64 h-16 bg-primary hover:bg-primary/90 text-white font-black text-lg rounded-full shadow-[0_15px_30px_rgba(255,77,109,0.3)] animate-pulse"
             onClick={() => setIsStoryMode(true)}
           >
             COMEÇAR STORY
@@ -346,7 +347,6 @@ export default function CriarPagina() {
       const start = new Date(startString);
       const now = new Date();
       
-      // Basic check if date is valid
       if (isNaN(start.getTime())) return;
       
       const diff = differenceInSeconds(now, start);
@@ -512,7 +512,7 @@ export default function CriarPagina() {
         <Button 
           variant="ghost" 
           size="sm" 
-          className="fixed top-14 right-6 z-[130] text-[10px] uppercase font-bold tracking-widest text-primary bg-white/90 hover:bg-white rounded-full px-4 h-9 gap-2 transition-all hover:scale-105 pink-glow shadow-xl backdrop-blur-md border border-primary/10"
+          className="fixed top-8 right-6 z-[130] text-[10px] uppercase font-bold tracking-widest text-primary bg-white/90 hover:bg-white rounded-full px-4 h-9 gap-2 transition-all hover:scale-105 pink-glow shadow-xl backdrop-blur-md border border-primary/10"
           onClick={() => setIsPreviewOpen(true)}
         >
           <div className="absolute inset-0 bg-primary/5 animate-pulse rounded-full" />
@@ -891,7 +891,7 @@ export default function CriarPagina() {
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
         <DialogContent 
           hideClose
-          className="max-w-[420px] h-[90vh] p-0 bg-transparent border-none shadow-none focus:outline-none flex items-center justify-center overflow-visible"
+          className="max-w-[420px] h-[90vh] p-0 bg-transparent border-none shadow-none focus:outline-none flex items-center justify-center overflow-visible z-[201]"
         >
           <DialogHeader className="sr-only">
             <DialogTitle>Visualização da Página</DialogTitle>
@@ -908,11 +908,11 @@ export default function CriarPagina() {
               <X className="w-5 h-5" />
             </Button>
 
-            <div className="w-[360px] h-full bg-white border-[12px] border-zinc-900 rounded-[3.5rem] overflow-hidden shadow-2xl flex flex-col relative">
-              <div className="flex-1 overflow-hidden relative">
+            <div className="w-[360px] h-full bg-zinc-900 border-[12px] border-zinc-900 rounded-[3.5rem] overflow-hidden shadow-2xl flex flex-col relative">
+              <div className="flex-1 overflow-hidden relative bg-white">
                 <PreviewContent data={data} timeTogether={timeTogether} />
               </div>
-              <div className="h-1.5 w-32 bg-zinc-200 rounded-full mx-auto mb-2 mt-auto shrink-0 z-10" />
+              <div className="h-1.5 w-32 bg-zinc-800 rounded-full mx-auto mb-2 mt-auto shrink-0 z-10" />
             </div>
           </div>
         </DialogContent>
