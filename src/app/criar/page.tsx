@@ -99,6 +99,7 @@ interface PageData {
 
 export default function CriarPagina() {
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [phase, setPhase] = useState<CreationPhase>('dados');
   const [wizardStep, setWizardStep] = useState(1);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -223,6 +224,19 @@ export default function CriarPagina() {
     }
   };
 
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const newPhotos = Array.from(files).map(file => URL.createObjectURL(file));
+      setData(prev => ({
+        ...prev,
+        photos: [...prev.photos, ...newPhotos].slice(0, 10)
+      }));
+    }
+    // Reset input value to allow uploading same file again
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
   const progress = useMemo(() => {
     if (phase === 'dados') return 15;
     if (phase === 'wizard') return 15 + (wizardStep * 10);
@@ -263,9 +277,9 @@ export default function CriarPagina() {
       switch(wizardStep) {
         case 1: return "Dê um título especial para esse presente! Como você chama seu amor?";
         case 2: return "Qual a trilha sonora de vocês? Escolha aquela música que faz o coração bater mais forte.";
-        case 3: return "Hora das fotos! Escolha as 5 melhores lembranças de vocês.";
+        case 3: return "Hora das fotos! Escolha as melhores lembranças de vocês (até 10 fotos).";
         case 4: return "Abra seu coração! Escreva uma carta de amor inesquecível.";
-        case 5: return "Estamos quase lá! Escolha a melhor foto para a capa do seu contador.";
+        case 5: return "Estamos quase lá! O visual do presente está incrível.";
         case 6: return "O seu presente está lindíssimo! Confira se está tudo certinho antes de finalizar.";
         default: return "";
       }
@@ -284,7 +298,7 @@ export default function CriarPagina() {
         <p className="text-sm text-muted-foreground italic tracking-wide">Para: {data.partnerName || "Amor"}</p>
       </div>
 
-      <GlassCard className="p-4 rounded-3xl border-primary/5 flex items-center gap-4 bg-muted/50">
+      <GlassCard className="p-4 rounded-3xl border-primary/5 flex items-center gap-4 bg-muted/50 shadow-none">
         <div className={cn(
           "w-14 h-14 bg-white rounded-xl overflow-hidden shrink-0 flex items-center justify-center relative shadow-sm border border-primary/5",
           playingTrackUrl && "animate-pulse"
@@ -516,25 +530,39 @@ export default function CriarPagina() {
               )}
 
               {wizardStep === 3 && (
-                <div className="grid grid-cols-2 gap-4">
-                  {data.photos.map((p, i) => (
-                    <div key={i} className="aspect-square rounded-3xl bg-muted/30 relative overflow-hidden border border-primary/10 group shadow-sm">
-                      <img src={p} className="w-full h-full object-cover" alt="Sua foto" />
-                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <Button variant="destructive" size="icon" className="h-10 w-10 rounded-full" onClick={() => setData({...data, photos: data.photos.filter((_, idx) => idx !== i)})}>
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                <div className="space-y-4">
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    multiple 
+                    className="hidden" 
+                    ref={fileInputRef} 
+                    onChange={handlePhotoUpload}
+                  />
+                  <div className="grid grid-cols-2 gap-4">
+                    {data.photos.map((p, i) => (
+                      <div key={i} className="aspect-square rounded-3xl bg-muted/30 relative overflow-hidden border border-primary/10 group shadow-sm">
+                        <img src={p} className="w-full h-full object-cover" alt="Sua foto" />
+                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <Button variant="destructive" size="icon" className="h-10 w-10 rounded-full" onClick={() => setData({...data, photos: data.photos.filter((_, idx) => idx !== i)})}>
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                  {data.photos.length < 5 && (
-                    <button className="aspect-square rounded-3xl bg-white border-2 border-dashed border-primary/10 flex flex-col items-center justify-center gap-2 hover:bg-primary/5 transition-colors group" onClick={() => setData({...data, photos: [...data.photos, `https://picsum.photos/seed/${Math.random()}/800/800` ]})}>
-                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <Upload className="w-5 h-5 text-primary" />
-                      </div>
-                      <span className="text-[10px] uppercase font-bold text-primary/60 tracking-widest">Enviar Foto</span>
-                    </button>
-                  )}
+                    ))}
+                    {data.photos.length < 10 && (
+                      <button 
+                        className="aspect-square rounded-3xl bg-white border-2 border-dashed border-primary/10 flex flex-col items-center justify-center gap-2 hover:bg-primary/5 transition-colors group" 
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <Upload className="w-5 h-5 text-primary" />
+                        </div>
+                        <span className="text-[10px] uppercase font-bold text-primary/60 tracking-widest">Enviar Foto</span>
+                      </button>
+                    )}
+                  </div>
+                  <p className="text-center text-[10px] text-muted-foreground">Você pode enviar até 10 fotos.</p>
                 </div>
               )}
 
