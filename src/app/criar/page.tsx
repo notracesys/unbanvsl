@@ -116,11 +116,11 @@ const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: 
 
   const handleOpenLetter = () => {
     setIsOpening(true);
-    // Tempo da animação: a carta salta, expande e então revelamos o conteúdo
+    // Tempo da animação otimizado: a carta salta, expande e então revelamos o conteúdo rapidamente
     setTimeout(() => {
       setPreviewOpened(true);
       setIsOpening(false);
-    }, 2500);
+    }, 1500);
   };
 
   if (!previewOpened) {
@@ -150,7 +150,7 @@ const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: 
         </div>
 
         {/* THE ENVELOPE (Nobel Prize Animation Stage) */}
-        <div className="relative w-full flex items-center justify-center h-64">
+        <div className="relative w-full flex items-center justify-center h-64 overflow-visible">
           
           {/* Opening Light Burst */}
           {isOpening && (
@@ -690,41 +690,43 @@ export default function CriarPagina() {
                   <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-[0.15em]">Seu Nome</span>
                   <span className="text-[9px] text-muted-foreground flex items-center gap-1"><ShieldCheck className="w-2.5 h-2.5" /> Apenas o primeiro nome</span>
                 </div>
-                <Input 
+                <input 
+                  type="text"
                   placeholder="Como você se chama?" 
                   value={data.creatorName}
                   onChange={e => setData({...data, creatorName: e.target.value})}
-                  className="h-16 bg-white border-primary/10 text-lg rounded-3xl focus:ring-primary/20 shadow-sm"
+                  className="flex h-16 w-full bg-white border border-primary/10 px-6 text-lg rounded-3xl focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-sm transition-all"
                 />
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between items-center ml-3">
                   <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-[0.15em]">Nome do seu Amor</span>
                 </div>
-                <Input 
+                <input 
+                  type="text"
                   placeholder="Qual o nome dele(a)?" 
                   value={data.partnerName}
                   onChange={e => setData({...data, partnerName: e.target.value})}
-                  className="h-16 bg-white border-primary/10 text-lg rounded-3xl focus:ring-primary/20 shadow-sm"
+                  className="flex h-16 w-full bg-white border border-primary/10 px-6 text-lg rounded-3xl focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-sm transition-all"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4 pt-4">
                 <div className="space-y-2">
                   <span className="text-[10px] uppercase font-bold text-muted-foreground ml-3 tracking-[0.15em]">Desde quando?</span>
-                  <Input 
+                  <input 
                     type="date" 
                     value={data.startDate}
                     onChange={e => setData({...data, startDate: e.target.value})}
-                    className="h-16 bg-white border-primary/10 rounded-3xl shadow-sm"
+                    className="flex h-16 w-full bg-white border border-primary/10 px-4 rounded-3xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
                   />
                 </div>
                 <div className="space-y-2">
                   <span className="text-[10px] uppercase font-bold text-muted-foreground ml-3 tracking-[0.15em]">Que horas?</span>
-                  <Input 
+                  <input 
                     type="time" 
                     value={data.startTime}
                     onChange={e => setData({...data, startTime: e.target.value})}
-                    className="h-16 bg-white border-primary/10 rounded-3xl shadow-sm"
+                    className="flex h-16 w-full bg-white border border-primary/10 px-4 rounded-3xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
                   />
                 </div>
               </div>
@@ -736,12 +738,13 @@ export default function CriarPagina() {
               {wizardStep === 1 && (
                 <div className="space-y-4">
                   <div className="relative">
-                    <Input 
+                    <input 
+                      type="text"
                       placeholder="Ex: Pra sempre juntos..." 
                       value={data.title}
                       onChange={e => setData({...data, title: e.target.value})}
                       maxLength={30}
-                      className="h-16 bg-white border-primary/10 text-lg rounded-3xl shadow-sm"
+                      className="flex h-16 w-full bg-white border border-primary/10 px-6 text-lg rounded-3xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
                     />
                     <span className="absolute right-5 bottom-5 text-[10px] text-muted-foreground">{data.title.length}/30</span>
                   </div>
@@ -755,9 +758,10 @@ export default function CriarPagina() {
                 <div className="space-y-5">
                   <div className="relative group">
                     <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                    <Input 
+                    <input 
+                      type="text"
                       placeholder="Busque música ou artista..." 
-                      className="pl-14 h-16 bg-white border-primary/10 rounded-3xl shadow-sm" 
+                      className="pl-14 flex h-16 w-full bg-white border border-primary/10 rounded-3xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all" 
                       value={musicSearch}
                       onChange={e => setMusicSearch(e.target.value)}
                     />
