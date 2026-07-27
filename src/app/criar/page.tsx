@@ -108,61 +108,108 @@ interface PageData {
 // --- Preview Component ---
 const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: any }) => {
   const [previewOpened, setPreviewOpened] = useState(false);
+  const [isOpening, setIsOpening] = useState(false);
   const [isStoryMode, setIsStoryMode] = useState(false);
 
-  // Fallback para quando o nome ainda não foi digitado
   const creatorNameDisplay = data.creatorName.trim() || "Alguém Especial";
   const partnerNameDisplay = data.partnerName.trim() || "Seu Amor";
 
+  const handleOpenLetter = () => {
+    setIsOpening(true);
+    // Nobel Prize animation duration: 2 seconds before switching view
+    setTimeout(() => {
+      setPreviewOpened(true);
+      setIsOpening(false);
+    }, 2200);
+  };
+
   if (!previewOpened) {
     return (
-      <div 
-        className="w-full h-full bg-[#0F0F0F] flex flex-col items-center justify-between py-12 px-8 cursor-pointer relative overflow-hidden text-center"
-        onClick={() => setPreviewOpened(true)}
-      >
-        {/* Banner Superior */}
-        <div className="absolute top-4 left-0 w-full bg-primary py-1.5 flex justify-center items-center">
-          <span className="text-[10px] font-black text-white tracking-[0.4em] uppercase">Um presente para você</span>
-        </div>
-
-        {/* Efeito de Brilho */}
+      <div className="w-full h-full bg-[#0F0F0F] flex flex-col items-center justify-between py-12 px-8 relative overflow-hidden text-center perspective-1000">
+        
+        {/* Background Aura */}
         <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-transparent to-primary/5 pointer-events-none" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-primary/20 blur-[100px] rounded-full pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-primary/20 blur-[120px] rounded-full pointer-events-none" />
 
-        {/* Envelope Rosa */}
-        <div className="relative mt-8 group animate-float">
-          <div className="absolute inset-0 bg-primary/40 blur-3xl rounded-full scale-125 group-hover:bg-primary/60 transition-colors" />
-          <div className="relative w-56 h-40 bg-primary rounded-2xl flex items-center justify-center shadow-[0_20px_50px_rgba(255,77,109,0.4)] border border-white/20">
-            <div className="absolute inset-0 flex flex-col">
-              <div className="w-full h-1/2 bg-white/10 rounded-t-2xl border-b border-white/5" />
-            </div>
-            <Mail className="w-16 h-16 text-white fill-current opacity-90" />
+        {/* Dynamic Header */}
+        <div className={cn(
+          "relative z-10 transition-all duration-700",
+          isOpening ? "opacity-0 -translate-y-20 scale-90" : "opacity-100 translate-y-0"
+        )}>
+          <div className="mb-6 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20">
+            <Sparkles className="w-3 h-3 text-primary" />
+            <span className="text-[9px] font-black text-primary uppercase tracking-[0.2em]">Exclusivo para você</span>
           </div>
-        </div>
-
-        {/* Texto Centralizado Dinâmico */}
-        <div className="relative z-10 space-y-4">
           <h2 className="text-3xl font-black text-white italic tracking-tighter uppercase leading-none">
             Olha o que<br/>
-            <span className="text-5xl text-primary block mt-2 drop-shadow-[0_0_15px_rgba(255,77,109,0.5)] truncate px-4">
+            <span className="text-5xl text-primary block mt-2 drop-shadow-[0_0_20px_rgba(255,77,109,0.5)] truncate px-4">
               {creatorNameDisplay}
             </span>
             <span className="block mt-2">Preparou...</span>
           </h2>
-          <p className="text-white/40 text-[11px] font-medium max-w-[220px] mx-auto leading-relaxed">
-            Um momento único feito com carinho para celebrar a jornada de vocês.
-          </p>
         </div>
 
-        {/* Botão de Ação */}
-        <div className="relative w-full px-4">
+        {/* THE ENVELOPE (Nobel Prize Animation Stage) */}
+        <div className="relative w-full flex items-center justify-center">
+          
+          {/* Opening Light Burst */}
+          {isOpening && (
+            <div className="absolute inset-0 flex items-center justify-center z-[60]">
+              <div className="w-1 h-1 bg-white rounded-full shadow-[0_0_200px_100px_rgba(255,255,255,1)] animate-pulse" />
+            </div>
+          )}
+
+          <div className={cn(
+            "relative w-64 h-44 group transition-transform duration-700",
+            isOpening ? "scale-110 translate-y-20" : "animate-float"
+          )}>
+            {/* Back Flap */}
+            <div className="absolute inset-0 bg-primary/90 rounded-2xl shadow-2xl border border-white/10 overflow-hidden">
+               {/* Letter Content (Emerging) */}
+               <div className={cn(
+                 "absolute inset-x-4 top-2 h-40 bg-white rounded-lg shadow-lg flex flex-col items-center justify-center gap-2 opacity-0",
+                 isOpening && "animate-letter-out z-50"
+               )}>
+                  <div className="w-12 h-1 bg-zinc-100 rounded-full" />
+                  <Heart className="w-8 h-8 text-primary fill-current animate-heart-glow" />
+                  <div className="w-20 h-1 bg-zinc-100 rounded-full" />
+               </div>
+            </div>
+
+            {/* Front Flap (Opening) */}
+            <div className={cn(
+              "absolute inset-x-0 top-0 h-1/2 bg-primary rounded-t-2xl z-40 border-b border-white/20 origin-top transition-transform duration-700",
+              isOpening && "animate-envelope-open"
+            )}>
+              <div className="w-full h-full bg-white/5" />
+            </div>
+
+            {/* Heart Seal */}
+            {!isOpening && (
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[45] bg-white rounded-full p-3 shadow-xl border-4 border-primary/20 group-hover:scale-110 transition-transform">
+                <Heart className="w-8 h-8 text-primary fill-current" />
+              </div>
+            )}
+            
+            <Mail className="absolute inset-0 w-full h-full text-white/10 pointer-events-none" />
+          </div>
+        </div>
+
+        {/* Action Button */}
+        <div className={cn(
+          "relative w-full px-4 transition-all duration-700",
+          isOpening ? "opacity-0 translate-y-20" : "opacity-100 translate-y-0"
+        )}>
           <Button 
-            className="w-full h-14 bg-white hover:bg-zinc-100 text-black font-black text-sm rounded-full shadow-2xl transition-transform active:scale-95 flex items-center justify-center gap-2 uppercase tracking-widest"
+            onClick={handleOpenLetter}
+            disabled={isOpening}
+            className="w-full h-16 bg-white hover:bg-zinc-100 text-black font-black text-sm rounded-full shadow-2xl transition-transform active:scale-95 flex items-center justify-center gap-3 uppercase tracking-widest"
           >
-            Abrir Carta <Heart className="w-4 h-4 text-primary fill-current" />
+            {isOpening ? "Abrindo..." : "Abrir Carta"} 
+            <Heart className="w-4 h-4 text-primary fill-current" />
           </Button>
           <p className="mt-6 text-[8px] font-black text-white/20 tracking-[0.5em] uppercase">
-            Toque para revelar seu amor
+            Toque para revelar o segredo
           </p>
         </div>
       </div>
@@ -171,7 +218,7 @@ const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: 
 
   if (isStoryMode) {
     return (
-      <div className="w-full h-full bg-black relative flex flex-col">
+      <div className="w-full h-full bg-black relative flex flex-col animate-content-reveal">
         <div className="absolute top-4 left-0 w-full px-4 flex gap-1 z-50">
           <div className="h-1 flex-1 bg-white/20 overflow-hidden rounded-full">
             <div className="h-full bg-white w-full animate-[progress_5s_linear_infinite]" />
@@ -233,7 +280,7 @@ const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: 
   }
 
   return (
-    <div className="w-full h-full bg-[#FAFAFA] overflow-y-auto no-scrollbar scroll-smooth">
+    <div className="w-full h-full bg-[#FAFAFA] overflow-y-auto no-scrollbar scroll-smooth animate-content-reveal">
       {/* Section 1: Music Player */}
       <section className="min-h-full flex flex-col items-center justify-center p-8 space-y-10 bg-white">
         <div className="w-full max-w-[280px] aspect-square rounded-[2.5rem] overflow-hidden shadow-[0_40px_80px_-15px_rgba(255,77,109,0.15)] relative group border-4 border-primary/5">
@@ -317,19 +364,19 @@ const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: 
 
       {/* Section 3: Note of Love */}
       <section className="min-h-full flex flex-col items-center justify-center p-8 bg-white">
-        <div className="bg-[#00E5FF] w-full p-12 rounded-[3.5rem] shadow-[0_50px_100px_-20px_rgba(0,229,255,0.4)] space-y-10 flex flex-col items-center text-center relative overflow-hidden">
+        <div className="bg-[#FF4D6D] w-full p-12 rounded-[3.5rem] shadow-[0_50px_100px_-20px_rgba(255,77,109,0.4)] space-y-10 flex flex-col items-center text-center relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 blur-3xl rounded-full -mr-16 -mt-16" />
           
-          <div className="flex items-center gap-3 bg-black/10 backdrop-blur-md px-6 py-2.5 rounded-full border border-black/5">
-            <MessageCircle className="w-4 h-4 text-black" />
-            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-black">NOTA DE AMOR</span>
+          <div className="flex items-center gap-3 bg-black/10 backdrop-blur-md px-6 py-2.5 rounded-full border border-white/10">
+            <MessageCircle className="w-4 h-4 text-white" />
+            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white">NOTA DE AMOR</span>
           </div>
           
-          <p className="text-3xl font-black text-black leading-[1.1] tracking-tighter uppercase italic line-clamp-5">
+          <p className="text-3xl font-black text-white leading-[1.1] tracking-tighter uppercase italic line-clamp-5">
             {data.message || "Sua mensagem especial aparecerá aqui para emocionar seu amor..."}
           </p>
 
-          <Button className="w-full h-16 bg-black hover:bg-zinc-900 text-white font-black rounded-full text-[11px] uppercase tracking-[0.2em] shadow-xl transition-all hover:scale-[1.02]">
+          <Button className="w-full h-16 bg-white hover:bg-zinc-100 text-primary font-black rounded-full text-[11px] uppercase tracking-[0.2em] shadow-xl transition-all hover:scale-[1.02]">
             LER MENSAGEM
           </Button>
         </div>
