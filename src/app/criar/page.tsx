@@ -22,7 +22,8 @@ import {
   Crown,
   Gift,
   Ticket,
-  QrCode
+  QrCode,
+  ShieldCheck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -418,7 +419,10 @@ export default function CriarPagina() {
           {phase === 'dados' && (
             <div className="space-y-5">
               <div className="space-y-2">
-                <span className="text-[10px] uppercase font-bold text-muted-foreground/60 ml-3 tracking-[0.15em]">Seu Nome</span>
+                <div className="flex justify-between items-center ml-3">
+                  <span className="text-[10px] uppercase font-bold text-muted-foreground/60 tracking-[0.15em]">Seu Nome</span>
+                  <span className="text-[9px] text-muted-foreground/40 flex items-center gap-1"><ShieldCheck className="w-2.5 h-2.5" /> Apenas o primeiro nome por segurança</span>
+                </div>
                 <Input 
                   placeholder="Como você se chama?" 
                   value={data.creatorName}
@@ -427,7 +431,10 @@ export default function CriarPagina() {
                 />
               </div>
               <div className="space-y-2">
-                <span className="text-[10px] uppercase font-bold text-muted-foreground/60 ml-3 tracking-[0.15em]">Nome do seu Amor</span>
+                <div className="flex justify-between items-center ml-3">
+                  <span className="text-[10px] uppercase font-bold text-muted-foreground/60 tracking-[0.15em]">Nome do seu Amor</span>
+                  <span className="text-[9px] text-muted-foreground/40 flex items-center gap-1"><ShieldCheck className="w-2.5 h-2.5" /> Não precisa ser o nome completo</span>
+                </div>
                 <Input 
                   placeholder="Qual o nome dele(a)?" 
                   value={data.partnerName}
