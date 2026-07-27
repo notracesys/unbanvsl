@@ -390,7 +390,7 @@ export default function CriarPagina() {
             <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full -z-10 animate-pulse" />
             <div className="w-28 h-28 rounded-full bg-white shadow-2xl flex items-center justify-center overflow-hidden border-[6px] border-white/10 animate-in zoom-in duration-700">
               <img 
-                src="https://picsum.photos/seed/love-panda/200/200" 
+                src="/lovi.png" 
                 alt="Mascote" 
                 className="w-full h-full object-cover" 
               />
