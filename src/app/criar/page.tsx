@@ -112,16 +112,19 @@ const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: 
   if (!previewOpened) {
     return (
       <div 
-        className="w-full h-full bg-[#FFF5F7] flex flex-col items-center justify-center p-8 cursor-pointer relative overflow-hidden"
+        className="w-full h-full bg-white flex flex-col items-center justify-center p-8 cursor-pointer relative overflow-hidden"
         onClick={() => setPreviewOpened(true)}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent opacity-30" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 opacity-50" />
         <div className="relative group flex flex-col items-center">
-          <div className="w-48 h-36 bg-white rounded-3xl border border-primary/10 shadow-[0_20px_50px_rgba(255,77,109,0.15)] flex items-center justify-center animate-bounce duration-[2000ms]">
-            <Heart className="w-16 h-16 text-primary fill-current animate-pulse" />
+          <div className="w-48 h-48 bg-white rounded-[3rem] border border-primary/10 shadow-[0_30px_70px_rgba(255,77,109,0.2)] flex items-center justify-center animate-float">
+            <div className="relative">
+              <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full animate-pulse" />
+              <Heart className="w-20 h-20 text-primary fill-current relative z-10" />
+            </div>
           </div>
-          <p className="mt-12 text-[11px] font-black uppercase tracking-[0.3em] text-primary/60 animate-pulse text-center leading-relaxed">
-            Você recebeu um presente<br/>Toque para abrir
+          <p className="mt-12 text-[10px] font-black uppercase tracking-[0.5em] text-primary animate-pulse text-center leading-relaxed">
+            VOCÊ RECEBEU UM PRESENTE<br/><span className="text-muted-foreground/60 font-medium">Toque para abrir</span>
           </p>
         </div>
       </div>
@@ -132,34 +135,46 @@ const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: 
     return (
       <div className="w-full h-full bg-black relative flex flex-col">
         <div className="absolute top-4 left-0 w-full px-4 flex gap-1 z-50">
-          <div className="h-0.5 flex-1 bg-white/30 overflow-hidden rounded-full">
+          <div className="h-1 flex-1 bg-white/20 overflow-hidden rounded-full">
             <div className="h-full bg-white w-full animate-[progress_5s_linear_infinite]" />
           </div>
         </div>
         <button 
           onClick={() => setIsStoryMode(false)}
-          className="absolute top-8 right-6 text-white z-50 bg-black/40 p-2 rounded-full backdrop-blur-md"
+          className="absolute top-8 left-6 text-white z-50 bg-white/10 p-2 rounded-full backdrop-blur-xl border border-white/10"
         >
           <X className="w-5 h-5" />
         </button>
-        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center relative">
+        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center relative overflow-hidden">
           <img 
             src={data.photos[0] || 'https://picsum.photos/seed/love/600/900'} 
-            className="absolute inset-0 w-full h-full object-cover opacity-60" 
+            className="absolute inset-0 w-full h-full object-cover scale-110 blur-sm opacity-40" 
             alt="Story BG" 
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/40" />
-          <div className="relative z-10 space-y-6">
-            <h2 className="text-5xl font-black text-white italic uppercase tracking-tighter leading-none">
-              Sua<br/>História<br/><span className="text-primary">Love Link</span>
-            </h2>
-            <p className="text-primary text-[10px] font-bold tracking-[0.3em] uppercase">Mergulhe nas memórias</p>
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-black/80" />
+          
+          <div className="relative z-10 space-y-8">
+            <div className="w-32 h-32 mx-auto rounded-full border-2 border-primary p-1 animate-spin-slow">
+              <img 
+                src={data.photos[0] || 'https://picsum.photos/seed/avatar/200/200'} 
+                className="w-full h-full object-cover rounded-full" 
+                alt="Profile" 
+              />
+            </div>
+            <div className="space-y-4">
+              <h2 className="text-4xl font-black text-white italic uppercase tracking-tighter leading-none">
+                NOSSA<br/>HISTÓRIA<br/><span className="text-primary">LOVE LINK</span>
+              </h2>
+              <div className="h-px w-12 bg-primary mx-auto" />
+              <p className="text-white/60 text-[10px] font-bold tracking-[0.3em] uppercase">Eternizando memórias</p>
+            </div>
           </div>
+
           <Button 
-            className="mt-12 w-64 h-16 bg-primary hover:bg-primary/90 text-white font-black text-lg rounded-full shadow-[0_0_30px_rgba(255,77,109,0.4)] animate-pulse"
+            className="mt-16 w-64 h-16 bg-primary hover:bg-primary/90 text-white font-black text-lg rounded-full shadow-[0_0_40px_rgba(255,77,109,0.5)] animate-pulse"
             onClick={() => setIsStoryMode(false)}
           >
-            COMEÇAR STORY
+            VER RETROSPECTIVA
           </Button>
         </div>
         <style jsx>{`
@@ -167,76 +182,83 @@ const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: 
             from { transform: translateX(-100%); }
             to { transform: translateX(0); }
           }
+          @keyframes spin-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+          .animate-spin-slow {
+            animation: spin-slow 12s linear infinite;
+          }
         `}</style>
       </div>
     );
   }
 
   return (
-    <div className="w-full h-full bg-[#FFF5F7] overflow-y-auto no-scrollbar scroll-smooth">
-      {/* Section 1: Music Player */}
-      <section className="min-h-full flex flex-col items-center justify-center p-8 space-y-8 bg-gradient-to-b from-white to-[#FFF5F7]">
-        <div className="w-72 aspect-square rounded-[2rem] overflow-hidden shadow-[0_30px_60px_-12px_rgba(255,77,109,0.2)] border border-primary/5 relative group">
+    <div className="w-full h-full bg-[#FAFAFA] overflow-y-auto no-scrollbar scroll-smooth">
+      {/* Section 1: Music Player - Light & Sophisticated */}
+      <section className="min-h-full flex flex-col items-center justify-center p-8 space-y-10 bg-white">
+        <div className="w-full max-w-[280px] aspect-square rounded-[2.5rem] overflow-hidden shadow-[0_40px_80px_-15px_rgba(0,0,0,0.15)] relative group">
           <img 
             src={data.photos[0] || 'https://picsum.photos/seed/love/600/600'} 
             className="w-full h-full object-cover transition-transform duration-[10s] group-hover:scale-110" 
             alt="Capa" 
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-primary/20 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
         </div>
 
-        <div className="w-full space-y-1 text-center px-4">
+        <div className="w-full space-y-2 text-center px-4">
           <div className="flex items-center justify-center gap-2">
             <h3 className="text-2xl font-black text-foreground truncate italic tracking-tighter">
               {data.music?.title || "Sua Música Especial"}
             </h3>
             <CheckCircle2 className="w-4 h-4 text-primary fill-primary/10" />
           </div>
-          <p className="text-sm text-muted-foreground font-medium uppercase tracking-widest">
-            {data.music?.artist || "Escolha seu artista favorito"}
+          <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-[0.2em]">
+            {data.music?.artist || "O som do nosso amor"}
           </p>
         </div>
 
-        <div className="w-full px-4 space-y-4">
-          <div className="relative h-1.5 w-full bg-primary/10 rounded-full overflow-hidden">
-            <div className="absolute left-0 top-0 h-full bg-primary w-[35%] shadow-[0_0_10px_rgba(255,77,109,0.3)]" />
+        <div className="w-full px-6 space-y-4">
+          <div className="relative h-1 w-full bg-primary/5 rounded-full overflow-hidden">
+            <div className="absolute left-0 top-0 h-full bg-primary w-[45%] shadow-[0_0_10px_rgba(255,77,109,0.4)]" />
           </div>
-          <div className="flex justify-between text-[10px] font-bold text-primary/40 tracking-widest uppercase">
+          <div className="flex justify-between text-[9px] font-black text-muted-foreground/50 tracking-widest uppercase">
             <span>1:14</span>
             <span>3:45</span>
           </div>
         </div>
 
-        <div className="flex items-center justify-between w-full px-4 pt-2">
-          <Shuffle className="w-5 h-5 text-primary/30" />
-          <SkipBack className="w-7 h-7 text-primary fill-current" />
-          <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center shadow-xl shadow-primary/20 hover:scale-105 transition-transform cursor-pointer">
+        <div className="flex items-center justify-between w-full px-6">
+          <Shuffle className="w-5 h-5 text-muted-foreground/30" />
+          <SkipBack className="w-7 h-7 text-foreground fill-current" />
+          <div className="w-20 h-20 rounded-full bg-primary flex items-center justify-center shadow-2xl shadow-primary/30 hover:scale-105 transition-transform cursor-pointer">
             <Play className="w-8 h-8 text-white fill-current ml-1" />
           </div>
-          <SkipForward className="w-7 h-7 text-primary fill-current" />
-          <Repeat className="w-5 h-5 text-primary/30" />
+          <SkipForward className="w-7 h-7 text-foreground fill-current" />
+          <Repeat className="w-5 h-5 text-muted-foreground/30" />
         </div>
 
-        <div className="pt-8">
-          <div className="flex flex-col items-center gap-2">
-            <div className="w-1 h-12 bg-gradient-to-b from-primary to-transparent rounded-full animate-bounce" />
-            <p className="text-[9px] font-black uppercase tracking-[0.4em] text-primary/40">Role para continuar</p>
-          </div>
+        <div className="pt-8 flex flex-col items-center gap-3">
+          <div className="w-1 h-10 bg-gradient-to-b from-primary/40 to-transparent rounded-full animate-bounce" />
+          <p className="text-[8px] font-black uppercase tracking-[0.5em] text-muted-foreground/40">Deslize para ver mais</p>
         </div>
       </section>
 
-      {/* Section 2: Counter Soft */}
-      <section className="min-h-full bg-white flex flex-col items-center justify-center p-8 py-20 space-y-12">
-        <div className="text-center space-y-4 w-full">
-          <h2 className="text-4xl lg:text-5xl font-black text-primary uppercase italic tracking-tighter leading-none break-words px-4">
-            {data.creatorName || "NOME"} & {data.partnerName || "AMOR"}
+      {/* Section 2: Counter - Brutalist & Clean */}
+      <section className="min-h-full bg-[#0F0F0F] flex flex-col items-center justify-center p-8 py-20 space-y-12">
+        <div className="text-center space-y-6 w-full">
+          <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter leading-none break-words px-4">
+            {data.creatorName || "VOCÊ"} <span className="text-primary">&</span> {data.partnerName || "AMOR"}
           </h2>
-          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground">
-            UM LAÇO ETERNO DESDE {data.startDate ? format(new Date(data.startDate), 'dd/MM/yyyy') : '...'}
-          </p>
+          <div className="inline-block px-4 py-1.5 rounded-full border border-white/10 bg-white/5">
+            <p className="text-[9px] font-black uppercase tracking-[0.3em] text-white/60">
+              DESDE {data.startDate ? format(new Date(data.startDate), 'dd/MM/yyyy') : '...'}
+            </p>
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 w-full max-w-sm">
+        <div className="grid grid-cols-2 gap-3 w-full max-w-sm">
           {[
             { label: 'Anos', value: timeTogether.years },
             { label: 'Meses', value: timeTogether.months },
@@ -245,49 +267,57 @@ const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: 
             { label: 'Minutos', value: timeTogether.minutes },
             { label: 'Segundos', value: timeTogether.seconds }
           ].map((t, i) => (
-            <div key={i} className="bg-[#FFF5F7] border border-primary/5 p-6 rounded-[2.5rem] text-center space-y-1 flex flex-col items-center justify-center shadow-sm">
-              <span className="text-4xl font-black text-primary italic tracking-tighter">{t.value}</span>
-              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-primary/40">{t.label}</span>
+            <div key={i} className="bg-white/5 border border-white/5 backdrop-blur-sm p-8 rounded-[2rem] text-center flex flex-col items-center justify-center transition-transform hover:scale-[1.02]">
+              <span className="text-4xl font-black text-white italic tracking-tighter mb-1">{t.value}</span>
+              <span className="text-[8px] font-black uppercase tracking-[0.3em] text-primary">{t.label}</span>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Section 3: Note of Love (Pink Card) */}
-      <section className="min-h-full flex flex-col items-center justify-center p-8 bg-[#FFF5F7]">
-        <div className="bg-primary w-full p-10 rounded-[3rem] shadow-[0_40px_100px_-20px_rgba(255,77,109,0.3)] space-y-8 flex flex-col items-center text-center">
-          <div className="flex items-center gap-3 bg-white/10 px-4 py-2 rounded-full">
-            <MessageCircle className="w-5 h-5 text-white" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-white">Nota de Amor</span>
+      {/* Section 3: Note of Love - Branded & Vibrant */}
+      <section className="min-h-full flex flex-col items-center justify-center p-8 bg-white">
+        <div className="bg-primary w-full p-12 rounded-[3.5rem] shadow-[0_50px_100px_-20px_rgba(255,77,109,0.4)] space-y-10 flex flex-col items-center text-center relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 blur-3xl rounded-full -mr-16 -mt-16" />
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-black/10 blur-3xl rounded-full -ml-16 -mb-16" />
+          
+          <div className="flex items-center gap-3 bg-white/20 backdrop-blur-md px-6 py-2.5 rounded-full border border-white/20">
+            <MessageCircle className="w-4 h-4 text-white" />
+            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white">MINHA MENSAGEM</span>
           </div>
           
-          <p className="text-2xl font-black text-white leading-tight tracking-tight uppercase italic line-clamp-4">
+          <p className="text-3xl font-black text-white leading-[1.1] tracking-tighter uppercase italic line-clamp-5">
             {data.message || "Sua mensagem especial aparecerá aqui para emocionar seu amor..."}
           </p>
 
-          <Button className="w-full h-16 bg-white hover:bg-white/90 text-primary font-black rounded-full text-sm uppercase tracking-widest shadow-lg">
-            LER MENSAGEM
+          <Button className="w-full h-16 bg-white hover:bg-[#FAFAFA] text-primary font-black rounded-full text-[11px] uppercase tracking-[0.2em] shadow-xl transition-all hover:scale-[1.02]">
+            LER CARTA COMPLETA
           </Button>
         </div>
       </section>
 
-      {/* Section 4: Story Redirect Soft */}
-      <section className="min-h-full flex flex-col items-center justify-center p-8 space-y-12 bg-white relative">
-        <div className="absolute inset-0 bg-gradient-to-t from-primary/10 to-transparent" />
-        <div className="relative z-10 text-center space-y-10">
-          <div className="space-y-4">
-            <h2 className="text-5xl font-black text-foreground italic uppercase tracking-tighter leading-none">
-              Sua<br/>História<br/><span className="text-primary">Love Link</span>
+      {/* Section 4: Story Redirect - Cinematic Final */}
+      <section className="min-h-full flex flex-col items-center justify-center p-8 space-y-12 bg-[#0F0F0F] relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-t from-primary/20 via-transparent to-transparent opacity-50" />
+        
+        <div className="relative z-10 text-center space-y-12">
+          <div className="space-y-6">
+            <div className="w-20 h-1 bg-primary mx-auto rounded-full" />
+            <h2 className="text-6xl font-black text-white italic uppercase tracking-tighter leading-[0.9]">
+              NOSSA<br/>HISTÓRIA<br/><span className="text-primary">LOVE LINK</span>
             </h2>
-            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary/40">Mergulhe nas memórias</p>
+            <p className="text-[9px] font-black uppercase tracking-[0.5em] text-white/30">Mergulhe em nossas memórias</p>
           </div>
           
-          <Button 
-            className="w-64 h-16 bg-primary hover:bg-primary/90 text-white font-black text-lg rounded-full shadow-[0_15px_30px_rgba(255,77,109,0.3)] animate-pulse"
-            onClick={() => setIsStoryMode(true)}
-          >
-            COMEÇAR STORY
-          </Button>
+          <div className="relative group">
+            <div className="absolute inset-0 bg-primary/40 blur-3xl rounded-full group-hover:bg-primary/60 transition-colors animate-pulse" />
+            <Button 
+              className="relative w-64 h-20 bg-primary hover:bg-primary/90 text-white font-black text-xl rounded-full shadow-2xl transition-transform active:scale-95"
+              onClick={() => setIsStoryMode(true)}
+            >
+              ABRIR STORY
+            </Button>
+          </div>
         </div>
       </section>
     </div>
@@ -512,7 +542,7 @@ export default function CriarPagina() {
         <Button 
           variant="ghost" 
           size="sm" 
-          className="fixed top-8 right-6 z-[130] text-[10px] uppercase font-bold tracking-widest text-primary bg-white/90 hover:bg-white rounded-full px-4 h-9 gap-2 transition-all hover:scale-105 pink-glow shadow-xl backdrop-blur-md border border-primary/10"
+          className="fixed top-6 right-6 z-[130] text-[10px] uppercase font-bold tracking-widest text-primary bg-white/90 hover:bg-white rounded-full px-4 h-9 gap-2 transition-all hover:scale-105 pink-glow shadow-xl backdrop-blur-md border border-primary/10"
           onClick={() => setIsPreviewOpen(true)}
         >
           <div className="absolute inset-0 bg-primary/5 animate-pulse rounded-full" />
