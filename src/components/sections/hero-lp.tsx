@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Heart, Sparkles, ArrowRight } from "lucide-react";
+import { Heart, Sparkles, Eye } from "lucide-react";
 import Link from "next/link";
 
 export function HeroLP() {
@@ -27,7 +27,7 @@ export function HeroLP() {
           </Button>
           <Button variant="ghost" className="text-primary hover:bg-primary/5 px-10 py-8 text-lg rounded-full font-bold" asChild>
             <Link href="#como-funciona">
-              Ver como funciona <ArrowRight className="ml-2 w-5 h-5" />
+              Ver Exemplo <Eye className="ml-2 w-5 h-5" />
             </Link>
           </Button>
         </div>
