@@ -290,8 +290,11 @@ export default function CriarPagina() {
     return "";
   }, [phase, wizardStep]);
 
-  const PreviewContent = () => (
-    <div className="w-full h-full bg-white overflow-y-auto no-scrollbar space-y-6 pb-20 p-6 rounded-[2rem] border border-primary/10">
+  const PreviewContent = ({ isFullScreen = false }) => (
+    <div className={cn(
+      "w-full h-full bg-white overflow-y-auto no-scrollbar space-y-6 pb-20 p-6",
+      !isFullScreen && "rounded-[2rem] border border-primary/10"
+    )}>
       <div className="text-center space-y-2 mt-4 animate-in fade-in zoom-in duration-700">
         <Heart className="w-10 h-10 text-primary fill-current mx-auto animate-pulse" />
         <h3 className="font-serif-elegant font-bold text-2xl leading-tight text-foreground">{data.title || "Seu Título Aqui"}</h3>
@@ -357,12 +360,10 @@ export default function CriarPagina() {
         onLoadedMetadata={onLoadedMetadata}
       />
       
-      {/* Banner de Urgência */}
       <div className="w-full bg-primary py-2.5 px-6 text-center text-[10px] font-bold text-white uppercase tracking-[0.1em] z-[120] shadow-sm relative shrink-0">
         Mais de 100 mil pessoas já emocionaram seu amor hoje ✨
       </div>
 
-      {/* Botão de Preview Flutuante Fixo (Segue o scroll) - Subido um pouco mais */}
       {phase !== 'sucesso' && (
         <Button 
           variant="ghost" 
@@ -376,7 +377,6 @@ export default function CriarPagina() {
         </Button>
       )}
 
-      {/* Header (Não fixo, sobe com a página) */}
       <header className="relative w-full bg-white px-6 py-6 flex items-center gap-4 z-50">
         <Button variant="ghost" size="icon" onClick={handleBack} className="rounded-full hover:bg-primary/5 shrink-0 h-9 w-9">
           <ArrowLeft className="w-5 h-5 text-primary" />
@@ -387,7 +387,6 @@ export default function CriarPagina() {
             style={{ width: `${progress}%` }}
           />
         </div>
-        {/* Espaçador para o botão de preview fixo não sobrepor no topo inicial */}
         <div className="w-24 shrink-0" />
       </header>
 
@@ -725,16 +724,23 @@ export default function CriarPagina() {
       </main>
 
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-        <DialogContent className="max-w-md w-[92%] p-0 bg-transparent border-none overflow-hidden rounded-[3rem] shadow-2xl">
+        <DialogContent className="max-w-none w-screen h-screen m-0 p-0 bg-white border-none overflow-hidden rounded-none shadow-none focus:outline-none">
           <DialogHeader className="sr-only">
             <DialogTitle>Visualização da Página</DialogTitle>
             <DialogDescription>Uma prévia de como sua surpresa será vista pelo seu amor.</DialogDescription>
           </DialogHeader>
-          <div className="relative h-[85vh] rounded-[3rem]">
-            <Button variant="ghost" size="icon" className="absolute top-5 right-5 z-[60] bg-white/80 text-primary rounded-full backdrop-blur-md shadow-md h-10 w-10" onClick={() => setIsPreviewOpen(false)}>
+          <div className="relative w-full h-full flex flex-col">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="absolute top-6 left-6 z-[140] bg-white/90 text-primary rounded-full backdrop-blur-md shadow-lg h-10 w-10 border border-primary/10 transition-transform active:scale-90" 
+              onClick={() => setIsPreviewOpen(false)}
+            >
               <X className="w-5 h-5" />
             </Button>
-            <PreviewContent />
+            <div className="flex-1 overflow-hidden pt-16">
+              <PreviewContent isFullScreen />
+            </div>
           </div>
         </DialogContent>
       </Dialog>
