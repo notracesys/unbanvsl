@@ -29,7 +29,8 @@ import {
   SkipForward,
   Repeat,
   Shuffle,
-  Plus
+  Plus,
+  Mail
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -112,19 +113,52 @@ const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: 
   if (!previewOpened) {
     return (
       <div 
-        className="w-full h-full bg-white flex flex-col items-center justify-center p-8 cursor-pointer relative overflow-hidden"
+        className="w-full h-full bg-[#0F0F0F] flex flex-col items-center justify-between py-12 px-8 cursor-pointer relative overflow-hidden text-center"
         onClick={() => setPreviewOpened(true)}
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 opacity-50" />
-        <div className="relative group flex flex-col items-center">
-          <div className="w-48 h-48 bg-white rounded-[3rem] border border-primary/10 shadow-[0_30px_70px_rgba(255,77,109,0.2)] flex items-center justify-center animate-float">
-            <div className="relative">
-              <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full animate-pulse" />
-              <Heart className="w-20 h-20 text-primary fill-current relative z-10" />
+        {/* Banner Superior */}
+        <div className="absolute top-4 left-0 w-full bg-primary py-1.5 flex justify-center items-center">
+          <span className="text-[10px] font-black text-white tracking-[0.4em] uppercase">Um presente para você</span>
+        </div>
+
+        {/* Efeito de Brilho */}
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-transparent to-primary/5 pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-primary/20 blur-[100px] rounded-full pointer-events-none" />
+
+        {/* Envelope Rosa */}
+        <div className="relative mt-8 group animate-float">
+          <div className="absolute inset-0 bg-primary/40 blur-3xl rounded-full scale-125 group-hover:bg-primary/60 transition-colors" />
+          <div className="relative w-56 h-40 bg-primary rounded-2xl flex items-center justify-center shadow-[0_20px_50px_rgba(255,77,109,0.4)] border border-white/20">
+            <div className="absolute inset-0 flex flex-col">
+              <div className="w-full h-1/2 bg-white/10 rounded-t-2xl border-b border-white/5" />
             </div>
+            <Mail className="w-16 h-16 text-white fill-current opacity-90" />
           </div>
-          <p className="mt-12 text-[10px] font-black uppercase tracking-[0.5em] text-primary animate-pulse text-center leading-relaxed">
-            VOCÊ RECEBEU UM PRESENTE<br/><span className="text-muted-foreground/60 font-medium">Toque para abrir</span>
+        </div>
+
+        {/* Texto Centralizado */}
+        <div className="relative z-10 space-y-4">
+          <h2 className="text-3xl font-black text-white italic tracking-tighter uppercase leading-none">
+            Olha o que<br/>
+            <span className="text-5xl text-primary block mt-2 drop-shadow-[0_0_15px_rgba(255,77,109,0.5)]">
+              {data.creatorName || "Pedro"}
+            </span>
+            <span className="block mt-2">Preparou...</span>
+          </h2>
+          <p className="text-white/40 text-[11px] font-medium max-w-[220px] mx-auto leading-relaxed">
+            Um momento único feito com carinho para celebrar a jornada de vocês.
+          </p>
+        </div>
+
+        {/* Botão de Ação */}
+        <div className="relative w-full px-4">
+          <Button 
+            className="w-full h-14 bg-white hover:bg-zinc-100 text-black font-black text-sm rounded-full shadow-2xl transition-transform active:scale-95 flex items-center justify-center gap-2 uppercase tracking-widest"
+          >
+            Abrir Carta <Heart className="w-4 h-4 text-primary fill-current" />
+          </Button>
+          <p className="mt-6 text-[8px] font-black text-white/20 tracking-[0.5em] uppercase">
+            Toque para revelar seu amor
           </p>
         </div>
       </div>
@@ -196,23 +230,25 @@ const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: 
 
   return (
     <div className="w-full h-full bg-[#FAFAFA] overflow-y-auto no-scrollbar scroll-smooth">
-      {/* Section 1: Music Player - Light & Sophisticated */}
+      {/* Section 1: Music Player - Premium Player Style */}
       <section className="min-h-full flex flex-col items-center justify-center p-8 space-y-10 bg-white">
-        <div className="w-full max-w-[280px] aspect-square rounded-[2.5rem] overflow-hidden shadow-[0_40px_80px_-15px_rgba(0,0,0,0.15)] relative group">
+        <div className="w-full max-w-[280px] aspect-square rounded-[2.5rem] overflow-hidden shadow-[0_40px_80px_-15px_rgba(255,77,109,0.15)] relative group border-4 border-primary/5">
           <img 
             src={data.photos[0] || 'https://picsum.photos/seed/love/600/600'} 
             className="w-full h-full object-cover transition-transform duration-[10s] group-hover:scale-110" 
             alt="Capa" 
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
         </div>
 
         <div className="w-full space-y-2 text-center px-4">
           <div className="flex items-center justify-center gap-2">
-            <h3 className="text-2xl font-black text-foreground truncate italic tracking-tighter">
+            <h3 className="text-2xl font-black text-foreground truncate italic tracking-tighter uppercase">
               {data.music?.title || "Sua Música Especial"}
             </h3>
-            <CheckCircle2 className="w-4 h-4 text-primary fill-primary/10" />
+            <div className="w-4 h-4 bg-primary rounded-full flex items-center justify-center shrink-0">
+              <CheckCircle2 className="w-3 h-3 text-white fill-current" />
+            </div>
           </div>
           <p className="text-[11px] text-muted-foreground font-bold uppercase tracking-[0.2em]">
             {data.music?.artist || "O som do nosso amor"}
@@ -220,8 +256,8 @@ const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: 
         </div>
 
         <div className="w-full px-6 space-y-4">
-          <div className="relative h-1 w-full bg-primary/5 rounded-full overflow-hidden">
-            <div className="absolute left-0 top-0 h-full bg-primary w-[45%] shadow-[0_0_10px_rgba(255,77,109,0.4)]" />
+          <div className="relative h-1.5 w-full bg-primary/10 rounded-full overflow-hidden">
+            <div className="absolute left-0 top-0 h-full bg-primary w-[45%] shadow-[0_0_15px_rgba(255,77,109,0.4)]" />
           </div>
           <div className="flex justify-between text-[9px] font-black text-muted-foreground/50 tracking-widest uppercase">
             <span>1:14</span>
@@ -245,15 +281,15 @@ const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: 
         </div>
       </section>
 
-      {/* Section 2: Counter - Brutalist & Clean */}
+      {/* Section 2: Counter - Brutalist & Premium Dark */}
       <section className="min-h-full bg-[#0F0F0F] flex flex-col items-center justify-center p-8 py-20 space-y-12">
         <div className="text-center space-y-6 w-full">
           <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter leading-none break-words px-4">
             {data.creatorName || "VOCÊ"} <span className="text-primary">&</span> {data.partnerName || "AMOR"}
           </h2>
-          <div className="inline-block px-4 py-1.5 rounded-full border border-white/10 bg-white/5">
-            <p className="text-[9px] font-black uppercase tracking-[0.3em] text-white/60">
-              DESDE {data.startDate ? format(new Date(data.startDate), 'dd/MM/yyyy') : '...'}
+          <div className="inline-block px-6 py-2 rounded-full border border-primary/20 bg-primary/5 backdrop-blur-sm">
+            <p className="text-[9px] font-black uppercase tracking-[0.3em] text-primary">
+              UM LAÇO ETERNO DESDE {data.startDate ? format(new Date(data.startDate), 'dd/MM/yyyy') : '...'}
             </p>
           </div>
         </div>
@@ -267,38 +303,37 @@ const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: 
             { label: 'Minutos', value: timeTogether.minutes },
             { label: 'Segundos', value: timeTogether.seconds }
           ].map((t, i) => (
-            <div key={i} className="bg-white/5 border border-white/5 backdrop-blur-sm p-8 rounded-[2rem] text-center flex flex-col items-center justify-center transition-transform hover:scale-[1.02]">
-              <span className="text-4xl font-black text-white italic tracking-tighter mb-1">{t.value}</span>
-              <span className="text-[8px] font-black uppercase tracking-[0.3em] text-primary">{t.label}</span>
+            <div key={i} className="bg-white/5 border border-white/5 backdrop-blur-md p-8 rounded-[2rem] text-center flex flex-col items-center justify-center transition-all hover:bg-white/10 hover:scale-[1.02] group">
+              <span className="text-4xl font-black text-white italic tracking-tighter mb-1 group-hover:text-primary transition-colors">{t.value}</span>
+              <span className="text-[8px] font-black uppercase tracking-[0.3em] text-white/40">{t.label}</span>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Section 3: Note of Love - Branded & Vibrant */}
+      {/* Section 3: Note of Love - Vibrant Card */}
       <section className="min-h-full flex flex-col items-center justify-center p-8 bg-white">
-        <div className="bg-primary w-full p-12 rounded-[3.5rem] shadow-[0_50px_100px_-20px_rgba(255,77,109,0.4)] space-y-10 flex flex-col items-center text-center relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 blur-3xl rounded-full -mr-16 -mt-16" />
-          <div className="absolute bottom-0 left-0 w-32 h-32 bg-black/10 blur-3xl rounded-full -ml-16 -mb-16" />
+        <div className="bg-[#00E5FF] w-full p-12 rounded-[3.5rem] shadow-[0_50px_100px_-20px_rgba(0,229,255,0.4)] space-y-10 flex flex-col items-center text-center relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 blur-3xl rounded-full -mr-16 -mt-16" />
           
-          <div className="flex items-center gap-3 bg-white/20 backdrop-blur-md px-6 py-2.5 rounded-full border border-white/20">
-            <MessageCircle className="w-4 h-4 text-white" />
-            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white">MINHA MENSAGEM</span>
+          <div className="flex items-center gap-3 bg-black/10 backdrop-blur-md px-6 py-2.5 rounded-full border border-black/5">
+            <MessageCircle className="w-4 h-4 text-black" />
+            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-black">NOTA DE AMOR</span>
           </div>
           
-          <p className="text-3xl font-black text-white leading-[1.1] tracking-tighter uppercase italic line-clamp-5">
+          <p className="text-3xl font-black text-black leading-[1.1] tracking-tighter uppercase italic line-clamp-5">
             {data.message || "Sua mensagem especial aparecerá aqui para emocionar seu amor..."}
           </p>
 
-          <Button className="w-full h-16 bg-white hover:bg-[#FAFAFA] text-primary font-black rounded-full text-[11px] uppercase tracking-[0.2em] shadow-xl transition-all hover:scale-[1.02]">
-            LER CARTA COMPLETA
+          <Button className="w-full h-16 bg-black hover:bg-zinc-900 text-white font-black rounded-full text-[11px] uppercase tracking-[0.2em] shadow-xl transition-all hover:scale-[1.02]">
+            LER MENSAGEM
           </Button>
         </div>
       </section>
 
       {/* Section 4: Story Redirect - Cinematic Final */}
       <section className="min-h-full flex flex-col items-center justify-center p-8 space-y-12 bg-[#0F0F0F] relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-t from-primary/20 via-transparent to-transparent opacity-50" />
+        <div className="absolute inset-0 bg-gradient-to-t from-primary/30 via-transparent to-transparent opacity-50" />
         
         <div className="relative z-10 text-center space-y-12">
           <div className="space-y-6">
@@ -542,7 +577,7 @@ export default function CriarPagina() {
         <Button 
           variant="ghost" 
           size="sm" 
-          className="fixed top-6 right-6 z-[130] text-[10px] uppercase font-bold tracking-widest text-primary bg-white/90 hover:bg-white rounded-full px-4 h-9 gap-2 transition-all hover:scale-105 pink-glow shadow-xl backdrop-blur-md border border-primary/10"
+          className="fixed top-24 right-6 z-[130] text-[10px] uppercase font-bold tracking-widest text-primary bg-white/90 hover:bg-white rounded-full px-4 h-9 gap-2 transition-all hover:scale-105 pink-glow shadow-xl backdrop-blur-md border border-primary/10"
           onClick={() => setIsPreviewOpen(true)}
         >
           <div className="absolute inset-0 bg-primary/5 animate-pulse rounded-full" />
