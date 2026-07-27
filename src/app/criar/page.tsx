@@ -29,7 +29,7 @@ import {
   SkipForward,
   Repeat,
   Shuffle,
-  MailOpen
+  Plus
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -135,6 +135,7 @@ export default function CriarPagina() {
   const [musicSearch, setMusicSearch] = useState('');
   const [musicResults, setMusicResults] = useState<MusicTrack[]>([]);
   const [isSearchingMusic, setIsSearchingMusic] = useState(false);
+  const [musicLimit, setMusicLimit] = useState(20);
 
   const [timeTogether, setTimeTogether] = useState({
     years: 0, months: 0, days: 0, hours: 0, minutes: 0, seconds: 0
@@ -171,6 +172,11 @@ export default function CriarPagina() {
     return () => clearInterval(interval);
   }, [data.startDate, data.startTime]);
 
+  // Reset limit on new search
+  useEffect(() => {
+    setMusicLimit(20);
+  }, [musicSearch]);
+
   useEffect(() => {
     const delayDebounceFn = setTimeout(async () => {
       if (musicSearch.length < 3) {
@@ -180,7 +186,8 @@ export default function CriarPagina() {
       
       setIsSearchingMusic(true);
       try {
-        const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(musicSearch)}&entity=song&limit=15`);
+        // country=br forces Brazilian store results to appear first
+        const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(musicSearch)}&entity=song&limit=${musicLimit}&country=br`);
         const result = await response.json();
         const tracks = result.results.map((item: any) => ({
           title: item.trackName,
@@ -197,7 +204,7 @@ export default function CriarPagina() {
     }, 500);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [musicSearch]);
+  }, [musicSearch, musicLimit]);
 
   const togglePlay = (track: MusicTrack) => {
     if (playingTrackUrl === track.previewUrl) {
@@ -295,8 +302,6 @@ export default function CriarPagina() {
     if (phase === 'checkout') return "Tudo pronto para o grande momento! Preencha os detalhes do pagamento abaixo e prepare-se para surpreender.";
     return "";
   }, [phase, wizardStep]);
-
-  // --- PREVIEW CONTENT (DARK NEON STYLE) ---
 
   const PreviewContent = () => {
     const [previewOpened, setPreviewOpened] = useState(false);
@@ -486,8 +491,6 @@ export default function CriarPagina() {
     );
   };
 
-  // --- END PREVIEW CONTENT ---
-
   return (
     <div className="min-h-screen flex flex-col bg-background selection:bg-primary/30 text-foreground overflow-x-hidden">
       <audio 
@@ -669,6 +672,27 @@ export default function CriarPagina() {
                         )}
                       </div>
                     ))}
+                    
+                    {musicResults.length > 0 && musicLimit < 50 && (
+                      <div className="pt-4 pb-8 flex justify-center">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          className="text-primary text-[10px] font-bold uppercase tracking-widest gap-2"
+                          onClick={() => setMusicLimit(prev => prev + 15)}
+                          disabled={isSearchingMusic}
+                        >
+                          {isSearchingMusic ? <Loader2 className="w-3 h-3 animate-spin" /> : <Plus className="w-3 h-3" />}
+                          Carregar mais músicas
+                        </Button>
+                      </div>
+                    )}
+
+                    {musicSearch.length >= 3 && musicResults.length === 0 && !isSearchingMusic && (
+                      <div className="text-center py-10 text-muted-foreground text-sm">
+                        Nenhuma música encontrada...
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
