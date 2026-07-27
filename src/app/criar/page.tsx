@@ -39,6 +39,36 @@ import {
 } from '@/components/ui/dialog';
 import { Slider } from '@/components/ui/slider';
 
+// --- Components ---
+
+/**
+ * Componente que anima o texto letra por letra
+ */
+function Typewriter({ text, speed = 30, onFinished }: { text: string; speed?: number; onFinished?: () => void }) {
+  const [displayedText, setDisplayedText] = useState('');
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    // Reset quando o texto muda
+    setDisplayedText('');
+    setIndex(0);
+  }, [text]);
+
+  useEffect(() => {
+    if (index < text.length) {
+      const timeout = setTimeout(() => {
+        setDisplayedText((prev) => prev + text[index]);
+        setIndex((prev) => prev + 1);
+      }, speed);
+      return () => clearTimeout(timeout);
+    } else if (onFinished) {
+      onFinished();
+    }
+  }, [index, text, speed, onFinished]);
+
+  return <span>{displayedText}</span>;
+}
+
 // --- Types ---
 type CreationPhase = 'dados' | 'wizard' | 'upsell' | 'planos' | 'checkout' | 'sucesso';
 
@@ -101,20 +131,14 @@ export default function CriarPagina() {
     years: 0, months: 0, days: 0, hours: 0, minutes: 0, seconds: 0
   });
 
-  // Animation effect for assistant text vs content
-  useEffect(() => {
-    setShowContent(false);
-    // Delay para o conteúdo aparecer após o balão de fala
-    const timer = setTimeout(() => setShowContent(true), 1200);
-    return () => clearTimeout(timer);
-  }, [phase, wizardStep]);
-
   // Stop audio on step/phase change
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.pause();
       setPlayingTrackUrl(null);
     }
+    // Esconde o conteúdo para esperar a animação do assistente
+    setShowContent(false);
   }, [phase, wizardStep]);
 
   // Calculate time in real-time
@@ -342,7 +366,7 @@ export default function CriarPagina() {
           <div className="w-10" />
         </div>
 
-        {/* Mascote e Fala (Sempre animam ao trocar de etapa) */}
+        {/* Mascote e Fala com Animação Letter-by-Letter */}
         <div 
           key={`assistant-header-${phase}-${wizardStep}`}
           className="mt-8 mb-4 flex flex-col items-center px-6 w-full"
@@ -357,18 +381,21 @@ export default function CriarPagina() {
           
           <div className="mt-6 w-full glass p-6 rounded-[2rem] shadow-2xl relative text-center border-white/10 animate-in slide-in-from-top-4 fade-in duration-700 delay-200">
             <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 glass rotate-45 border-l border-t border-white/5" />
-            <p className="text-sm font-medium leading-relaxed text-foreground/80">
-              {assistantMessage}
+            <p className="text-sm font-medium leading-relaxed text-foreground/80 min-h-[3rem]">
+              <Typewriter 
+                text={assistantMessage} 
+                onFinished={() => setTimeout(() => setShowContent(true), 300)} 
+              />
             </p>
           </div>
         </div>
 
-        {/* Conteúdo da Etapa (Staggered Animation) */}
+        {/* Conteúdo da Etapa (Aparece após o texto terminar) */}
         <div 
           key={`content-body-${phase}-${wizardStep}`}
           className={cn(
-            "w-full px-6 py-6 transition-all duration-1000 flex-1",
-            showContent ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+            "w-full px-6 py-6 transition-all duration-700 flex-1",
+            showContent ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
           )}
         >
           {phase === 'dados' && (
