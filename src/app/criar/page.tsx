@@ -373,7 +373,7 @@ export default function CriarPagina() {
         <Button 
           variant="ghost" 
           size="sm" 
-          className="fixed top-12 right-6 z-[130] text-[10px] uppercase font-bold tracking-widest text-primary bg-white/90 hover:bg-white rounded-full px-4 h-9 gap-2 transition-all hover:scale-105 pink-glow shadow-xl backdrop-blur-md border border-primary/10"
+          className="fixed top-14 right-6 z-[130] text-[10px] uppercase font-bold tracking-widest text-primary bg-white/90 hover:bg-white rounded-full px-4 h-9 gap-2 transition-all hover:scale-105 pink-glow shadow-xl backdrop-blur-md border border-primary/10"
           onClick={() => setIsPreviewOpen(true)}
         >
           <div className="absolute inset-0 bg-primary/5 animate-pulse rounded-full" />
@@ -731,26 +731,32 @@ export default function CriarPagina() {
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
         <DialogContent 
           hideClose
-          className="max-w-[380px] h-[85vh] p-0 bg-white border-[12px] border-zinc-900 rounded-[3.5rem] overflow-hidden shadow-2xl focus:outline-none flex flex-col"
+          className="max-w-[420px] h-[90vh] p-0 bg-transparent border-none shadow-none focus:outline-none flex items-center justify-center overflow-visible"
         >
           <DialogHeader className="sr-only">
             <DialogTitle>Visualização da Página</DialogTitle>
             <DialogDescription>Uma prévia de como sua surpresa será vista pelo seu amor.</DialogDescription>
           </DialogHeader>
-          <div className="relative w-full h-full flex flex-col">
+          
+          <div className="relative w-full h-full flex items-center justify-center group">
+            {/* Botão de Fechar "Flutuante" fora da moldura */}
             <Button 
               variant="ghost" 
               size="icon" 
-              className="absolute top-6 left-6 z-[210] bg-white/90 text-primary rounded-full backdrop-blur-md shadow-lg h-10 w-10 border border-primary/10 transition-transform active:scale-90" 
+              className="absolute top-0 -left-12 z-[220] bg-white text-primary rounded-full shadow-2xl h-10 w-10 border border-primary/10 transition-transform hover:scale-110 active:scale-90" 
               onClick={() => setIsPreviewOpen(false)}
             >
               <X className="w-5 h-5" />
             </Button>
-            <div className="flex-1 overflow-hidden">
-              <PreviewContent isFullScreen />
+
+            {/* Moldura do Celular */}
+            <div className="w-[360px] h-full bg-white border-[12px] border-zinc-900 rounded-[3.5rem] overflow-hidden shadow-2xl flex flex-col relative">
+              <div className="flex-1 overflow-hidden relative">
+                <PreviewContent isFullScreen />
+              </div>
+              {/* Home Indicator */}
+              <div className="h-1.5 w-32 bg-zinc-200 rounded-full mx-auto mb-2 mt-auto shrink-0 z-10" />
             </div>
-            {/* Elemento que simula a barra inferior do iPhone */}
-            <div className="h-1.5 w-32 bg-zinc-200 rounded-full mx-auto mb-2 mt-auto shrink-0" />
           </div>
         </DialogContent>
       </Dialog>
