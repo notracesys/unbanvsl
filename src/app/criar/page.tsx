@@ -42,9 +42,6 @@ import { Slider } from '@/components/ui/slider';
 
 // --- Components ---
 
-/**
- * Componente que anima o texto letra por letra com efeito de fade e desfoque suave
- */
 function Typewriter({ text, speed = 25, onFinished }: { text: string; speed?: number; onFinished?: () => void }) {
   const [displayedText, setDisplayedText] = useState('');
   const [index, setIndex] = useState(0);
@@ -122,13 +119,11 @@ export default function CriarPagina() {
     email: ''
   });
 
-  // Audio States
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [playingTrackUrl, setPlayingTrackUrl] = useState<string | null>(null);
   const [audioProgress, setAudioProgress] = useState(0);
   const [audioDuration, setAudioDuration] = useState(0);
 
-  // Music Search States
   const [musicSearch, setMusicSearch] = useState('');
   const [musicResults, setMusicResults] = useState<MusicTrack[]>([]);
   const [isSearchingMusic, setIsSearchingMusic] = useState(false);
@@ -137,7 +132,6 @@ export default function CriarPagina() {
     years: 0, months: 0, days: 0, hours: 0, minutes: 0, seconds: 0
   });
 
-  // Stop audio and hide content on phase/step change to allow typewriter animation
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.pause();
@@ -146,7 +140,6 @@ export default function CriarPagina() {
     setShowContent(false);
   }, [phase, wizardStep]);
 
-  // Calculate time in real-time
   useEffect(() => {
     if (!data.startDate) return;
     
@@ -170,7 +163,6 @@ export default function CriarPagina() {
     return () => clearInterval(interval);
   }, [data.startDate, data.startTime]);
 
-  // iTunes Music Search API
   useEffect(() => {
     const delayDebounceFn = setTimeout(async () => {
       if (musicSearch.length < 3) {
@@ -285,16 +277,16 @@ export default function CriarPagina() {
   }, [phase, wizardStep]);
 
   const PreviewContent = () => (
-    <div className="w-full h-full bg-[#050505] overflow-y-auto no-scrollbar space-y-6 pb-20 p-6 rounded-[2rem] border border-white/5">
+    <div className="w-full h-full bg-white overflow-y-auto no-scrollbar space-y-6 pb-20 p-6 rounded-[2rem] border border-primary/10">
       <div className="text-center space-y-2 mt-4 animate-in fade-in zoom-in duration-700">
         <Heart className="w-10 h-10 text-primary fill-current mx-auto animate-pulse" />
-        <h3 className="font-serif-elegant font-bold text-2xl leading-tight text-white/90">{data.title || "Seu Título Aqui"}</h3>
+        <h3 className="font-serif-elegant font-bold text-2xl leading-tight text-foreground">{data.title || "Seu Título Aqui"}</h3>
         <p className="text-sm text-muted-foreground italic tracking-wide">Para: {data.partnerName || "Amor"}</p>
       </div>
 
-      <GlassCard className="p-4 rounded-3xl border-white/10 flex items-center gap-4 bg-white/[0.03] backdrop-blur-xl">
+      <GlassCard className="p-4 rounded-3xl border-primary/5 flex items-center gap-4 bg-muted/50">
         <div className={cn(
-          "w-14 h-14 bg-white/10 rounded-xl overflow-hidden shrink-0 flex items-center justify-center relative shadow-inner",
+          "w-14 h-14 bg-white rounded-xl overflow-hidden shrink-0 flex items-center justify-center relative shadow-sm border border-primary/5",
           playingTrackUrl && "animate-pulse"
         )}>
           {data.music?.cover ? (
@@ -304,38 +296,37 @@ export default function CriarPagina() {
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-base font-bold truncate text-white/90">{data.music?.title || "Nenhuma música"}</p>
+          <p className="text-base font-bold truncate text-foreground">{data.music?.title || "Nenhuma música"}</p>
           <p className="text-xs text-muted-foreground truncate">{data.music?.artist || "Escolha no passo 2"}</p>
-          <div className="h-1 bg-white/10 w-full rounded-full mt-2 relative overflow-hidden">
-            <div className={cn("absolute left-0 top-0 h-full bg-primary transition-all duration-500 shadow-[0_0_8px_rgba(255,77,109,0.8)]", playingTrackUrl ? "w-2/3" : "w-0")} />
+          <div className="h-1 bg-primary/10 w-full rounded-full mt-2 relative overflow-hidden">
+            <div className={cn("absolute left-0 top-0 h-full bg-primary transition-all duration-500", playingTrackUrl ? "w-2/3" : "w-0")} />
           </div>
         </div>
       </GlassCard>
 
-      <div className="aspect-square rounded-[2rem] bg-white/[0.02] border border-white/10 overflow-hidden shadow-2xl relative group">
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      <div className="aspect-square rounded-[2rem] bg-muted/30 border border-primary/5 overflow-hidden shadow-lg relative group">
         {data.photos[0] ? (
           <img src={data.photos[0]} className="w-full h-full object-cover animate-in fade-in duration-1000" alt="Casal" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-            <ImageIcon className="w-12 h-12 opacity-20" />
+          <div className="w-full h-full flex items-center justify-center text-muted-foreground/30">
+            <ImageIcon className="w-12 h-12" />
           </div>
         )}
       </div>
 
       <div className="text-center space-y-4">
-        <p className="text-[10px] uppercase font-bold tracking-[0.2em] text-primary/80">Nossa História</p>
+        <p className="text-[10px] uppercase font-bold tracking-[0.2em] text-primary">Nossa História</p>
         <div className="grid grid-cols-3 gap-3">
-          <div className="bg-white/[0.03] backdrop-blur-md p-4 rounded-2xl border border-white/5 shadow-lg">
-            <p className="text-xl font-bold text-white/90">{timeTogether.years}</p>
+          <div className="bg-white p-4 rounded-2xl border border-primary/5 shadow-sm">
+            <p className="text-xl font-bold text-foreground">{timeTogether.years}</p>
             <p className="text-[10px] uppercase text-muted-foreground font-semibold">Anos</p>
           </div>
-          <div className="bg-white/[0.03] backdrop-blur-md p-4 rounded-2xl border border-white/5 shadow-lg">
-            <p className="text-xl font-bold text-white/90">{timeTogether.months}</p>
+          <div className="bg-white p-4 rounded-2xl border border-primary/5 shadow-sm">
+            <p className="text-xl font-bold text-foreground">{timeTogether.months}</p>
             <p className="text-[10px] uppercase text-muted-foreground font-semibold">Meses</p>
           </div>
-          <div className="bg-white/[0.03] backdrop-blur-md p-4 rounded-2xl border border-white/5 shadow-lg">
-            <p className="text-xl font-bold text-white/90">{timeTogether.days}</p>
+          <div className="bg-white p-4 rounded-2xl border border-primary/5 shadow-sm">
+            <p className="text-xl font-bold text-foreground">{timeTogether.days}</p>
             <p className="text-[10px] uppercase text-muted-foreground font-semibold">Dias</p>
           </div>
         </div>
@@ -352,20 +343,18 @@ export default function CriarPagina() {
         onLoadedMetadata={onLoadedMetadata}
       />
       
-      {/* Banner de Urgência Topo */}
-      <div className="w-full bg-primary/90 backdrop-blur-md py-2.5 px-6 text-center text-[10px] font-bold text-white uppercase tracking-[0.1em] z-[110] shadow-md border-b border-white/10">
+      <div className="w-full bg-primary py-2.5 px-6 text-center text-[10px] font-bold text-white uppercase tracking-[0.1em] z-[110] shadow-sm">
         Mais de 100 mil pessoas já emocionaram seu amor hoje ✨
       </div>
 
       <main className="flex-1 w-full max-w-lg mx-auto flex flex-col items-center pb-32">
-        {/* Barra de Progresso e Preview */}
         <div className="w-full px-8 pt-6 flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={handleBack} className="rounded-full -ml-4 opacity-40 hover:opacity-100 transition-opacity">
-            <ArrowLeft className="w-5 h-5" />
+          <Button variant="ghost" size="icon" onClick={handleBack} className="rounded-full -ml-4 hover:bg-primary/5">
+            <ArrowLeft className="w-5 h-5 text-primary" />
           </Button>
-          <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden shadow-inner">
+          <div className="flex-1 h-1.5 bg-primary/10 rounded-full overflow-hidden">
             <div 
-              className="h-full bg-primary transition-all duration-1000 ease-in-out rounded-full shadow-[0_0_10px_rgba(255,77,109,0.5)]" 
+              className="h-full bg-primary transition-all duration-1000 ease-in-out rounded-full" 
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -373,7 +362,7 @@ export default function CriarPagina() {
             <Button 
               variant="ghost" 
               size="sm" 
-              className="text-[10px] uppercase font-bold tracking-widest text-white/40 hover:text-primary transition-colors gap-2"
+              className="text-[10px] uppercase font-bold tracking-widest text-primary hover:bg-primary/5 gap-2"
               onClick={() => setIsPreviewOpen(true)}
             >
               <Eye className="w-3.5 h-3.5" /> Preview
@@ -381,14 +370,13 @@ export default function CriarPagina() {
           )}
         </div>
 
-        {/* Mascote e Fala Animada */}
         <div 
           key={`assistant-header-${phase}-${wizardStep}`}
           className="mt-10 mb-6 flex flex-col items-center px-6 w-full"
         >
           <div className="relative">
-            <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full -z-10 animate-pulse" />
-            <div className="w-28 h-28 rounded-full bg-white shadow-2xl flex items-center justify-center overflow-hidden border-[6px] border-white/10 animate-in zoom-in duration-700">
+            <div className="absolute inset-0 bg-primary/10 blur-2xl rounded-full -z-10" />
+            <div className="w-28 h-28 rounded-full bg-white shadow-xl flex items-center justify-center overflow-hidden border-4 border-white animate-in zoom-in duration-700">
               <img 
                 src="/lovi.png" 
                 alt="Mascote" 
@@ -397,9 +385,9 @@ export default function CriarPagina() {
             </div>
           </div>
           
-          <div className="mt-8 w-full glass p-7 rounded-[2.5rem] shadow-2xl relative text-center border-white/20 bg-white/[0.03] backdrop-blur-2xl animate-in slide-in-from-top-6 fade-in duration-1000">
-            <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 w-5 h-5 bg-white/[0.05] backdrop-blur-xl rotate-45 border-l border-t border-white/10" />
-            <div className="text-sm font-medium leading-relaxed text-white/80 min-h-[3rem] font-headline tracking-wide">
+          <div className="mt-8 w-full bg-white p-7 rounded-[2.5rem] shadow-xl relative text-center border border-primary/10 animate-in slide-in-from-top-6 fade-in duration-1000">
+            <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 w-5 h-5 bg-white rotate-45 border-l border-t border-primary/10" />
+            <div className="text-sm font-medium leading-relaxed text-foreground min-h-[3rem] font-headline tracking-wide">
               <Typewriter 
                 text={assistantMessage} 
                 onFinished={() => setShowContent(true)} 
@@ -408,57 +396,55 @@ export default function CriarPagina() {
           </div>
         </div>
 
-        {/* Conteúdo da Etapa */}
         <div 
           key={`content-body-${phase}-${wizardStep}`}
           className={cn(
             "w-full px-6 py-4 transition-all duration-1000 flex-1",
-            showContent ? "opacity-100 translate-y-0 blur-none scale-100" : "opacity-0 translate-y-8 blur-md scale-[0.98] pointer-events-none"
+            showContent ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8 pointer-events-none"
           )}
         >
           {phase === 'dados' && (
             <div className="space-y-5">
               <div className="space-y-2">
                 <div className="flex justify-between items-center ml-3">
-                  <span className="text-[10px] uppercase font-bold text-muted-foreground/60 tracking-[0.15em]">Seu Nome</span>
-                  <span className="text-[9px] text-muted-foreground/40 flex items-center gap-1"><ShieldCheck className="w-2.5 h-2.5" /> Apenas o primeiro nome por segurança</span>
+                  <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-[0.15em]">Seu Nome</span>
+                  <span className="text-[9px] text-muted-foreground flex items-center gap-1"><ShieldCheck className="w-2.5 h-2.5" /> Apenas o primeiro nome</span>
                 </div>
                 <Input 
                   placeholder="Como você se chama?" 
                   value={data.creatorName}
                   onChange={e => setData({...data, creatorName: e.target.value})}
-                  className="h-16 bg-white/[0.04] border-white/10 text-lg rounded-3xl focus:ring-primary/40 backdrop-blur-sm"
+                  className="h-16 bg-white border-primary/10 text-lg rounded-3xl focus:ring-primary/20 shadow-sm"
                 />
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between items-center ml-3">
-                  <span className="text-[10px] uppercase font-bold text-muted-foreground/60 tracking-[0.15em]">Nome do seu Amor</span>
-                  <span className="text-[9px] text-muted-foreground/40 flex items-center gap-1"><ShieldCheck className="w-2.5 h-2.5" /> Não precisa ser o nome completo</span>
+                  <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-[0.15em]">Nome do seu Amor</span>
                 </div>
                 <Input 
                   placeholder="Qual o nome dele(a)?" 
                   value={data.partnerName}
                   onChange={e => setData({...data, partnerName: e.target.value})}
-                  className="h-16 bg-white/[0.04] border-white/10 text-lg rounded-3xl focus:ring-primary/40 backdrop-blur-sm"
+                  className="h-16 bg-white border-primary/10 text-lg rounded-3xl focus:ring-primary/20 shadow-sm"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4 pt-4">
                 <div className="space-y-2">
-                  <span className="text-[10px] uppercase font-bold text-muted-foreground/60 ml-3 tracking-[0.15em]">Desde quando?</span>
+                  <span className="text-[10px] uppercase font-bold text-muted-foreground ml-3 tracking-[0.15em]">Desde quando?</span>
                   <Input 
                     type="date" 
                     value={data.startDate}
                     onChange={e => setData({...data, startDate: e.target.value})}
-                    className="h-16 bg-white/[0.04] border-white/10 rounded-3xl focus:ring-primary/40 backdrop-blur-sm"
+                    className="h-16 bg-white border-primary/10 rounded-3xl shadow-sm"
                   />
                 </div>
                 <div className="space-y-2">
-                  <span className="text-[10px] uppercase font-bold text-muted-foreground/60 ml-3 tracking-[0.15em]">Que horas?</span>
+                  <span className="text-[10px] uppercase font-bold text-muted-foreground ml-3 tracking-[0.15em]">Que horas?</span>
                   <Input 
                     type="time" 
                     value={data.startTime}
                     onChange={e => setData({...data, startTime: e.target.value})}
-                    className="h-16 bg-white/[0.04] border-white/10 rounded-3xl focus:ring-primary/40 backdrop-blur-sm"
+                    className="h-16 bg-white border-primary/10 rounded-3xl shadow-sm"
                   />
                 </div>
               </div>
@@ -475,11 +461,11 @@ export default function CriarPagina() {
                       value={data.title}
                       onChange={e => setData({...data, title: e.target.value})}
                       maxLength={30}
-                      className="h-16 bg-white/[0.04] border-white/10 text-lg rounded-3xl focus:ring-primary/40"
+                      className="h-16 bg-white border-primary/10 text-lg rounded-3xl shadow-sm"
                     />
-                    <span className="absolute right-5 bottom-5 text-[10px] text-muted-foreground/50 tracking-tighter">{data.title.length}/30</span>
+                    <span className="absolute right-5 bottom-5 text-[10px] text-muted-foreground">{data.title.length}/30</span>
                   </div>
-                  <Button variant="ghost" className="w-full h-12 text-xs gap-2 text-primary/70 font-bold hover:text-primary hover:bg-white/5 rounded-2xl" onClick={() => setData({...data, title: "Nosso amor é infinito ❤️"})}>
+                  <Button variant="outline" className="w-full h-12 text-xs gap-2 text-primary border-primary/20 hover:bg-primary/5 rounded-2xl" onClick={() => setData({...data, title: "Nosso amor é infinito ❤️"})}>
                     <Sparkles className="w-3.5 h-3.5" /> Gerar ideia romântica
                   </Button>
                 </div>
@@ -488,11 +474,10 @@ export default function CriarPagina() {
               {wizardStep === 2 && (
                 <div className="space-y-5">
                   <div className="relative group">
-                    <div className="absolute inset-0 bg-primary/5 blur-xl group-focus-within:bg-primary/10 transition-colors -z-10" />
-                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground/40" />
+                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <Input 
                       placeholder="Busque música ou artista..." 
-                      className="pl-14 h-16 bg-white/[0.04] border-white/10 rounded-3xl focus:ring-primary/40" 
+                      className="pl-14 h-16 bg-white border-primary/10 rounded-3xl shadow-sm" 
                       value={musicSearch}
                       onChange={e => setMusicSearch(e.target.value)}
                     />
@@ -503,32 +488,29 @@ export default function CriarPagina() {
                       <div 
                         key={i} 
                         className={cn(
-                          "flex flex-col p-4 rounded-3xl border transition-all duration-300 backdrop-blur-sm",
-                          data.music?.previewUrl === m.previewUrl ? "border-primary/50 bg-primary/[0.07] shadow-lg" : "border-white/5 bg-white/[0.02] hover:bg-white/[0.04]"
+                          "flex flex-col p-4 rounded-3xl border transition-all duration-300",
+                          data.music?.previewUrl === m.previewUrl ? "border-primary bg-primary/5 shadow-md" : "border-primary/5 bg-white hover:bg-muted/50"
                         )}
                       >
                         <div className="flex items-center gap-4">
                           <div className="relative group/play cursor-pointer" onClick={() => togglePlay(m)}>
-                            <img src={m.cover} alt="Capa" className="w-14 h-14 rounded-2xl shadow-xl object-cover transition-transform group-hover/play:scale-105" />
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-2xl opacity-0 group-hover/play:opacity-100 transition-opacity">
+                            <img src={m.cover} alt="Capa" className="w-14 h-14 rounded-2xl shadow-sm object-cover" />
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-2xl opacity-0 group-hover/play:opacity-100 transition-opacity">
                               {playingTrackUrl === m.previewUrl ? <Pause className="w-6 h-6 text-white" /> : <Play className="w-6 h-6 text-white" />}
                             </div>
                           </div>
                           <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setData({...data, music: m})}>
-                            <p className="text-sm font-bold truncate text-white/90">{m.title}</p>
-                            <p className="text-[11px] text-muted-foreground/70 truncate">{m.artist}</p>
+                            <p className="text-sm font-bold truncate text-foreground">{m.title}</p>
+                            <p className="text-[11px] text-muted-foreground truncate">{m.artist}</p>
                           </div>
                         </div>
                         {playingTrackUrl === m.previewUrl && (
                           <div className="mt-5 px-1 space-y-2 animate-in slide-in-from-top-2 duration-300">
-                            <Slider value={[audioProgress]} max={audioDuration} step={0.1} onValueChange={handleSeek} className="cursor-pointer" />
+                            <Slider value={[audioProgress]} max={audioDuration} step={0.1} onValueChange={handleSeek} />
                           </div>
                         )}
                       </div>
                     ))}
-                    {musicSearch.length >= 3 && musicResults.length === 0 && !isSearchingMusic && (
-                      <p className="text-center text-xs text-muted-foreground py-10 italic">Nenhuma música encontrada...</p>
-                    )}
                   </div>
                 </div>
               )}
@@ -536,21 +518,21 @@ export default function CriarPagina() {
               {wizardStep === 3 && (
                 <div className="grid grid-cols-2 gap-4">
                   {data.photos.map((p, i) => (
-                    <div key={i} className="aspect-square rounded-3xl bg-white/[0.03] relative overflow-hidden border border-white/10 shadow-xl group">
-                      <img src={p} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Sua foto" />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <Button variant="destructive" size="icon" className="h-10 w-10 rounded-full shadow-2xl" onClick={() => setData({...data, photos: data.photos.filter((_, idx) => idx !== i)})}>
+                    <div key={i} className="aspect-square rounded-3xl bg-muted/30 relative overflow-hidden border border-primary/10 group shadow-sm">
+                      <img src={p} className="w-full h-full object-cover" alt="Sua foto" />
+                      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <Button variant="destructive" size="icon" className="h-10 w-10 rounded-full" onClick={() => setData({...data, photos: data.photos.filter((_, idx) => idx !== i)})}>
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
                     </div>
                   ))}
                   {data.photos.length < 5 && (
-                    <button className="aspect-square rounded-3xl bg-white/[0.03] border-2 border-dashed border-white/10 flex flex-col items-center justify-center gap-2 hover:bg-white/[0.05] transition-colors group" onClick={() => setData({...data, photos: [...data.photos, `https://picsum.photos/seed/${Math.random()}/800/800` ]})}>
+                    <button className="aspect-square rounded-3xl bg-white border-2 border-dashed border-primary/10 flex flex-col items-center justify-center gap-2 hover:bg-primary/5 transition-colors group" onClick={() => setData({...data, photos: [...data.photos, `https://picsum.photos/seed/${Math.random()}/800/800` ]})}>
                       <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
                         <Upload className="w-5 h-5 text-primary" />
                       </div>
-                      <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Enviar Foto</span>
+                      <span className="text-[10px] uppercase font-bold text-primary/60 tracking-widest">Enviar Foto</span>
                     </button>
                   )}
                 </div>
@@ -560,14 +542,14 @@ export default function CriarPagina() {
                 <div className="space-y-5 animate-in fade-in duration-1000">
                   <Textarea 
                     placeholder="Abra seu coração aqui..." 
-                    className="min-h-[300px] bg-white/[0.04] border-white/10 rounded-3xl p-6 text-base leading-relaxed focus:ring-primary/40 shadow-inner"
+                    className="min-h-[300px] bg-white border-primary/10 rounded-3xl p-6 text-base leading-relaxed focus:ring-primary/20 shadow-sm"
                     value={data.message}
                     onChange={e => setData({...data, message: e.target.value})}
                   />
                   <div className="flex justify-between items-center px-2">
-                    <span className="text-[10px] text-muted-foreground/50">{data.message.length}/5000 caracteres</span>
-                    <Button variant="ghost" size="sm" className="text-[10px] uppercase font-bold tracking-widest text-primary hover:bg-primary/10">
-                      Inspirar-me com IA ✨
+                    <span className="text-[10px] text-muted-foreground">{data.message.length}/5000</span>
+                    <Button variant="ghost" size="sm" className="text-[10px] uppercase font-bold tracking-widest text-primary hover:bg-primary/5">
+                      Inspirar-me ✨
                     </Button>
                   </div>
                 </div>
@@ -576,14 +558,14 @@ export default function CriarPagina() {
               {wizardStep >= 5 && (
                  <div className="text-center space-y-6 py-10 animate-in zoom-in duration-1000">
                   <div className="relative mx-auto w-24 h-24">
-                    <div className="absolute inset-0 bg-primary/30 blur-2xl rounded-full animate-pulse" />
-                    <div className="relative w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center shadow-2xl border border-primary/20">
+                    <div className="absolute inset-0 bg-primary/10 blur-2xl rounded-full animate-pulse" />
+                    <div className="relative w-24 h-24 bg-white border border-primary/10 rounded-full flex items-center justify-center shadow-md">
                       <CheckCircle2 className="w-12 h-12 text-primary" />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <h3 className="text-3xl font-serif-elegant font-bold text-white/90">Presente Perfeito!</h3>
-                    <p className="text-sm text-muted-foreground max-w-[250px] mx-auto">Tudo pronto para ser eternizado. Revise como ficou no botão acima.</p>
+                    <h3 className="text-3xl font-serif-elegant font-bold text-foreground">Presente Perfeito!</h3>
+                    <p className="text-sm text-muted-foreground max-w-[250px] mx-auto">Tudo pronto para ser eternizado. Confira o preview acima.</p>
                   </div>
                 </div>
               )}
@@ -594,8 +576,8 @@ export default function CriarPagina() {
             <div className="space-y-5">
               <div 
                 className={cn(
-                  "p-8 rounded-[2.5rem] border-2 transition-all relative overflow-hidden cursor-pointer group",
-                  data.plan === 'lifetime' ? "border-primary bg-primary/10 shadow-[0_0_30px_rgba(255,77,109,0.2)]" : "border-white/10 glass hover:bg-white/[0.05]"
+                  "p-8 rounded-[2.5rem] border-2 transition-all relative overflow-hidden cursor-pointer bg-white",
+                  data.plan === 'lifetime' ? "border-primary shadow-lg ring-4 ring-primary/5" : "border-primary/5 hover:bg-primary/5"
                 )}
                 onClick={() => setData({...data, plan: 'lifetime'})}
               >
@@ -606,28 +588,28 @@ export default function CriarPagina() {
                 )}
                 <div className="flex justify-between items-start">
                   <div className="space-y-1">
-                    <h3 className="font-bold text-xl text-white/90">Acesso Vitalício</h3>
+                    <h3 className="font-bold text-xl text-foreground">Acesso Vitalício</h3>
                     <p className="text-[11px] text-muted-foreground uppercase tracking-wider">Presente para sempre</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs text-muted-foreground line-through decoration-primary/50">R$ 57,00</p>
+                    <p className="text-xs text-muted-foreground line-through">R$ 57,00</p>
                     <p className="text-2xl font-bold text-primary">R$ 27,97</p>
                   </div>
                 </div>
               </div>
               <div 
                 className={cn(
-                  "p-8 rounded-[2.5rem] border-2 transition-all cursor-pointer",
-                  data.plan === 'temporary' ? "border-primary bg-primary/10 shadow-[0_0_30px_rgba(255,77,109,0.2)]" : "border-white/10 glass hover:bg-white/[0.05]"
+                  "p-8 rounded-[2.5rem] border-2 transition-all cursor-pointer bg-white",
+                  data.plan === 'temporary' ? "border-primary shadow-lg ring-4 ring-primary/5" : "border-primary/5 hover:bg-primary/5"
                 )}
                 onClick={() => setData({...data, plan: 'temporary'})}
               >
                 <div className="flex justify-between items-center">
                   <div className="space-y-1">
-                    <h3 className="font-bold text-xl text-white/90">Plano Econômico</h3>
+                    <h3 className="font-bold text-xl text-foreground">Plano Econômico</h3>
                     <p className="text-[11px] text-muted-foreground uppercase tracking-wider">Válido por 1 ano</p>
                   </div>
-                  <p className="text-2xl font-bold text-white/90">R$ 19,90</p>
+                  <p className="text-2xl font-bold text-foreground">R$ 19,90</p>
                 </div>
               </div>
             </div>
@@ -635,10 +617,10 @@ export default function CriarPagina() {
 
           {phase === 'checkout' && (
             <div className="space-y-6">
-              <GlassCard className="p-8 border-white/10 bg-white/[0.02] space-y-7 rounded-[3rem] shadow-2xl backdrop-blur-3xl">
-                <div className="flex items-center justify-between border-b border-white/5 pb-4">
-                  <h3 className="text-lg font-bold text-white/90">Resumo do Pedido</h3>
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <div className="p-8 border border-primary/10 bg-white space-y-7 rounded-[3rem] shadow-xl">
+                <div className="flex items-center justify-between border-b border-muted pb-4">
+                  <h3 className="text-lg font-bold text-foreground">Resumo do Pedido</h3>
+                  <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center">
                     <QrCode className="w-5 h-5 text-primary" />
                   </div>
                 </div>
@@ -646,77 +628,54 @@ export default function CriarPagina() {
                 <div className="space-y-5">
                   <div className="flex justify-between items-center text-sm">
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-white/[0.05] flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
                         <Gift className="w-5 h-5 text-muted-foreground" />
                       </div>
                       <span className="text-muted-foreground font-medium">Plano: {data.plan === 'lifetime' ? 'Vitalício' : 'Econômico'}</span>
                     </div>
-                    <span className="font-bold text-white/90">R$ {data.plan === 'lifetime' ? '27,97' : '19,90'}</span>
-                  </div>
-                  
-                  <div className="flex justify-between items-center text-sm">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-white/[0.05] flex items-center justify-center">
-                        <Sparkles className="w-5 h-5 text-primary/60" />
-                      </div>
-                      <span className="text-muted-foreground font-medium">Tema Exclusivo & Música</span>
-                    </div>
-                    <span className="font-bold text-white/90">Grátis</span>
+                    <span className="font-bold text-foreground">R$ {data.plan === 'lifetime' ? '27,97' : '19,90'}</span>
                   </div>
                 </div>
 
-                <div className="h-px bg-white/10 w-full" />
+                <div className="h-px bg-muted w-full" />
                 
                 <div className="flex justify-between items-end pt-2">
                   <div className="space-y-1">
                     <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Total a pagar</span>
-                    <p className="text-3xl font-bold text-white tracking-tighter">R$ {data.plan === 'lifetime' ? '27,97' : '19,90'}</p>
+                    <p className="text-3xl font-bold text-foreground tracking-tighter">R$ {data.plan === 'lifetime' ? '27,97' : '19,90'}</p>
                   </div>
-                  <Button variant="ghost" className="h-8 text-[10px] gap-2 text-muted-foreground/60 hover:text-primary tracking-widest uppercase font-bold">
+                  <Button variant="ghost" className="h-8 text-[10px] gap-2 text-primary tracking-widest uppercase font-bold">
                     <Ticket className="w-3.5 h-3.5" /> Cupom
                   </Button>
                 </div>
-
-                <div className="p-6 rounded-[2rem] bg-primary/[0.04] border border-primary/10 flex items-center gap-5 group relative overflow-hidden">
-                  <div className="absolute inset-0 bg-primary/[0.02] -z-10 group-hover:bg-primary/[0.05] transition-colors" />
-                  <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
-                    <Crown className="w-6 h-6 text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-xs font-bold leading-tight text-white/90 tracking-tight">O amor dura <span className="text-primary">PARA SEMPRE</span></p>
-                    <p className="text-[10px] text-muted-foreground/70 mt-0.5">Mude para o vitalício por apenas + R$ 8,00</p>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-primary group-hover:translate-x-1 transition-transform" />
-                </div>
-              </GlassCard>
+              </div>
             </div>
           )}
 
           {phase === 'sucesso' && (
             <div className="text-center space-y-8 py-14 animate-in zoom-in duration-1000">
               <div className="relative mx-auto w-28 h-28">
-                <div className="absolute inset-0 bg-primary/40 blur-3xl rounded-full animate-pulse" />
-                <div className="relative w-28 h-28 bg-white/10 rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(255,77,109,0.4)] border border-white/20">
+                <div className="absolute inset-0 bg-primary/10 blur-3xl rounded-full animate-pulse" />
+                <div className="relative w-28 h-28 bg-white rounded-full flex items-center justify-center shadow-xl border border-primary/5">
                   <Sparkles className="w-14 h-14 text-primary animate-float" />
                 </div>
               </div>
               <div className="space-y-3">
-                <h2 className="text-4xl font-serif-elegant font-bold text-white tracking-tight">Presente Criado!</h2>
+                <h2 className="text-4xl font-serif-elegant font-bold text-foreground">Presente Criado!</h2>
                 <p className="text-muted-foreground max-w-xs mx-auto text-sm leading-relaxed">Sua história agora está eternizada. Compartilhe esse link e veja a mágica acontecer.</p>
               </div>
-              <Button size="lg" className="w-full h-16 bg-[#25D366] hover:bg-[#25D366]/90 rounded-full font-bold text-lg shadow-[0_10px_30px_rgba(37,211,102,0.3)] gap-3 transition-transform hover:scale-[1.02]">
+              <Button size="lg" className="w-full h-16 bg-[#25D366] hover:bg-[#25D366]/90 rounded-full font-bold text-lg shadow-lg shadow-green-200 gap-3 transition-transform hover:scale-[1.02]">
                 Compartilhar no WhatsApp <ArrowRight className="w-5 h-5" />
               </Button>
             </div>
           )}
         </div>
 
-        {/* Botão de Navegação Rodapé Fixo */}
         {phase !== 'sucesso' && showContent && (
-          <div className="fixed bottom-0 left-0 w-full p-8 bg-gradient-to-t from-background via-background/95 to-transparent z-[100] animate-in fade-in slide-in-from-bottom-6 duration-700">
+          <div className="fixed bottom-0 left-0 w-full p-8 bg-gradient-to-t from-background to-transparent z-[100] animate-in fade-in slide-in-from-bottom-6 duration-700">
             <Button 
               size="lg" 
-              className="w-full h-16 bg-primary hover:bg-primary/90 pink-glow text-lg font-bold rounded-full max-w-lg mx-auto flex items-center justify-center gap-3 shadow-[0_15px_35px_rgba(255,77,109,0.4)]"
+              className="w-full h-16 bg-primary hover:bg-primary/90 text-lg font-bold rounded-full max-w-lg mx-auto flex items-center justify-center gap-3 pink-glow"
               onClick={handleNext}
               disabled={
                 (phase === 'dados' && !(data.creatorName && data.partnerName && data.startDate))
@@ -729,15 +688,14 @@ export default function CriarPagina() {
         )}
       </main>
 
-      {/* Modal de Preview */}
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-        <DialogContent className="max-w-md w-[92%] p-0 bg-transparent border-none overflow-hidden rounded-[3rem] shadow-none">
+        <DialogContent className="max-w-md w-[92%] p-0 bg-transparent border-none overflow-hidden rounded-[3rem] shadow-2xl">
           <DialogHeader className="sr-only">
             <DialogTitle>Visualização da Página</DialogTitle>
             <DialogDescription>Uma prévia de como sua surpresa será vista pelo seu amor.</DialogDescription>
           </DialogHeader>
-          <div className="relative h-[85vh] shadow-[0_0_100px_rgba(0,0,0,0.8)] rounded-[3rem]">
-            <Button variant="ghost" size="icon" className="absolute top-5 right-5 z-[60] bg-black/60 text-white rounded-full backdrop-blur-md border border-white/10" onClick={() => setIsPreviewOpen(false)}>
+          <div className="relative h-[85vh] rounded-[3rem]">
+            <Button variant="ghost" size="icon" className="absolute top-5 right-5 z-[60] bg-white/80 text-primary rounded-full backdrop-blur-md shadow-md" onClick={() => setIsPreviewOpen(false)}>
               <X className="w-5 h-5" />
             </Button>
             <PreviewContent />

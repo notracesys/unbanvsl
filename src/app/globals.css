@@ -1,13 +1,12 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* Background: Deep dark romantic gradient */
-    --background: 340 50% 5%;
-    --foreground: 0 0% 100%;
+    /* Background: Soft White / Rose Tint */
+    --background: 340 30% 98%;
+    --foreground: 340 50% 15%;
 
     /* Primary: Romantic Pink #FF4D6D */
     --primary: 349 100% 65%;
@@ -21,17 +20,17 @@
     --secondary: 343 79% 44%;
     --secondary-foreground: 0 0% 100%;
 
-    --card: 340 50% 8%;
-    --card-foreground: 0 0% 100%;
+    --card: 0 0% 100%;
+    --card-foreground: 340 50% 15%;
     
-    --muted: 340 30% 15%;
-    --muted-foreground: 340 10% 70%;
+    --muted: 340 20% 94%;
+    --muted-foreground: 340 10% 45%;
     
-    --border: 340 30% 20%;
-    --input: 340 30% 20%;
+    --border: 340 20% 88%;
+    --input: 340 20% 88%;
     --ring: 349 100% 65%;
     
-    --radius: 1.25rem;
+    --radius: 1.5rem;
   }
 }
 
@@ -41,8 +40,8 @@
   }
   body {
     @apply bg-background text-foreground font-body antialiased;
-    background-image: radial-gradient(circle at top right, rgba(255, 77, 109, 0.1), transparent),
-                      radial-gradient(circle at bottom left, rgba(201, 24, 74, 0.1), transparent);
+    background-image: radial-gradient(circle at top right, rgba(255, 77, 109, 0.05), transparent),
+                      radial-gradient(circle at bottom left, rgba(201, 24, 74, 0.05), transparent);
     background-attachment: fixed;
   }
   h1, h2, h3, h4, h5, h6 {
@@ -55,18 +54,19 @@
 }
 
 .glass {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 77, 109, 0.1);
+  box-shadow: 0 8px 32px rgba(255, 77, 109, 0.05);
 }
 
 .pink-glow {
-  box-shadow: 0 0 20px rgba(255, 77, 109, 0.3);
+  box-shadow: 0 10px 25px rgba(255, 77, 109, 0.2);
 }
 
 .text-gradient {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-[#FF4D6D] to-[#FF8FA3];
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-[#FF4D6D] to-[#C9184A];
 }
 
 @keyframes float {
