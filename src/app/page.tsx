@@ -9,7 +9,8 @@ import {
   ChevronRight,
   ShieldCheck,
   Zap,
-  Gift
+  Gift,
+  Eye
 } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import Link from "next/link";
@@ -29,9 +30,14 @@ export default function Home() {
             </div>
             <span className="font-serif-elegant font-bold text-2xl tracking-tighter">Love<span className="text-primary">Link</span></span>
           </div>
-          <Button size="sm" className="bg-primary hover:bg-primary/90 text-white rounded-full font-bold px-6 pink-glow" asChild>
-            <Link href="/criar">Começar</Link>
-          </Button>
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="sm" className="hidden sm:flex text-primary font-bold" asChild>
+              <Link href="/criar?exemplo=true">Ver Exemplo</Link>
+            </Button>
+            <Button size="sm" className="bg-primary hover:bg-primary/90 text-white rounded-full font-bold px-6 pink-glow" asChild>
+              <Link href="/criar">Começar</Link>
+            </Button>
+          </div>
         </div>
       </header>
 

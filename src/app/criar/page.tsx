@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { 
   Heart, 
   ArrowLeft, 
@@ -324,7 +324,7 @@ const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: 
           </h2>
           <div className="inline-block px-6 py-2 rounded-full border border-primary/20 bg-primary/5 backdrop-blur-sm">
             <p className="text-[9px] font-black uppercase tracking-[0.3em] text-primary">
-              UM LAÇO ETERNO DESDE {data.startDate ? format(new Date(data.startDate), 'dd/MM/yyyy') : '...'}
+              UM LAÇO ETERNO DESDE {data.startDate ? format(new Date(data.startDate.includes('T') ? data.startDate : `${data.startDate}T00:00`), 'dd/MM/yyyy') : '...'}
             </p>
           </div>
         </div>
@@ -396,6 +396,7 @@ const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: 
 
 export default function CriarPagina() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [phase, setPhase] = useState<CreationPhase>('dados');
   const [wizardStep, setWizardStep] = useState(1);
@@ -430,6 +431,37 @@ export default function CriarPagina() {
   const [timeTogether, setTimeTogether] = useState({
     years: 0, months: 0, days: 0, hours: 0, minutes: 0, seconds: 0
   });
+
+  // Detect example parameter and pre-fill data
+  useEffect(() => {
+    const isExample = searchParams.get('exemplo') === 'true';
+    if (isExample) {
+      setData({
+        creatorName: 'Pedro',
+        partnerName: 'Ana',
+        startDate: '2021-06-12',
+        startTime: '20:30',
+        city: 'São Paulo',
+        title: 'Para a minha rainha ❤️',
+        music: {
+          title: "Como é Grande o Meu Amor por Você",
+          artist: "Roberto Carlos",
+          cover: "https://picsum.photos/seed/roberto/600/600",
+          previewUrl: "https://audio-ssl.itunes.apple.com/itunes-assets/AudioPreview115/v4/8e/3c/6e/8e3c6e8e-3c6e-8e3c-6e8e-3c6e8e3c6e8e/mzaf_123456789.plus.aac.p.m4a"
+        },
+        photos: [
+          'https://picsum.photos/seed/couple1/600/600',
+          'https://picsum.photos/seed/couple2/600/600',
+          'https://picsum.photos/seed/couple3/600/600'
+        ],
+        message: "Ana, você é a razão do meu sorriso todos os dias. Este presente é apenas uma pequena demonstração de como o meu amor por você cresce a cada segundo. Como diria o Rei: Como é grande o meu amor por você! ❤️",
+        theme: 'classic',
+        plan: 'lifetime',
+        email: 'exemplo@love.link'
+      });
+      setIsPreviewOpen(true);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (audioRef.current) {

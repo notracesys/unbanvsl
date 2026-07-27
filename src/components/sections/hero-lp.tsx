@@ -26,7 +26,7 @@ export function HeroLP() {
             </Link>
           </Button>
           <Button variant="ghost" className="text-primary hover:bg-primary/5 px-10 py-8 text-lg rounded-full font-bold" asChild>
-            <Link href="#como-funciona">
+            <Link href="/criar?exemplo=true">
               Ver Exemplo <Eye className="ml-2 w-5 h-5" />
             </Link>
           </Button>
