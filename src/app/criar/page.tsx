@@ -116,7 +116,6 @@ const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: 
 
   const handleOpenLetter = () => {
     setIsOpening(true);
-    // Tempo da animação otimizado: a carta salta, expande e então revelamos o conteúdo rapidamente
     setTimeout(() => {
       setPreviewOpened(true);
       setIsOpening(false);
@@ -126,12 +125,9 @@ const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: 
   if (!previewOpened) {
     return (
       <div className="w-full h-full bg-[#0F0F0F] flex flex-col items-center justify-between py-12 px-8 relative overflow-hidden text-center perspective-1000">
-        
-        {/* Background Aura */}
         <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-transparent to-primary/5 pointer-events-none" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-primary/20 blur-[120px] rounded-full pointer-events-none" />
 
-        {/* Dynamic Header */}
         <div className={cn(
           "relative z-10 transition-all duration-700",
           isOpening ? "opacity-0 -translate-y-20 scale-90" : "opacity-100 translate-y-0"
@@ -149,10 +145,7 @@ const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: 
           </h2>
         </div>
 
-        {/* THE ENVELOPE (Nobel Prize Animation Stage) */}
         <div className="relative w-full flex items-center justify-center h-64 overflow-visible">
-          
-          {/* Opening Light Burst */}
           {isOpening && (
             <div className="absolute inset-0 flex items-center justify-center z-[60]">
               <div className="w-2 h-2 bg-white rounded-full shadow-[0_0_300px_150px_rgba(255,255,255,0.8)] animate-pulse" />
@@ -163,7 +156,6 @@ const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: 
             "relative w-64 h-44 transition-all duration-700",
             isOpening ? "scale-110 translate-y-32" : "animate-float"
           )}>
-            {/* Front Letter (The one that SALTS!) */}
             {isOpening && (
               <div className="absolute inset-x-4 top-2 h-40 bg-white rounded-xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] flex flex-col items-center justify-center gap-3 z-[100] animate-letter-out border border-primary/5">
                 <div className="w-16 h-1.5 bg-zinc-100 rounded-full" />
@@ -172,12 +164,10 @@ const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: 
               </div>
             )}
 
-            {/* Back Flap (The envelope body) */}
             <div className="absolute inset-0 bg-primary/95 rounded-2xl shadow-2xl border border-white/10 z-20">
               <Mail className="absolute inset-0 w-full h-full text-white/10 p-12 pointer-events-none" />
             </div>
 
-            {/* Top Flap (Opening) */}
             <div className={cn(
               "absolute inset-x-0 top-0 h-1/2 bg-primary rounded-t-2xl z-40 border-b border-white/20 origin-top transition-transform duration-1000",
               isOpening && "animate-envelope-open"
@@ -185,7 +175,6 @@ const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: 
               <div className="w-full h-full bg-white/5" />
             </div>
 
-            {/* Heart Seal */}
             {!isOpening && (
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[45] bg-white rounded-full p-3 shadow-xl border-4 border-primary/20 group-hover:scale-110 transition-transform">
                 <Heart className="w-8 h-8 text-primary fill-current" />
@@ -194,7 +183,6 @@ const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: 
           </div>
         </div>
 
-        {/* Action Button */}
         <div className={cn(
           "relative w-full px-4 transition-all duration-700",
           isOpening ? "opacity-0 translate-y-20" : "opacity-100 translate-y-0"
@@ -597,7 +585,7 @@ export default function CriarPagina() {
       switch(wizardStep) {
         case 1: return "Dê um título especial para esse presente! Como você chama seu amor?";
         case 2: return "Qual a trilha sonora de vocês? Escolha aquela música que faz o coração bater mais forte.";
-        case 3: return "Hora das fotos! Escolha as melhores lembranças de vocês (até 10 fotos).";
+        case 3: return "Hora das fotos! Escolha as melhores lembranças de vocês (até 10 fotos). A primeira será a capa do player!";
         case 4: return "Abra seu coração! Escreva uma carta de amor inesquecível.";
         case 5: return "Estamos quase lá! O visual do presente está incrível.";
         case 6: return "O seu presente está lindíssimo! Confira se está tudo certinho antes de finalizar.";
@@ -821,39 +809,75 @@ export default function CriarPagina() {
               )}
 
               {wizardStep === 3 && (
-                <div className="space-y-4">
-                  <input 
-                    type="file" 
-                    accept="image/*" 
-                    multiple 
-                    className="hidden" 
-                    ref={fileInputRef} 
-                    onChange={handlePhotoUpload}
-                  />
-                  <div className="grid grid-cols-2 gap-4">
-                    {data.photos.map((p, i) => (
-                      <div key={i} className="aspect-square rounded-3xl bg-muted/30 relative overflow-hidden border border-primary/10 group shadow-sm">
-                        <img src={p} className="w-full h-full object-cover" alt="Sua foto" />
-                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <Button variant="destructive" size="icon" className="h-10 w-10 rounded-full" onClick={() => setData({...data, photos: data.photos.filter((_, idx) => idx !== i)})}>
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
+                <div className="space-y-8">
+                  {/* Spotify Cover Preview Section */}
+                  <div className="flex flex-col items-center space-y-4">
+                    <span className="text-[10px] uppercase font-bold text-primary tracking-[0.2em]">Capa do seu Presente</span>
+                    <div className="w-full max-w-[240px] aspect-square rounded-[2rem] overflow-hidden shadow-2xl relative border-4 border-white group">
+                      <img 
+                        src={data.photos[0] || 'https://picsum.photos/seed/love/600/600'} 
+                        className="w-full h-full object-cover" 
+                        alt="Preview da Capa" 
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
+                      <div className="absolute bottom-4 left-0 w-full text-center px-4">
+                        <p className="text-white text-[10px] font-black uppercase tracking-widest truncate">
+                          {data.music?.title || "Sua Música"}
+                        </p>
                       </div>
-                    ))}
-                    {data.photos.length < 10 && (
-                      <button 
-                        className="aspect-square rounded-3xl bg-white border-2 border-dashed border-primary/10 flex flex-col items-center justify-center gap-2 hover:bg-primary/5 transition-colors group" 
-                        onClick={() => fileInputRef.current?.click()}
-                      >
-                        <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
-                          <Upload className="w-5 h-5 text-primary" />
+                      {!data.photos[0] && (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-muted/20">
+                          <ImageIcon className="w-8 h-8 text-primary/40" />
+                          <span className="text-[8px] font-bold uppercase mt-2 text-primary/40">Aguardando foto</span>
                         </div>
-                        <span className="text-[10px] uppercase font-bold text-primary/60 tracking-widest">Enviar Foto</span>
-                      </button>
-                    )}
+                      )}
+                    </div>
                   </div>
-                  <p className="text-center text-[10px] text-muted-foreground">Você pode enviar até 10 fotos.</p>
+
+                  <div className="space-y-4">
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      multiple 
+                      className="hidden" 
+                      ref={fileInputRef} 
+                      onChange={handlePhotoUpload}
+                    />
+                    
+                    <div className="flex items-center justify-between px-2">
+                      <h4 className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Sua Galeria</h4>
+                      <span className="text-[10px] text-muted-foreground">{data.photos.length}/10 fotos</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      {data.photos.map((p, i) => (
+                        <div key={i} className="aspect-square rounded-3xl bg-muted/30 relative overflow-hidden border border-primary/10 group shadow-sm">
+                          <img src={p} className="w-full h-full object-cover" alt="Sua foto" />
+                          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <Button variant="destructive" size="icon" className="h-10 w-10 rounded-full" onClick={() => setData({...data, photos: data.photos.filter((_, idx) => idx !== i)})}>
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                          {i === 0 && (
+                            <div className="absolute top-3 left-3 bg-primary text-white text-[8px] font-black px-2 py-1 rounded-full uppercase tracking-tighter">
+                              Capa
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                      {data.photos.length < 10 && (
+                        <button 
+                          className="aspect-square rounded-3xl bg-white border-2 border-dashed border-primary/10 flex flex-col items-center justify-center gap-2 hover:bg-primary/5 transition-colors group" 
+                          onClick={() => fileInputRef.current?.click()}
+                        >
+                          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <Upload className="w-5 h-5 text-primary" />
+                          </div>
+                          <span className="text-[10px] uppercase font-bold text-primary/60 tracking-widest">Enviar Foto</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
 
