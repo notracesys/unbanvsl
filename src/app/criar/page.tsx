@@ -116,11 +116,11 @@ const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: 
 
   const handleOpenLetter = () => {
     setIsOpening(true);
-    // Nobel Prize animation duration: 2 seconds before switching view
+    // Tempo da animação: a carta salta, expande e então revelamos o conteúdo
     setTimeout(() => {
       setPreviewOpened(true);
       setIsOpening(false);
-    }, 2200);
+    }, 2500);
   };
 
   if (!previewOpened) {
@@ -150,35 +150,36 @@ const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: 
         </div>
 
         {/* THE ENVELOPE (Nobel Prize Animation Stage) */}
-        <div className="relative w-full flex items-center justify-center">
+        <div className="relative w-full flex items-center justify-center h-64">
           
           {/* Opening Light Burst */}
           {isOpening && (
             <div className="absolute inset-0 flex items-center justify-center z-[60]">
-              <div className="w-1 h-1 bg-white rounded-full shadow-[0_0_200px_100px_rgba(255,255,255,1)] animate-pulse" />
+              <div className="w-2 h-2 bg-white rounded-full shadow-[0_0_300px_150px_rgba(255,255,255,0.8)] animate-pulse" />
             </div>
           )}
 
           <div className={cn(
-            "relative w-64 h-44 group transition-transform duration-700",
-            isOpening ? "scale-110 translate-y-20" : "animate-float"
+            "relative w-64 h-44 transition-all duration-700",
+            isOpening ? "scale-110 translate-y-32" : "animate-float"
           )}>
-            {/* Back Flap */}
-            <div className="absolute inset-0 bg-primary/90 rounded-2xl shadow-2xl border border-white/10 overflow-hidden">
-               {/* Letter Content (Emerging) */}
-               <div className={cn(
-                 "absolute inset-x-4 top-2 h-40 bg-white rounded-lg shadow-lg flex flex-col items-center justify-center gap-2 opacity-0",
-                 isOpening && "animate-letter-out z-50"
-               )}>
-                  <div className="w-12 h-1 bg-zinc-100 rounded-full" />
-                  <Heart className="w-8 h-8 text-primary fill-current animate-heart-glow" />
-                  <div className="w-20 h-1 bg-zinc-100 rounded-full" />
-               </div>
+            {/* Front Letter (The one that SALTS!) */}
+            {isOpening && (
+              <div className="absolute inset-x-4 top-2 h-40 bg-white rounded-xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] flex flex-col items-center justify-center gap-3 z-[100] animate-letter-out border border-primary/5">
+                <div className="w-16 h-1.5 bg-zinc-100 rounded-full" />
+                <Heart className="w-12 h-12 text-primary fill-current animate-heart-glow" />
+                <div className="w-24 h-1.5 bg-zinc-100 rounded-full" />
+              </div>
+            )}
+
+            {/* Back Flap (The envelope body) */}
+            <div className="absolute inset-0 bg-primary/95 rounded-2xl shadow-2xl border border-white/10 z-20">
+              <Mail className="absolute inset-0 w-full h-full text-white/10 p-12 pointer-events-none" />
             </div>
 
-            {/* Front Flap (Opening) */}
+            {/* Top Flap (Opening) */}
             <div className={cn(
-              "absolute inset-x-0 top-0 h-1/2 bg-primary rounded-t-2xl z-40 border-b border-white/20 origin-top transition-transform duration-700",
+              "absolute inset-x-0 top-0 h-1/2 bg-primary rounded-t-2xl z-40 border-b border-white/20 origin-top transition-transform duration-1000",
               isOpening && "animate-envelope-open"
             )}>
               <div className="w-full h-full bg-white/5" />
@@ -190,8 +191,6 @@ const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: 
                 <Heart className="w-8 h-8 text-primary fill-current" />
               </div>
             )}
-            
-            <Mail className="absolute inset-0 w-full h-full text-white/10 pointer-events-none" />
           </div>
         </div>
 

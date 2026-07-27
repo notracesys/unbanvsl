@@ -76,13 +76,14 @@
 
 @keyframes envelope-open {
   0% { transform: perspective(1000px) rotateX(0deg); }
-  100% { transform: perspective(1000px) rotateX(-180deg); }
+  100% { transform: perspective(1000px) rotateX(-160deg); }
 }
 
 @keyframes letter-out {
-  0% { transform: translateY(0) scale(0.8); opacity: 0; }
-  50% { opacity: 1; }
-  100% { transform: translateY(-150%) scale(1.2); opacity: 1; }
+  0% { transform: translateY(0) scale(0.5); opacity: 0; }
+  30% { transform: translateY(-80px) scale(0.8); opacity: 1; }
+  60% { transform: translateY(-160px) scale(1.2); opacity: 1; }
+  100% { transform: translateY(-300px) scale(4); opacity: 0; }
 }
 
 @keyframes heart-beat-glow {
@@ -100,12 +101,12 @@
 }
 
 .animate-envelope-open {
-  animation: envelope-open 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: envelope-open 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   transform-origin: top;
 }
 
 .animate-letter-out {
-  animation: letter-out 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s forwards;
+  animation: letter-out 2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.5s forwards;
 }
 
 .animate-heart-glow {
