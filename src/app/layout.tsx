@@ -1,10 +1,10 @@
 
-import type {Metadata} from 'next';
+import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'AprovaçãoDrive - O Drive Definitivo para o ENEM',
-  description: 'Tenha acesso organizado a milhares de materiais em um único lugar para dominar o ENEM.',
+  title: 'Love Link - Transforme sua história de amor em um presente digital',
+  description: 'Crie uma página romântica personalizada para surpreender quem você ama. Com contador de tempo, galeria de fotos e música.',
 };
 
 export default function RootLayout({
@@ -17,9 +17,9 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet" />
       </head>
-      <body className="font-body antialiased bg-background text-foreground selection:bg-primary/20">
+      <body className="font-body selection:bg-primary/30">
         {children}
       </body>
     </html>

@@ -1,106 +1,159 @@
 
-import { Hero } from "@/components/sections/hero";
-import { Features } from "@/components/sections/features";
-import { DriveStructure } from "@/components/sections/drive-structure";
-import { Comparison } from "@/components/sections/comparison";
-import { AITools } from "@/components/sections/ai-tools";
-import { Testimonials } from "@/components/sections/testimonials";
-import { FAQ } from "@/components/sections/faq";
+import { HeroLP } from "@/components/sections/hero-lp";
 import { Button } from "@/components/ui/button";
-import { ShieldCheck, Mail, Phone, Lock } from "lucide-react";
+import { 
+  Heart, 
+  Clock, 
+  Image as ImageIcon, 
+  Music, 
+  QrCode, 
+  Star, 
+  ChevronRight,
+  ShieldCheck,
+  Zap,
+  Gift
+} from "lucide-react";
+import { GlassCard } from "@/components/ui/glass-card";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import Link from "next/link";
 
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Sticky Header Simple */}
-      <header className="fixed top-0 w-full z-50 glass border-b">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+      {/* Header */}
+      <header className="fixed top-0 w-full z-50 glass border-b border-white/10">
+        <div className="container mx-auto px-4 h-20 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center font-bold text-white">A</div>
-            <span className="font-headline font-bold text-xl tracking-tighter">Aprovação<span className="text-primary">Drive</span></span>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg">
+              <Heart className="text-white fill-current w-6 h-6" />
+            </div>
+            <span className="font-serif-elegant font-bold text-2xl tracking-tighter">Love<span className="text-primary">Link</span></span>
           </div>
-          <Button size="sm" className="bg-accent hover:bg-accent/90 text-white rounded-full font-bold">
-            Acesso Agora
+          <Button size="sm" className="bg-primary hover:bg-primary/90 text-white rounded-full font-bold px-6" asChild>
+            <Link href="/criar">Começar</Link>
           </Button>
         </div>
       </header>
 
       <main>
-        <Hero />
-        <Features />
-        <DriveStructure />
-        <AITools />
-        <Comparison />
-        <Testimonials />
-        <FAQ />
+        <HeroLP />
 
-        {/* Final CTA */}
-        <section className="py-24 bg-white">
+        {/* Como Funciona */}
+        <section id="como-funciona" className="py-24">
           <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto bg-gradient-to-br from-primary to-blue-700 rounded-[3rem] p-12 lg:p-20 text-center text-white relative overflow-hidden shadow-2xl">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
-              <div className="relative z-10">
-                <h2 className="text-4xl lg:text-6xl font-bold mb-6">Pronto para a sua aprovação?</h2>
-                <p className="text-xl mb-10 text-primary-foreground/90 max-w-2xl mx-auto">
-                  Garanta acesso hoje mesmo a toda essa estrutura de materiais organizada e comece a estudar do jeito certo.
-                </p>
-                <Button size="lg" className="bg-accent hover:bg-accent/90 text-white px-12 py-8 text-xl rounded-2xl shadow-xl transition-transform hover:scale-105">
-                  Quero meu acesso agora
-                </Button>
-                <div className="mt-8 flex items-center justify-center gap-6 text-sm text-primary-foreground/70">
-                  <div className="flex items-center gap-2">
-                    <ShieldCheck className="w-4 h-4" /> Pagamento Seguro
+            <div className="text-center mb-16">
+              <h2 className="text-4xl lg:text-5xl font-serif-elegant font-bold mb-4">Como funciona?</h2>
+              <p className="text-muted-foreground">Em apenas 3 passos simples você cria seu presente digital.</p>
+            </div>
+            
+            <div className="grid md:grid-cols-3 gap-8">
+              {[
+                { icon: Zap, title: "1. Preencha os dados", desc: "Conte sua história, adicione a data e nomes do casal." },
+                { icon: ImageIcon, title: "2. Personalize", desc: "Escolha um tema e envie suas fotos favoritas." },
+                { icon: Gift, title: "3. Surpreenda", desc: "Receba seu link e QR Code para compartilhar com seu amor." }
+              ].map((step, i) => (
+                <GlassCard key={i} className="text-center group">
+                  <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                    <step.icon className="w-8 h-8 text-primary" />
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Lock className="w-4 h-4" /> Acesso Vitalício
-                  </div>
+                  <h3 className="text-2xl font-bold mb-3">{step.title}</h3>
+                  <p className="text-muted-foreground">{step.desc}</p>
+                </GlassCard>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Recursos */}
+        <section className="py-24 bg-white/5">
+          <div className="container mx-auto px-4">
+            <div className="grid lg:grid-cols-2 gap-16 items-center">
+              <div>
+                <h2 className="text-4xl lg:text-5xl font-serif-elegant font-bold mb-8">Tudo o que o seu amor <span className="text-primary italic">merece</span></h2>
+                <div className="grid sm:grid-cols-2 gap-6">
+                  {[
+                    { icon: Clock, title: "Contador Real", desc: "Tempo exato do amor de vocês." },
+                    { icon: ImageIcon, title: "Galeria Premium", desc: "Seus melhores momentos juntos." },
+                    { icon: Music, title: "Sua Música", desc: "Link direto do Spotify de vocês." },
+                    { icon: QrCode, title: "QR Code Exclusivo", desc: "Perfeito para cartões físicos." }
+                  ].map((feat, i) => (
+                    <div key={i} className="flex items-start gap-4">
+                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+                        <feat.icon className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <h4 className="font-bold mb-1">{feat.title}</h4>
+                        <p className="text-sm text-muted-foreground">{feat.desc}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <p className="mt-4 text-xs opacity-50">Acesso liberado logo após a confirmação do pagamento.</p>
+              </div>
+              <div className="relative">
+                <div className="absolute inset-0 bg-primary/30 blur-[80px] rounded-full" />
+                <img src="https://picsum.photos/seed/phone-mock/400/800" alt="Mockup do site" className="w-full max-w-sm mx-auto relative rounded-[3rem] border-8 border-white/10" />
               </div>
             </div>
           </div>
         </section>
+
+        {/* Preço */}
+        <section className="py-24">
+          <div className="container mx-auto px-4 text-center">
+            <div className="max-w-2xl mx-auto bg-gradient-to-b from-primary/10 to-transparent p-12 rounded-[3rem] border border-white/10">
+              <span className="text-primary font-bold uppercase tracking-widest text-sm mb-4 block">Acesso Vitalício</span>
+              <h2 className="text-5xl font-serif-elegant font-bold mb-6">Plano Único</h2>
+              <div className="flex items-center justify-center gap-2 mb-8">
+                <span className="text-2xl text-muted-foreground line-through">R$ 57,00</span>
+                <span className="text-6xl font-bold text-primary">R$ 27,97</span>
+              </div>
+              <ul className="text-left space-y-4 mb-10 max-w-xs mx-auto">
+                <li className="flex items-center gap-3"><ShieldCheck className="w-5 h-5 text-primary" /> Galeria com 10 fotos</li>
+                <li className="flex items-center gap-3"><ShieldCheck className="w-5 h-5 text-primary" /> Música personalizada</li>
+                <li className="flex items-center gap-3"><ShieldCheck className="w-5 h-5 text-primary" /> QR Code para imprimir</li>
+                <li className="flex items-center gap-3"><ShieldCheck className="w-5 h-5 text-primary" /> 4 Temas românticos</li>
+              </ul>
+              <Button size="lg" className="w-full bg-primary hover:bg-primary/90 text-white py-8 text-xl rounded-full pink-glow" asChild>
+                <Link href="/criar">Garantir meu acesso agora</Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ */}
+        <section className="py-24">
+          <div className="container mx-auto px-4 max-w-3xl">
+            <h2 className="text-4xl font-serif-elegant font-bold mb-12 text-center">Dúvidas Frequentes</h2>
+            <Accordion type="single" collapsible className="space-y-4">
+              {[
+                { q: "Como eu recebo meu link?", a: "Imediatamente após o pagamento, você verá seu link e QR Code na tela e também receberá por e-mail." },
+                { q: "Posso editar depois?", a: "Sim! Você terá uma área exclusiva para alterar fotos, mensagens e temas quando quiser." },
+                { q: "O pagamento é seguro?", a: "Sim, processamos tudo via PIX e Cartão de crédito de forma 100% segura e criptografada." },
+                { q: "Por quanto tempo a página fica no ar?", a: "No plano único, sua página fica disponível por tempo indeterminado (mínimo de 1 ano garantido)." }
+              ].map((faq, i) => (
+                <AccordionItem key={i} value={`item-${i}`} className="glass rounded-2xl border-white/5 px-6">
+                  <AccordionTrigger className="text-left font-bold py-6 hover:no-underline">{faq.q}</AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground pb-6">{faq.a}</AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </div>
+        </section>
       </main>
 
-      <footer className="bg-background border-t py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-12 mb-12">
-            <div className="col-span-1 md:col-span-2">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center font-bold text-white">A</div>
-                <span className="font-headline font-bold text-xl tracking-tighter">Aprovação<span className="text-primary">Drive</span></span>
-              </div>
-              <p className="text-muted-foreground max-w-sm mb-6">
-                O maior acervo de materiais para o ENEM, organizado de forma profissional para facilitar o seu dia a dia.
-              </p>
-              <div className="flex gap-4">
-                <Button variant="ghost" size="icon" className="rounded-full"><Mail className="w-5 h-5" /></Button>
-                <Button variant="ghost" size="icon" className="rounded-full"><Phone className="w-5 h-5" /></Button>
-              </div>
-            </div>
-            
-            <div>
-              <h4 className="font-bold mb-4 uppercase text-xs tracking-widest text-muted-foreground">Legal</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-primary transition-colors">Política de Privacidade</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Termos de Uso</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Direitos Autorais</a></li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-bold mb-4 uppercase text-xs tracking-widest text-muted-foreground">Suporte</h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><a href="#" className="hover:text-primary transition-colors">Fale Conosco</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Dúvidas</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Como Acessar</a></li>
-              </ul>
-            </div>
+      <footer className="py-12 border-t border-white/5 bg-black/20">
+        <div className="container mx-auto px-4 text-center">
+          <div className="flex items-center justify-center gap-2 mb-6">
+            <Heart className="text-primary fill-current w-5 h-5" />
+            <span className="font-serif-elegant font-bold text-xl">LoveLink</span>
           </div>
-          
-          <div className="border-t pt-8 text-center text-xs text-muted-foreground">
-            <p>© {new Date().getFullYear()} AprovaçãoDrive. Todos os direitos reservados. Não temos vínculo oficial com o Google ou o INEP.</p>
+          <p className="text-sm text-muted-foreground mb-8">Feito com amor para casais que celebram cada segundo.</p>
+          <div className="flex justify-center gap-8 text-xs text-muted-foreground uppercase tracking-widest">
+            <a href="#" className="hover:text-primary transition-colors">Termos</a>
+            <a href="#" className="hover:text-primary transition-colors">Privacidade</a>
+            <a href="#" className="hover:text-primary transition-colors">Contato</a>
           </div>
+          <p className="mt-8 text-[10px] text-muted-foreground/50">© 2024 LoveLink. Todos os direitos reservados.</p>
         </div>
       </footer>
     </div>

@@ -1,0 +1,46 @@
+
+{
+  "entities": {
+    "LovePage": {
+      "title": "LovePage",
+      "description": "Uma página personalizada criada por um casal.",
+      "type": "object",
+      "properties": {
+        "slug": { "type": "string", "description": "URL única da página" },
+        "userId": { "type": "string", "description": "ID do proprietário" },
+        "creatorName": { "type": "string", "description": "Nome de quem criou" },
+        "partnerName": { "type": "string", "description": "Nome do parceiro(a)" },
+        "startDate": { "type": "string", "format": "date", "description": "Data de início do relacionamento" },
+        "message": { "type": "string", "description": "Carta de amor" },
+        "theme": { "type": "string", "enum": ["classic", "starry", "elegant", "minimal"], "description": "Tema visual escolhido" },
+        "musicUrl": { "type": "string", "description": "Link do Spotify ou YouTube" },
+        "paymentStatus": { "type": "string", "enum": ["pending", "paid"], "description": "Status do pagamento" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["slug", "userId", "creatorName", "partnerName", "startDate", "theme", "paymentStatus"]
+    },
+    "Photo": {
+      "title": "Photo",
+      "description": "Uma foto enviada para a página de amor.",
+      "type": "object",
+      "properties": {
+        "url": { "type": "string", "description": "URL da imagem no storage" },
+        "order": { "type": "number", "description": "Ordem de exibição" }
+      },
+      "required": ["url", "order"]
+    }
+  },
+  "auth": {
+    "providers": ["google.com", "password"]
+  },
+  "firestore": {
+    "/love_pages/{pageId}": {
+      "schema": "LovePage",
+      "description": "Coleção principal de páginas de amor."
+    },
+    "/love_pages/{pageId}/photos/{photoId}": {
+      "schema": "Photo",
+      "description": "Sub-coleção de fotos de cada página."
+    }
+  }
+}

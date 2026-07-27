@@ -2,16 +2,22 @@
 {
   "placeholderImages": [
     {
-      "id": "hero-laptop",
-      "description": "A modern laptop showing a Google Drive interface with organized study folders",
-      "imageUrl": "https://picsum.photos/seed/drive-study/1200/800",
-      "imageHint": "laptop google drive"
+      "id": "couple-hero",
+      "description": "Happy couple hugging and smiling, soft focus romantic atmosphere",
+      "imageUrl": "https://picsum.photos/seed/lovelink-hero/800/600",
+      "imageHint": "happy couple romantic"
     },
     {
-      "id": "student-profile",
-      "description": "Profile picture for student testimonial",
-      "imageUrl": "https://picsum.photos/seed/student1/100/100",
-      "imageHint": "student portrait"
+      "id": "mockup-phone",
+      "description": "Smartphone display showing a romantic digital gift interface",
+      "imageUrl": "https://picsum.photos/seed/phone-mock/400/800",
+      "imageHint": "smartphone screen romance"
+    },
+    {
+      "id": "testimonial-1",
+      "description": "Young woman smiling with a phone in her hands",
+      "imageUrl": "https://picsum.photos/seed/user1/100/100",
+      "imageHint": "woman smiling happy"
     }
   ]
 }

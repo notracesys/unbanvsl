@@ -4,15 +4,13 @@ import React from "react";
 
 interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
-  variant?: 'light' | 'dark';
 }
 
-export function GlassCard({ children, className, variant = 'light', ...props }: GlassCardProps) {
+export function GlassCard({ children, className, ...props }: GlassCardProps) {
   return (
     <div 
       className={cn(
-        "rounded-2xl p-6 transition-all duration-300 hover:shadow-xl",
-        variant === 'light' ? "glass" : "glass-dark",
+        "rounded-3xl p-6 transition-all duration-300 hover:shadow-2xl glass",
         className
       )}
       {...props}
