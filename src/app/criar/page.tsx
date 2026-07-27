@@ -357,12 +357,14 @@ export default function CriarPagina() {
         onLoadedMetadata={onLoadedMetadata}
       />
       
-      <div className="w-full bg-primary py-2.5 px-6 text-center text-[10px] font-bold text-white uppercase tracking-[0.1em] z-[110] shadow-sm relative">
+      {/* Banner de Urgência Fixo */}
+      <div className="w-full bg-primary py-2.5 px-6 text-center text-[10px] font-bold text-white uppercase tracking-[0.1em] z-[120] shadow-sm relative shrink-0">
         Mais de 100 mil pessoas já emocionaram seu amor hoje ✨
       </div>
 
-      <header className="sticky top-0 w-full bg-white/95 backdrop-blur-md z-[105] border-b border-primary/5 shadow-sm px-6 py-4 flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={handleBack} className="rounded-full hover:bg-primary/5 shrink-0">
+      {/* Header Fixo com Barra de Progresso e Preview */}
+      <header className="sticky top-0 w-full bg-white/95 backdrop-blur-md z-[110] border-b border-primary/5 shadow-sm px-6 py-4 flex items-center gap-4">
+        <Button variant="ghost" size="icon" onClick={handleBack} className="rounded-full hover:bg-primary/5 shrink-0 h-9 w-9">
           <ArrowLeft className="w-5 h-5 text-primary" />
         </Button>
         <div className="flex-1 h-1.5 bg-primary/10 rounded-full overflow-hidden">
@@ -375,18 +377,20 @@ export default function CriarPagina() {
           <Button 
             variant="ghost" 
             size="sm" 
-            className="text-[10px] uppercase font-bold tracking-widest text-primary bg-primary/5 hover:bg-primary/10 rounded-full px-4 h-9 gap-2 transition-all hover:scale-105 pink-glow group"
+            className="text-[10px] uppercase font-bold tracking-widest text-primary bg-primary/10 hover:bg-primary/20 rounded-full px-4 h-9 gap-2 transition-all hover:scale-105 pink-glow group relative overflow-hidden"
             onClick={() => setIsPreviewOpen(true)}
           >
-            <Eye className="w-3.5 h-3.5 group-hover:animate-pulse" /> Preview
+            <div className="absolute inset-0 bg-primary/5 animate-pulse" />
+            <Eye className="w-3.5 h-3.5 group-hover:animate-pulse relative z-10" /> 
+            <span className="relative z-10">Preview</span>
           </Button>
         )}
       </header>
 
-      <main className="flex-1 w-full max-w-lg mx-auto flex flex-col items-center pb-32">
+      <main className="flex-1 w-full max-w-lg mx-auto flex flex-col items-center pb-32 pt-6">
         <div 
           key={`assistant-header-${phase}-${wizardStep}`}
-          className="mt-10 mb-6 flex flex-col items-center px-6 w-full"
+          className="mt-4 mb-6 flex flex-col items-center px-6 w-full"
         >
           <div className="relative">
             <div className="absolute inset-0 bg-primary/10 blur-2xl rounded-full -z-10" />
@@ -703,7 +707,7 @@ export default function CriarPagina() {
           <div className="fixed bottom-0 left-0 w-full p-8 bg-gradient-to-t from-background to-transparent z-[100] animate-in fade-in slide-in-from-bottom-6 duration-700 pointer-events-none">
             <Button 
               size="lg" 
-              className="w-full h-16 bg-primary hover:bg-primary/90 text-lg font-bold rounded-full max-w-lg mx-auto flex items-center justify-center gap-3 pink-glow pointer-events-auto"
+              className="w-full h-16 bg-primary hover:bg-primary/90 text-lg font-bold rounded-full max-w-lg mx-auto flex items-center justify-center gap-3 pink-glow pointer-events-auto shadow-2xl"
               onClick={handleNext}
               disabled={
                 (phase === 'dados' && !(data.creatorName && data.partnerName && data.startDate))
@@ -723,7 +727,7 @@ export default function CriarPagina() {
             <DialogDescription>Uma prévia de como sua surpresa será vista pelo seu amor.</DialogDescription>
           </DialogHeader>
           <div className="relative h-[85vh] rounded-[3rem]">
-            <Button variant="ghost" size="icon" className="absolute top-5 right-5 z-[60] bg-white/80 text-primary rounded-full backdrop-blur-md shadow-md" onClick={() => setIsPreviewOpen(false)}>
+            <Button variant="ghost" size="icon" className="absolute top-5 right-5 z-[60] bg-white/80 text-primary rounded-full backdrop-blur-md shadow-md h-10 w-10" onClick={() => setIsPreviewOpen(false)}>
               <X className="w-5 h-5" />
             </Button>
             <PreviewContent />
