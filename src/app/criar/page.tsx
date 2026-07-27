@@ -104,6 +104,195 @@ interface PageData {
   email: string;
 }
 
+// --- Preview Component (Extracted to avoid re-renders) ---
+const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: any }) => {
+  const [previewOpened, setPreviewOpened] = useState(false);
+  const [isStoryMode, setIsStoryMode] = useState(false);
+
+  if (!previewOpened) {
+    return (
+      <div 
+        className="w-full h-full bg-[#050505] flex flex-col items-center justify-center p-8 cursor-pointer relative overflow-hidden"
+        onClick={() => setPreviewOpened(true)}
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent opacity-30" />
+        <div className="relative group flex flex-col items-center">
+          <div className="w-48 h-36 bg-zinc-900 rounded-3xl border border-white/10 shadow-[0_0_50px_rgba(255,77,109,0.15)] flex items-center justify-center animate-bounce duration-[2000ms]">
+            <Heart className="w-16 h-16 text-primary fill-current animate-pulse" />
+          </div>
+          <p className="mt-12 text-[11px] font-black uppercase tracking-[0.3em] text-white/40 animate-pulse text-center leading-relaxed">
+            Você recebeu um presente<br/>Toque para abrir
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isStoryMode) {
+    return (
+      <div className="w-full h-full bg-black relative flex flex-col">
+        <div className="absolute top-4 left-0 w-full px-4 flex gap-1 z-50">
+          <div className="h-0.5 flex-1 bg-white/30 overflow-hidden rounded-full">
+            <div className="h-full bg-white w-full animate-[progress_5s_linear_infinite]" />
+          </div>
+        </div>
+        <button 
+          onClick={() => setIsStoryMode(false)}
+          className="absolute top-8 right-6 text-white z-50 bg-black/40 p-2 rounded-full backdrop-blur-md"
+        >
+          <X className="w-5 h-5" />
+        </button>
+        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center relative">
+          <img 
+            src={data.photos[0] || 'https://picsum.photos/seed/love/600/900'} 
+            className="absolute inset-0 w-full h-full object-cover opacity-40 grayscale" 
+            alt="Story BG" 
+          />
+          <div className="relative z-10 space-y-6">
+            <h2 className="text-5xl font-black text-white italic uppercase tracking-tighter leading-none">
+              Sua<br/>História<br/><span className="text-[#00FFFF]">Love Link</span>
+            </h2>
+            <p className="text-[#00FFFF] text-[10px] font-bold tracking-[0.3em] uppercase">Mergulhe nas memórias</p>
+          </div>
+          <Button 
+            className="mt-12 w-64 h-16 bg-[#00FFFF] hover:bg-[#00FFFF]/90 text-black font-black text-lg rounded-full shadow-[0_0_30px_rgba(0,255,255,0.4)] animate-pulse"
+            onClick={() => setIsStoryMode(false)}
+          >
+            COMEÇAR STORY
+          </Button>
+        </div>
+        <style jsx>{`
+          @keyframes progress {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(0); }
+          }
+        `}</style>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full h-full bg-[#050505] overflow-y-auto no-scrollbar scroll-smooth">
+      {/* Section 1: Music Player */}
+      <section className="min-h-full flex flex-col items-center justify-center p-8 space-y-8 bg-gradient-to-b from-[#0a0a0a] to-[#050505]">
+        <div className="w-72 aspect-square rounded-[2rem] overflow-hidden shadow-[0_30px_60px_-12px_rgba(0,0,0,0.8)] border border-white/5 relative group">
+          <img 
+            src={data.photos[0] || 'https://picsum.photos/seed/love/600/600'} 
+            className="w-full h-full object-cover transition-transform duration-[10s] group-hover:scale-110" 
+            alt="Capa" 
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+        </div>
+
+        <div className="w-full space-y-1 text-left px-4">
+          <div className="flex items-center gap-2">
+            <h3 className="text-2xl font-black text-white truncate italic tracking-tighter">
+              {data.music?.title || "Sua Música Especial"}
+            </h3>
+            <CheckCircle2 className="w-4 h-4 text-[#00FFFF] fill-[#00FFFF]/20" />
+          </div>
+          <p className="text-sm text-zinc-500 font-medium">
+            {data.music?.artist || "Escolha seu artista favorito"}
+          </p>
+        </div>
+
+        <div className="w-full px-4 space-y-4">
+          <div className="relative h-1 w-full bg-white/10 rounded-full overflow-hidden">
+            <div className="absolute left-0 top-0 h-full bg-[#00FFFF] w-[35%] shadow-[0_0_10px_#00FFFF]" />
+          </div>
+          <div className="flex justify-between text-[10px] font-bold text-zinc-600 tracking-widest">
+            <span>1:14</span>
+            <span>3:45</span>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between w-full px-4 pt-2">
+          <Shuffle className="w-5 h-5 text-zinc-600" />
+          <SkipBack className="w-7 h-7 text-white fill-current" />
+          <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center shadow-xl shadow-white/5 hover:scale-105 transition-transform cursor-pointer">
+            <Play className="w-8 h-8 text-black fill-current ml-1" />
+          </div>
+          <SkipForward className="w-7 h-7 text-white fill-current" />
+          <Repeat className="w-5 h-5 text-zinc-600" />
+        </div>
+
+        <div className="pt-8">
+          <div className="flex flex-col items-center gap-2">
+            <div className="w-1 h-12 bg-gradient-to-b from-[#00FFFF] to-transparent rounded-full animate-bounce" />
+            <p className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-700">Role para continuar</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 2: Counter Brutalist */}
+      <section className="min-h-full bg-black flex flex-col items-center justify-center p-8 py-20 space-y-12">
+        <div className="text-center space-y-4 w-full">
+          <h2 className="text-4xl lg:text-5xl font-black text-white uppercase italic tracking-tighter leading-none break-words px-4">
+            {data.creatorName || "NOME"} & {data.partnerName || "AMOR"}
+          </h2>
+          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-600">
+            UM LAÇO ETERNO DESDE {data.startDate ? format(new Date(data.startDate), 'dd/MM/yyyy') : '...'}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 w-full max-w-sm">
+          {[
+            { label: 'Anos', value: timeTogether.years },
+            { label: 'Meses', value: timeTogether.months },
+            { label: 'Dias', value: timeTogether.days },
+            { label: 'Horas', value: timeTogether.hours },
+            { label: 'Minutos', value: timeTogether.minutes },
+            { label: 'Segundos', value: timeTogether.seconds }
+          ].map((t, i) => (
+            <div key={i} className="bg-zinc-900/50 border border-white/5 p-6 rounded-[2rem] text-center space-y-1 flex flex-col items-center justify-center backdrop-blur-sm">
+              <span className="text-4xl font-black text-white italic tracking-tighter">{t.value}</span>
+              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-600">{t.label}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Section 3: Note of Love (Cyan Card) */}
+      <section className="min-h-full flex flex-col items-center justify-center p-8 bg-[#050505]">
+        <div className="bg-[#00FFFF] w-full p-10 rounded-[3rem] shadow-[0_40px_100px_-20px_rgba(0,255,255,0.3)] space-y-8 flex flex-col items-center text-center">
+          <div className="flex items-center gap-3 bg-black/10 px-4 py-2 rounded-full">
+            <MessageCircle className="w-5 h-5 text-black" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-black">Nota de Amor</span>
+          </div>
+          
+          <p className="text-2xl font-black text-black leading-tight tracking-tight uppercase italic line-clamp-4">
+            {data.message || "Sua mensagem especial aparecerá aqui para emocionar seu amor..."}
+          </p>
+
+          <Button className="w-full h-16 bg-black hover:bg-black/90 text-white font-black rounded-full text-sm uppercase tracking-widest">
+            LER MENSAGEM
+          </Button>
+        </div>
+      </section>
+
+      {/* Section 4: Story Redirect */}
+      <section className="min-h-full flex flex-col items-center justify-center p-8 space-y-12 bg-black relative">
+        <div className="absolute inset-0 bg-gradient-to-t from-[#00FFFF]/10 to-transparent" />
+        <div className="relative z-10 text-center space-y-10">
+          <div className="space-y-4">
+            <h2 className="text-5xl font-black text-white italic uppercase tracking-tighter leading-none">
+              Sua<br/>História<br/><span className="text-[#00FFFF]">Love Link</span>
+            </h2>
+            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-600">Mergulhe nas memórias</p>
+          </div>
+          
+          <Button 
+            className="w-64 h-16 bg-[#00FFFF] hover:bg-[#00FFFF]/90 text-black font-black text-lg rounded-full shadow-[0_0_30px_rgba(0,255,255,0.4)] animate-pulse"
+            onClick={() => setIsStoryMode(true)}
+          >
+            COMEÇAR STORY
+          </Button>
+        </div>
+      </section>
+    </div>
+  );
+};
+
 export default function CriarPagina() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -153,8 +342,13 @@ export default function CriarPagina() {
     if (!data.startDate) return;
     
     const interval = setInterval(() => {
-      const start = new Date(`${data.startDate}T${data.startTime || '00:00'}`);
+      const startString = `${data.startDate}T${data.startTime || '00:00'}`;
+      const start = new Date(startString);
       const now = new Date();
+      
+      // Basic check if date is valid
+      if (isNaN(start.getTime())) return;
+      
       const diff = differenceInSeconds(now, start);
       
       if (diff > 0) {
@@ -172,7 +366,6 @@ export default function CriarPagina() {
     return () => clearInterval(interval);
   }, [data.startDate, data.startTime]);
 
-  // Reset limit on new search
   useEffect(() => {
     setMusicLimit(20);
   }, [musicSearch]);
@@ -186,7 +379,6 @@ export default function CriarPagina() {
       
       setIsSearchingMusic(true);
       try {
-        // country=br forces Brazilian store results to appear first
         const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(musicSearch)}&entity=song&limit=${musicLimit}&country=br`);
         const result = await response.json();
         const tracks = result.results.map((item: any) => ({
@@ -250,7 +442,7 @@ export default function CriarPagina() {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  const progress = useMemo(() => {
+  const progressValue = useMemo(() => {
     if (phase === 'dados') return 15;
     if (phase === 'wizard') return 15 + (wizardStep * 10);
     if (phase === 'upsell') return 75;
@@ -303,194 +495,6 @@ export default function CriarPagina() {
     return "";
   }, [phase, wizardStep]);
 
-  const PreviewContent = () => {
-    const [previewOpened, setPreviewOpened] = useState(false);
-    const [isStoryMode, setIsStoryMode] = useState(false);
-
-    if (!previewOpened) {
-      return (
-        <div 
-          className="w-full h-full bg-[#050505] flex flex-col items-center justify-center p-8 cursor-pointer relative overflow-hidden"
-          onClick={() => setPreviewOpened(true)}
-        >
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent opacity-30" />
-          <div className="relative group flex flex-col items-center">
-            <div className="w-48 h-36 bg-zinc-900 rounded-3xl border border-white/10 shadow-[0_0_50px_rgba(255,77,109,0.15)] flex items-center justify-center animate-bounce duration-[2000ms]">
-              <Heart className="w-16 h-16 text-primary fill-current animate-pulse" />
-            </div>
-            <p className="mt-12 text-[11px] font-black uppercase tracking-[0.3em] text-white/40 animate-pulse text-center leading-relaxed">
-              Você recebeu um presente<br/>Toque para abrir
-            </p>
-          </div>
-        </div>
-      );
-    }
-
-    if (isStoryMode) {
-      return (
-        <div className="w-full h-full bg-black relative flex flex-col">
-          <div className="absolute top-4 left-0 w-full px-4 flex gap-1 z-50">
-            <div className="h-0.5 flex-1 bg-white/30 overflow-hidden rounded-full">
-              <div className="h-full bg-white w-full animate-[progress_5s_linear_infinite]" />
-            </div>
-          </div>
-          <button 
-            onClick={() => setIsStoryMode(false)}
-            className="absolute top-8 right-6 text-white z-50 bg-black/40 p-2 rounded-full backdrop-blur-md"
-          >
-            <X className="w-5 h-5" />
-          </button>
-          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center relative">
-            <img 
-              src={data.photos[0] || 'https://picsum.photos/seed/love/600/900'} 
-              className="absolute inset-0 w-full h-full object-cover opacity-40 grayscale" 
-              alt="Story BG" 
-            />
-            <div className="relative z-10 space-y-6">
-              <h2 className="text-5xl font-black text-white italic uppercase tracking-tighter leading-none">
-                Sua<br/>História<br/><span className="text-[#00FFFF]">Love Link</span>
-              </h2>
-              <p className="text-[#00FFFF] text-[10px] font-bold tracking-[0.3em] uppercase">Mergulhe nas memórias</p>
-            </div>
-            <Button 
-              className="mt-12 w-64 h-16 bg-[#00FFFF] hover:bg-[#00FFFF]/90 text-black font-black text-lg rounded-full shadow-[0_0_30px_rgba(0,255,255,0.4)] animate-pulse"
-              onClick={() => setIsStoryMode(false)}
-            >
-              COMEÇAR STORY
-            </Button>
-          </div>
-          <style jsx>{`
-            @keyframes progress {
-              from { transform: translateX(-100%); }
-              to { transform: translateX(0); }
-            }
-          `}</style>
-        </div>
-      );
-    }
-
-    return (
-      <div className="w-full h-full bg-[#050505] overflow-y-auto no-scrollbar scroll-smooth">
-        {/* Section 1: Music Player */}
-        <section className="min-h-full flex flex-col items-center justify-center p-8 space-y-8 bg-gradient-to-b from-[#0a0a0a] to-[#050505]">
-          <div className="w-72 aspect-square rounded-[2rem] overflow-hidden shadow-[0_30px_60px_-12px_rgba(0,0,0,0.8)] border border-white/5 relative group">
-            <img 
-              src={data.photos[0] || 'https://picsum.photos/seed/love/600/600'} 
-              className="w-full h-full object-cover transition-transform duration-[10s] group-hover:scale-110" 
-              alt="Capa" 
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-          </div>
-
-          <div className="w-full space-y-1 text-left px-4">
-            <div className="flex items-center gap-2">
-              <h3 className="text-2xl font-black text-white truncate italic tracking-tighter">
-                {data.music?.title || "Sua Música Especial"}
-              </h3>
-              <CheckCircle2 className="w-4 h-4 text-[#00FFFF] fill-[#00FFFF]/20" />
-            </div>
-            <p className="text-sm text-zinc-500 font-medium">
-              {data.music?.artist || "Escolha seu artista favorito"}
-            </p>
-          </div>
-
-          <div className="w-full px-4 space-y-4">
-            <div className="relative h-1 w-full bg-white/10 rounded-full overflow-hidden">
-              <div className="absolute left-0 top-0 h-full bg-[#00FFFF] w-[35%] shadow-[0_0_10px_#00FFFF]" />
-            </div>
-            <div className="flex justify-between text-[10px] font-bold text-zinc-600 tracking-widest">
-              <span>1:14</span>
-              <span>3:45</span>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between w-full px-4 pt-2">
-            <Shuffle className="w-5 h-5 text-zinc-600" />
-            <SkipBack className="w-7 h-7 text-white fill-current" />
-            <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center shadow-xl shadow-white/5 hover:scale-105 transition-transform cursor-pointer">
-              <Play className="w-8 h-8 text-black fill-current ml-1" />
-            </div>
-            <SkipForward className="w-7 h-7 text-white fill-current" />
-            <Repeat className="w-5 h-5 text-zinc-600" />
-          </div>
-
-          <div className="pt-8">
-            <div className="flex flex-col items-center gap-2">
-              <div className="w-1 h-12 bg-gradient-to-b from-[#00FFFF] to-transparent rounded-full animate-bounce" />
-              <p className="text-[9px] font-black uppercase tracking-[0.4em] text-zinc-700">Role para continuar</p>
-            </div>
-          </div>
-        </section>
-
-        {/* Section 2: Counter Brutalist */}
-        <section className="min-h-full bg-black flex flex-col items-center justify-center p-8 py-20 space-y-12">
-          <div className="text-center space-y-4 w-full">
-            <h2 className="text-4xl lg:text-5xl font-black text-white uppercase italic tracking-tighter leading-none break-words px-4">
-              {data.creatorName || "NOME"} & {data.partnerName || "AMOR"}
-            </h2>
-            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-600">
-              UM LAÇO ETERNO DESDE {data.startDate ? format(new Date(data.startDate), 'dd/MM/yyyy') : '...'}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 w-full max-w-sm">
-            {[
-              { label: 'Anos', value: timeTogether.years },
-              { label: 'Meses', value: timeTogether.months },
-              { label: 'Dias', value: timeTogether.days },
-              { label: 'Horas', value: timeTogether.hours },
-              { label: 'Minutos', value: timeTogether.minutes },
-              { label: 'Segundos', value: timeTogether.seconds }
-            ].map((t, i) => (
-              <div key={i} className="bg-zinc-900/50 border border-white/5 p-6 rounded-[2rem] text-center space-y-1 flex flex-col items-center justify-center backdrop-blur-sm">
-                <span className="text-4xl font-black text-white italic tracking-tighter">{t.value}</span>
-                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-600">{t.label}</span>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Section 3: Note of Love (Cyan Card) */}
-        <section className="min-h-full flex flex-col items-center justify-center p-8 bg-[#050505]">
-          <div className="bg-[#00FFFF] w-full p-10 rounded-[3rem] shadow-[0_40px_100px_-20px_rgba(0,255,255,0.3)] space-y-8 flex flex-col items-center text-center">
-            <div className="flex items-center gap-3 bg-black/10 px-4 py-2 rounded-full">
-              <MessageCircle className="w-5 h-5 text-black" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-black">Nota de Amor</span>
-            </div>
-            
-            <p className="text-2xl font-black text-black leading-tight tracking-tight uppercase italic line-clamp-4">
-              {data.message || "Sua mensagem especial aparecerá aqui para emocionar seu amor..."}
-            </p>
-
-            <Button className="w-full h-16 bg-black hover:bg-black/90 text-white font-black rounded-full text-sm uppercase tracking-widest">
-              LER MENSAGEM
-            </Button>
-          </div>
-        </section>
-
-        {/* Section 4: Story Redirect */}
-        <section className="min-h-full flex flex-col items-center justify-center p-8 space-y-12 bg-black relative">
-          <div className="absolute inset-0 bg-gradient-to-t from-[#00FFFF]/10 to-transparent" />
-          <div className="relative z-10 text-center space-y-10">
-            <div className="space-y-4">
-              <h2 className="text-5xl font-black text-white italic uppercase tracking-tighter leading-none">
-                Sua<br/>História<br/><span className="text-[#00FFFF]">Love Link</span>
-              </h2>
-              <p className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-600">Mergulhe nas memórias</p>
-            </div>
-            
-            <Button 
-              className="w-64 h-16 bg-[#00FFFF] hover:bg-[#00FFFF]/90 text-black font-black text-lg rounded-full shadow-[0_0_30px_rgba(0,255,255,0.4)] animate-pulse"
-              onClick={() => setIsStoryMode(true)}
-            >
-              COMEÇAR STORY
-            </Button>
-          </div>
-        </section>
-      </div>
-    );
-  };
-
   return (
     <div className="min-h-screen flex flex-col bg-background selection:bg-primary/30 text-foreground overflow-x-hidden">
       <audio 
@@ -524,7 +528,7 @@ export default function CriarPagina() {
         <div className="flex-1 h-1.5 bg-primary/10 rounded-full overflow-hidden">
           <div 
             className="h-full bg-primary transition-all duration-1000 ease-in-out rounded-full" 
-            style={{ width: `${progress}%` }}
+            style={{ width: `${progressValue}%` }}
           />
         </div>
         <div className="w-24 shrink-0" />
@@ -853,7 +857,7 @@ export default function CriarPagina() {
               <div className="relative mx-auto w-28 h-28">
                 <div className="absolute inset-0 bg-primary/10 blur-3xl rounded-full animate-pulse" />
                 <div className="relative w-28 h-28 bg-white rounded-full flex items-center justify-center shadow-xl border border-primary/5">
-                  <Sparkles className="w-14 h-14 text-primary animate-float" />
+                  <CheckCircle2 className="w-14 h-14 text-primary animate-float" />
                 </div>
               </div>
               <div className="space-y-3">
@@ -906,7 +910,7 @@ export default function CriarPagina() {
 
             <div className="w-[360px] h-full bg-white border-[12px] border-zinc-900 rounded-[3.5rem] overflow-hidden shadow-2xl flex flex-col relative">
               <div className="flex-1 overflow-hidden relative">
-                <PreviewContent />
+                <PreviewContent data={data} timeTogether={timeTogether} />
               </div>
               <div className="h-1.5 w-32 bg-zinc-200 rounded-full mx-auto mb-2 mt-auto shrink-0 z-10" />
             </div>
