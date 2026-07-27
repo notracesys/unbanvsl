@@ -50,6 +50,39 @@ import { Slider } from '@/components/ui/slider';
 
 // --- Components ---
 
+function FloatingHearts() {
+  const hearts = useMemo(() => [
+    { left: '5%', top: '10%', size: '20px', delay: '0s', duration: '8s' },
+    { left: '15%', top: '40%', size: '30px', delay: '2s', duration: '12s' },
+    { left: '85%', top: '15%', size: '25px', delay: '1s', duration: '10s' },
+    { left: '75%', top: '65%', size: '35px', delay: '3s', duration: '15s' },
+    { left: '10%', top: '80%', size: '22px', delay: '4s', duration: '9s' },
+    { left: '90%', top: '50%', size: '28px', delay: '1.5s', duration: '11s' },
+    { left: '50%', top: '5%', size: '24px', delay: '2.5s', duration: '13s' },
+    { left: '45%', top: '90%', size: '32px', delay: '0.5s', duration: '14s' },
+  ], []);
+
+  return (
+    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+      {hearts.map((h, i) => (
+        <span
+          key={i}
+          className="absolute opacity-20 blur-[2px] animate-float-up-down"
+          style={{
+            left: h.left,
+            top: h.top,
+            fontSize: h.size,
+            animationDelay: h.delay,
+            animationDuration: h.duration,
+          }}
+        >
+          ❤️
+        </span>
+      ))}
+    </div>
+  );
+}
+
 function Typewriter({ text, speed = 25, onFinished }: { text: string; speed?: number; onFinished?: () => void }) {
   const [displayedText, setDisplayedText] = useState('');
   const [index, setIndex] = useState(0);
@@ -599,7 +632,9 @@ export default function CriarPagina() {
   }, [phase, wizardStep]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-background selection:bg-primary/30 text-foreground overflow-x-hidden">
+    <div className="min-h-screen flex flex-col bg-background selection:bg-primary/30 text-foreground overflow-x-hidden relative">
+      <FloatingHearts />
+      
       <audio 
         ref={audioRef} 
         onEnded={() => setPlayingTrackUrl(null)}
@@ -624,7 +659,7 @@ export default function CriarPagina() {
         </Button>
       )}
 
-      <header className="relative w-full bg-white px-6 py-6 flex items-center gap-4 z-50">
+      <header className="relative w-full bg-white/80 backdrop-blur-md px-6 py-6 flex items-center gap-4 z-50 border-b border-primary/5">
         <Button variant="ghost" size="icon" onClick={handleBack} className="rounded-full hover:bg-primary/5 shrink-0 h-9 w-9">
           <ArrowLeft className="w-5 h-5 text-primary" />
         </Button>
@@ -637,7 +672,7 @@ export default function CriarPagina() {
         <div className="w-24 shrink-0" />
       </header>
 
-      <main className="flex-1 w-full max-w-lg mx-auto flex flex-col items-center pb-32 pt-2">
+      <main className="flex-1 w-full max-w-lg mx-auto flex flex-col items-center pb-32 pt-2 relative z-10">
         <div 
           key={`assistant-header-${phase}-${wizardStep}`}
           className="mt-4 mb-6 flex flex-col items-center px-6 w-full"
@@ -653,7 +688,7 @@ export default function CriarPagina() {
             </div>
           </div>
           
-          <div className="mt-8 w-full bg-white p-7 rounded-[2.5rem] shadow-xl relative text-center border border-primary/10 animate-in slide-in-from-top-6 fade-in duration-1000">
+          <div className="mt-8 w-full bg-white/90 backdrop-blur-sm p-7 rounded-[2.5rem] shadow-xl relative text-center border border-primary/10 animate-in slide-in-from-top-6 fade-in duration-1000">
             <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 w-5 h-5 bg-white rotate-45 border-l border-t border-primary/10" />
             <div className="text-sm font-medium leading-relaxed text-foreground min-h-[3rem] font-headline tracking-wide">
               <Typewriter 

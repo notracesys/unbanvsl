@@ -74,6 +74,11 @@
   50% { transform: translateY(-10px); }
 }
 
+@keyframes float-up-down {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-30px) rotate(5deg); }
+}
+
 @keyframes envelope-open {
   0% { transform: perspective(1000px) rotateX(0deg); }
   100% { transform: perspective(1000px) rotateX(-160deg); }
@@ -81,9 +86,9 @@
 
 @keyframes letter-out {
   0% { transform: translateY(0) scale(0.5); opacity: 0; }
-  30% { transform: translateY(-100px) scale(0.8); opacity: 1; }
-  60% { transform: translateY(-200px) scale(1.5); opacity: 1; }
-  100% { transform: translateY(-400px) scale(5); opacity: 0; }
+  30% { transform: translateY(-50px) scale(0.8); opacity: 1; }
+  60% { transform: translateY(-150px) scale(1.5); opacity: 1; }
+  100% { transform: translateY(-300px) scale(4); opacity: 0; }
 }
 
 @keyframes heart-beat-glow {
@@ -98,6 +103,10 @@
 
 .animate-float {
   animation: float 4s ease-in-out infinite;
+}
+
+.animate-float-up-down {
+  animation: float-up-down 6s ease-in-out infinite;
 }
 
 .animate-envelope-open {
