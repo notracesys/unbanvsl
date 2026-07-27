@@ -61,7 +61,6 @@ function Typewriter({ text, speed = 25, onFinished }: { text: string; speed?: nu
       }, speed);
       return () => clearTimeout(timeout);
     } else if (onFinished) {
-      // Pequeno delay após o texto terminar para dar tempo de leitura antes do conteúdo aparecer
       const finishTimeout = setTimeout(onFinished, 400);
       return () => clearTimeout(finishTimeout);
     }
@@ -358,18 +357,27 @@ export default function CriarPagina() {
       </div>
 
       <main className="flex-1 w-full max-w-lg mx-auto flex flex-col items-center pb-32">
-        {/* Barra de Progresso */}
-        <div className="w-full px-8 pt-6 flex items-center justify-between">
+        {/* Barra de Progresso e Preview */}
+        <div className="w-full px-8 pt-6 flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={handleBack} className="rounded-full -ml-4 opacity-40 hover:opacity-100 transition-opacity">
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <div className="flex-1 mx-4 h-1.5 bg-white/10 rounded-full overflow-hidden shadow-inner">
+          <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden shadow-inner">
             <div 
               className="h-full bg-primary transition-all duration-1000 ease-in-out rounded-full shadow-[0_0_10px_rgba(255,77,109,0.5)]" 
               style={{ width: `${progress}%` }}
             />
           </div>
-          <div className="w-10" />
+          {phase !== 'sucesso' && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-[10px] uppercase font-bold tracking-widest text-white/40 hover:text-primary transition-colors gap-2"
+              onClick={() => setIsPreviewOpen(true)}
+            >
+              <Eye className="w-3.5 h-3.5" /> Preview
+            </Button>
+          )}
         </div>
 
         {/* Mascote e Fala Animada */}
@@ -390,12 +398,12 @@ export default function CriarPagina() {
           
           <div className="mt-8 w-full glass p-7 rounded-[2.5rem] shadow-2xl relative text-center border-white/20 bg-white/[0.03] backdrop-blur-2xl animate-in slide-in-from-top-6 fade-in duration-1000">
             <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 w-5 h-5 bg-white/[0.05] backdrop-blur-xl rotate-45 border-l border-t border-white/10" />
-            <p className="text-sm font-medium leading-relaxed text-white/80 min-h-[3rem] font-headline tracking-wide">
+            <div className="text-sm font-medium leading-relaxed text-white/80 min-h-[3rem] font-headline tracking-wide">
               <Typewriter 
                 text={assistantMessage} 
                 onFinished={() => setShowContent(true)} 
               />
-            </p>
+            </div>
           </div>
         </div>
 
@@ -568,7 +576,7 @@ export default function CriarPagina() {
                   </div>
                   <div className="space-y-2">
                     <h3 className="text-3xl font-serif-elegant font-bold text-white/90">Presente Perfeito!</h3>
-                    <p className="text-sm text-muted-foreground max-w-[250px] mx-auto">Tudo pronto para ser eternizado. Revise como ficou no botão abaixo.</p>
+                    <p className="text-sm text-muted-foreground max-w-[250px] mx-auto">Tudo pronto para ser eternizado. Revise como ficou no botão acima.</p>
                   </div>
                 </div>
               )}
@@ -713,18 +721,6 @@ export default function CriarPagina() {
           </div>
         )}
       </main>
-
-      {/* Botão de Preview Flutuante */}
-      {phase !== 'sucesso' && showContent && (
-        <Button 
-          variant="secondary" 
-          size="icon" 
-          className="fixed bottom-32 left-8 w-14 h-14 rounded-full shadow-[0_10px_25px_rgba(0,0,0,0.5)] z-[120] bg-white text-black hover:scale-110 transition-transform animate-in fade-in duration-1000"
-          onClick={() => setIsPreviewOpen(true)}
-        >
-          <Eye className="w-6 h-6" />
-        </Button>
-      )}
 
       {/* Modal de Preview */}
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
