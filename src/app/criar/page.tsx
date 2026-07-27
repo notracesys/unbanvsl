@@ -110,6 +110,10 @@ const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: 
   const [previewOpened, setPreviewOpened] = useState(false);
   const [isStoryMode, setIsStoryMode] = useState(false);
 
+  // Fallback para quando o nome ainda não foi digitado
+  const creatorNameDisplay = data.creatorName.trim() || "Alguém Especial";
+  const partnerNameDisplay = data.partnerName.trim() || "Seu Amor";
+
   if (!previewOpened) {
     return (
       <div 
@@ -136,12 +140,12 @@ const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: 
           </div>
         </div>
 
-        {/* Texto Centralizado */}
+        {/* Texto Centralizado Dinâmico */}
         <div className="relative z-10 space-y-4">
           <h2 className="text-3xl font-black text-white italic tracking-tighter uppercase leading-none">
             Olha o que<br/>
-            <span className="text-5xl text-primary block mt-2 drop-shadow-[0_0_15px_rgba(255,77,109,0.5)]">
-              {data.creatorName || "Pedro"}
+            <span className="text-5xl text-primary block mt-2 drop-shadow-[0_0_15px_rgba(255,77,109,0.5)] truncate px-4">
+              {creatorNameDisplay}
             </span>
             <span className="block mt-2">Preparou...</span>
           </h2>
@@ -230,7 +234,7 @@ const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: 
 
   return (
     <div className="w-full h-full bg-[#FAFAFA] overflow-y-auto no-scrollbar scroll-smooth">
-      {/* Section 1: Music Player - Premium Player Style */}
+      {/* Section 1: Music Player */}
       <section className="min-h-full flex flex-col items-center justify-center p-8 space-y-10 bg-white">
         <div className="w-full max-w-[280px] aspect-square rounded-[2.5rem] overflow-hidden shadow-[0_40px_80px_-15px_rgba(255,77,109,0.15)] relative group border-4 border-primary/5">
           <img 
@@ -281,11 +285,11 @@ const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: 
         </div>
       </section>
 
-      {/* Section 2: Counter - Brutalist & Premium Dark */}
+      {/* Section 2: Counter */}
       <section className="min-h-full bg-[#0F0F0F] flex flex-col items-center justify-center p-8 py-20 space-y-12">
         <div className="text-center space-y-6 w-full">
           <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter leading-none break-words px-4">
-            {data.creatorName || "VOCÊ"} <span className="text-primary">&</span> {data.partnerName || "AMOR"}
+            {creatorNameDisplay} <span className="text-primary">&</span> {partnerNameDisplay}
           </h2>
           <div className="inline-block px-6 py-2 rounded-full border border-primary/20 bg-primary/5 backdrop-blur-sm">
             <p className="text-[9px] font-black uppercase tracking-[0.3em] text-primary">
@@ -311,7 +315,7 @@ const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: 
         </div>
       </section>
 
-      {/* Section 3: Note of Love - Vibrant Card */}
+      {/* Section 3: Note of Love */}
       <section className="min-h-full flex flex-col items-center justify-center p-8 bg-white">
         <div className="bg-[#00E5FF] w-full p-12 rounded-[3.5rem] shadow-[0_50px_100px_-20px_rgba(0,229,255,0.4)] space-y-10 flex flex-col items-center text-center relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 blur-3xl rounded-full -mr-16 -mt-16" />
@@ -331,7 +335,7 @@ const PreviewContent = ({ data, timeTogether }: { data: PageData, timeTogether: 
         </div>
       </section>
 
-      {/* Section 4: Story Redirect - Cinematic Final */}
+      {/* Section 4: Story Redirect */}
       <section className="min-h-full flex flex-col items-center justify-center p-8 space-y-12 bg-[#0F0F0F] relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-t from-primary/30 via-transparent to-transparent opacity-50" />
         
