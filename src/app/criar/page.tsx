@@ -357,13 +357,27 @@ export default function CriarPagina() {
         onLoadedMetadata={onLoadedMetadata}
       />
       
-      {/* Banner de Urgência Fixo */}
+      {/* Banner de Urgência */}
       <div className="w-full bg-primary py-2.5 px-6 text-center text-[10px] font-bold text-white uppercase tracking-[0.1em] z-[120] shadow-sm relative shrink-0">
         Mais de 100 mil pessoas já emocionaram seu amor hoje ✨
       </div>
 
-      {/* Header Fixo com Barra de Progresso e Preview */}
-      <header className="sticky top-0 w-full bg-white/95 backdrop-blur-md z-[110] border-b border-primary/5 shadow-sm px-6 py-4 flex items-center gap-4">
+      {/* Botão de Preview Flutuante Fixo (Segue o scroll) */}
+      {phase !== 'sucesso' && (
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="fixed top-20 right-6 z-[130] text-[10px] uppercase font-bold tracking-widest text-primary bg-white/90 hover:bg-white rounded-full px-4 h-9 gap-2 transition-all hover:scale-105 pink-glow shadow-xl backdrop-blur-md border border-primary/10"
+          onClick={() => setIsPreviewOpen(true)}
+        >
+          <div className="absolute inset-0 bg-primary/5 animate-pulse rounded-full" />
+          <Eye className="w-3.5 h-3.5 relative z-10" /> 
+          <span className="relative z-10">Preview</span>
+        </Button>
+      )}
+
+      {/* Header (Não fixo, sobe com a página) */}
+      <header className="relative w-full bg-white px-6 py-6 flex items-center gap-4 z-50">
         <Button variant="ghost" size="icon" onClick={handleBack} className="rounded-full hover:bg-primary/5 shrink-0 h-9 w-9">
           <ArrowLeft className="w-5 h-5 text-primary" />
         </Button>
@@ -373,21 +387,11 @@ export default function CriarPagina() {
             style={{ width: `${progress}%` }}
           />
         </div>
-        {phase !== 'sucesso' && (
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="text-[10px] uppercase font-bold tracking-widest text-primary bg-primary/10 hover:bg-primary/20 rounded-full px-4 h-9 gap-2 transition-all hover:scale-105 pink-glow group relative overflow-hidden"
-            onClick={() => setIsPreviewOpen(true)}
-          >
-            <div className="absolute inset-0 bg-primary/5 animate-pulse" />
-            <Eye className="w-3.5 h-3.5 group-hover:animate-pulse relative z-10" /> 
-            <span className="relative z-10">Preview</span>
-          </Button>
-        )}
+        {/* Espaçador para o botão de preview fixo não sobrepor no topo inicial */}
+        <div className="w-24 shrink-0" />
       </header>
 
-      <main className="flex-1 w-full max-w-lg mx-auto flex flex-col items-center pb-32 pt-6">
+      <main className="flex-1 w-full max-w-lg mx-auto flex flex-col items-center pb-32 pt-2">
         <div 
           key={`assistant-header-${phase}-${wizardStep}`}
           className="mt-4 mb-6 flex flex-col items-center px-6 w-full"
