@@ -45,6 +45,7 @@ import {
   DialogDescription 
 } from '@/components/ui/dialog';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Slider } from '@/components/ui/slider';
 
 // --- Types ---
 type CreationPhase = 'dados' | 'wizard' | 'upsell' | 'planos' | 'checkout' | 'sucesso';
@@ -94,6 +95,8 @@ export default function CriarPagina() {
   // Audio States
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [playingTrackUrl, setPlayingTrackUrl] = useState<string | null>(null);
+  const [audioProgress, setAudioProgress] = useState(0);
+  const [audioDuration, setAudioDuration] = useState(0);
 
   // Music Search States
   const [musicSearch, setMusicSearch] = useState('');
@@ -157,6 +160,14 @@ export default function CriarPagina() {
     return () => clearTimeout(delayDebounceFn);
   }, [musicSearch]);
 
+  // Stop audio on step/phase change
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      setPlayingTrackUrl(null);
+    }
+  }, [phase, wizardStep]);
+
   const togglePlay = (track: MusicTrack) => {
     if (playingTrackUrl === track.previewUrl) {
       audioRef.current?.pause();
@@ -167,6 +178,25 @@ export default function CriarPagina() {
         audioRef.current.play();
         setPlayingTrackUrl(track.previewUrl);
       }
+    }
+  };
+
+  const handleSeek = (value: number[]) => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = value[0];
+      setAudioProgress(value[0]);
+    }
+  };
+
+  const onTimeUpdate = () => {
+    if (audioRef.current) {
+      setAudioProgress(audioRef.current.currentTime);
+    }
+  };
+
+  const onLoadedMetadata = () => {
+    if (audioRef.current) {
+      setAudioDuration(audioRef.current.duration);
     }
   };
 
@@ -274,7 +304,12 @@ export default function CriarPagina() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background selection:bg-primary/30">
-      <audio ref={audioRef} onEnded={() => setPlayingTrackUrl(null)} />
+      <audio 
+        ref={audioRef} 
+        onEnded={() => setPlayingTrackUrl(null)}
+        onTimeUpdate={onTimeUpdate}
+        onLoadedMetadata={onLoadedMetadata}
+      />
       
       {/* Barra de Progresso Fixa */}
       <div className="fixed top-0 left-0 w-full z-[100] h-1.5 bg-white/5">
@@ -323,7 +358,7 @@ export default function CriarPagina() {
               <p className="text-xs font-medium leading-relaxed">
                 {phase === 'dados' && "Olá! Sou seu assistente do amor. Para começar, quem são vocês?"}
                 {phase === 'wizard' && wizardStep === 1 && "Dê um título especial para esse presente!"}
-                {phase === 'wizard' && wizardStep === 2 && "Qual a trilha sonora de vocês? Clique no play para ouvir."}
+                {phase === 'wizard' && wizardStep === 2 && "Qual a trilha sonora de vocês? Clique no play para ouvir e escolher o melhor momento."}
                 {phase === 'wizard' && wizardStep === 3 && "Hora das fotos! Escolha as melhores lembranças."}
                 {phase === 'wizard' && wizardStep === 4 && "Abra seu coração na carta de amor."}
                 {phase === 'wizard' && wizardStep === 5 && "Escolha a capa do seu contador."}
@@ -421,33 +456,52 @@ export default function CriarPagina() {
                     />
                     {isSearchingMusic && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary animate-spin" />}
                   </div>
-                  <div className="space-y-2 max-h-[350px] overflow-y-auto no-scrollbar pb-10">
+                  <div className="space-y-3 max-h-[350px] overflow-y-auto no-scrollbar pb-10">
                     {musicResults.map((m, i) => (
                       <div 
                         key={i} 
                         className={cn(
-                          "flex items-center gap-3 p-3 rounded-xl border border-white/5 transition-all",
+                          "flex flex-col p-3 rounded-xl border border-white/5 transition-all",
                           data.music?.previewUrl === m.previewUrl ? "border-primary bg-primary/10" : "bg-white/5"
                         )}
                       >
-                        <div className="relative group cursor-pointer" onClick={() => togglePlay(m)}>
-                          <img src={m.cover} alt="Capa" className="w-12 h-12 rounded-lg shadow-md object-cover" />
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-lg">
-                            {playingTrackUrl === m.previewUrl ? <Pause className="w-5 h-5 text-white" /> : <Play className="w-5 h-5 text-white" />}
+                        <div className="flex items-center gap-3">
+                          <div className="relative group cursor-pointer" onClick={() => togglePlay(m)}>
+                            <img src={m.cover} alt="Capa" className="w-12 h-12 rounded-lg shadow-md object-cover" />
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-lg">
+                              {playingTrackUrl === m.previewUrl ? <Pause className="w-5 h-5 text-white" /> : <Play className="w-5 h-5 text-white" />}
+                            </div>
                           </div>
+                          <div className="flex-1 min-w-0" onClick={() => setData({...data, music: m})}>
+                            <p className="text-sm font-bold leading-tight truncate">{m.title}</p>
+                            <p className="text-xs text-muted-foreground truncate">{m.artist}</p>
+                          </div>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className={cn("rounded-full", data.music?.previewUrl === m.previewUrl && "text-primary")}
+                            onClick={() => setData({...data, music: m})}
+                          >
+                            <Heart className={cn("w-5 h-5", data.music?.previewUrl === m.previewUrl && "fill-current")} />
+                          </Button>
                         </div>
-                        <div className="flex-1 min-w-0" onClick={() => setData({...data, music: m})}>
-                          <p className="text-sm font-bold leading-tight truncate">{m.title}</p>
-                          <p className="text-xs text-muted-foreground truncate">{m.artist}</p>
-                        </div>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className={cn("rounded-full", data.music?.previewUrl === m.previewUrl && "text-primary")}
-                          onClick={() => setData({...data, music: m})}
-                        >
-                          <Heart className={cn("w-5 h-5", data.music?.previewUrl === m.previewUrl && "fill-current")} />
-                        </Button>
+                        
+                        {/* Seeker / Slider quando a música está tocando */}
+                        {playingTrackUrl === m.previewUrl && (
+                          <div className="mt-4 px-2 space-y-2 animate-in fade-in slide-in-from-top-2">
+                            <Slider 
+                              value={[audioProgress]} 
+                              max={audioDuration} 
+                              step={0.1}
+                              onValueChange={handleSeek}
+                              className="cursor-pointer"
+                            />
+                            <div className="flex justify-between text-[8px] font-bold text-muted-foreground uppercase tracking-widest">
+                              <span>{Math.floor(audioProgress)}s</span>
+                              <span>{Math.floor(audioDuration)}s (preview)</span>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
