@@ -729,7 +729,10 @@ export default function CriarPagina() {
       </main>
 
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-        <DialogContent className="max-w-[380px] h-[85vh] p-0 bg-white border-[12px] border-zinc-900 rounded-[3.5rem] overflow-hidden shadow-2xl focus:outline-none flex flex-col">
+        <DialogContent 
+          hideClose
+          className="max-w-[380px] h-[85vh] p-0 bg-white border-[12px] border-zinc-900 rounded-[3.5rem] overflow-hidden shadow-2xl focus:outline-none flex flex-col"
+        >
           <DialogHeader className="sr-only">
             <DialogTitle>Visualização da Página</DialogTitle>
             <DialogDescription>Uma prévia de como sua surpresa será vista pelo seu amor.</DialogDescription>
@@ -738,7 +741,7 @@ export default function CriarPagina() {
             <Button 
               variant="ghost" 
               size="icon" 
-              className="absolute top-6 left-6 z-[140] bg-white/90 text-primary rounded-full backdrop-blur-md shadow-lg h-10 w-10 border border-primary/10 transition-transform active:scale-90" 
+              className="absolute top-6 left-6 z-[210] bg-white/90 text-primary rounded-full backdrop-blur-md shadow-lg h-10 w-10 border border-primary/10 transition-transform active:scale-90" 
               onClick={() => setIsPreviewOpen(false)}
             >
               <X className="w-5 h-5" />
