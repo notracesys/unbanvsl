@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -18,7 +17,8 @@ import {
   Search,
   Lock,
   Zap,
-  Star
+  Star,
+  Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,6 +32,13 @@ import { format, differenceInSeconds } from 'date-fns';
 // --- Types ---
 type CreationPhase = 'dados' | 'wizard' | 'upsell' | 'planos' | 'checkout';
 
+interface MusicTrack {
+  title: string;
+  artist: string;
+  cover: string;
+  previewUrl?: string;
+}
+
 interface PageData {
   creatorName: string;
   partnerName: string;
@@ -39,11 +46,7 @@ interface PageData {
   startTime: string;
   city: string;
   title: string;
-  music: {
-    title: string;
-    artist: string;
-    cover: string;
-  } | null;
+  music: MusicTrack | null;
   photos: string[];
   message: string;
   theme: 'classic' | 'starry' | 'elegant' | 'minimal';
@@ -67,6 +70,11 @@ export default function CriarPagina() {
     theme: 'classic',
     plan: 'lifetime'
   });
+
+  // Music Search States
+  const [musicSearch, setMusicSearch] = useState('');
+  const [musicResults, setMusicResults] = useState<MusicTrack[]>([]);
+  const [isSearchingMusic, setIsSearchingMusic] = useState(false);
 
   const [timeTogether, setTimeTogether] = useState({
     years: 0, months: 0, days: 0, hours: 0, minutes: 0, seconds: 0
@@ -95,6 +103,35 @@ export default function CriarPagina() {
     
     return () => clearInterval(interval);
   }, [data.startDate, data.startTime]);
+
+  // iTunes Music Search API
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(async () => {
+      if (musicSearch.length < 3) {
+        setMusicResults([]);
+        return;
+      }
+      
+      setIsSearchingMusic(true);
+      try {
+        const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(musicSearch)}&entity=song&limit=8`);
+        const result = await response.json();
+        const tracks = result.results.map((item: any) => ({
+          title: item.trackName,
+          artist: item.artistName,
+          cover: item.artworkUrl100.replace('100x100', '400x400'),
+          previewUrl: item.previewUrl
+        }));
+        setMusicResults(tracks);
+      } catch (error) {
+        console.error("Erro ao buscar música:", error);
+      } finally {
+        setIsSearchingMusic(false);
+      }
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [musicSearch]);
 
   const progress = useMemo(() => {
     if (phase === 'dados') return 20;
@@ -182,7 +219,7 @@ export default function CriarPagina() {
               <p className="text-sm font-medium leading-relaxed">
                 {phase === 'dados' && "Olá! Sou seu assistente do amor. Para começar, me conta... quem são vocês?"}
                 {phase === 'wizard' && wizardStep === 1 && "Agora vamos dar um título especial para esse presente!"}
-                {phase === 'wizard' && wizardStep === 2 && "Qual a trilha sonora do amor de vocês? Procure aqui embaixo."}
+                {phase === 'wizard' && wizardStep === 2 && "Qual a trilha sonora do amor de vocês? Digite o nome da música abaixo."}
                 {phase === 'wizard' && wizardStep === 3 && "Hora das fotos! Escolha as 5 melhores lembranças de vocês."}
                 {phase === 'wizard' && wizardStep === 4 && "Abra seu coração. Escreva uma carta linda ou use minha ajuda."}
                 {phase === 'wizard' && wizardStep === 5 && "Escolha uma foto bem marcante para o nosso contador de tempo."}
@@ -286,30 +323,37 @@ export default function CriarPagina() {
                     <label className="text-sm font-bold">Busque a música de vocês</label>
                     <div className="relative">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input placeholder="Nome da música ou artista..." className="pl-10 h-12 bg-white/5" />
+                      <Input 
+                        placeholder="Nome da música ou artista..." 
+                        className="pl-10 h-12 bg-white/5" 
+                        value={musicSearch}
+                        onChange={e => setMusicSearch(e.target.value)}
+                      />
+                      {isSearchingMusic && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary animate-spin" />}
                     </div>
-                    <div className="space-y-2">
-                      {/* Simulação de resultados */}
-                      {[
-                        { title: "Perfect", artist: "Ed Sheeran", cover: "https://picsum.photos/seed/music1/50/50" },
-                        { title: "Always", artist: "Bon Jovi", cover: "https://picsum.photos/seed/music2/50/50" }
-                      ].map((m, i) => (
+                    
+                    <div className="space-y-2 max-h-[300px] overflow-y-auto no-scrollbar">
+                      {musicResults.map((m, i) => (
                         <div 
                           key={i} 
                           onClick={() => setData({...data, music: m})}
                           className={cn(
-                            "flex items-center gap-3 p-3 rounded-xl border border-white/5 cursor-pointer hover:bg-white/5 transition-colors",
+                            "flex items-center gap-3 p-3 rounded-xl border border-white/5 cursor-pointer hover:bg-white/5 transition-colors animate-in fade-in slide-in-from-top-1",
                             data.music?.title === m.title && "border-primary bg-primary/5"
                           )}
                         >
-                          <img src={m.cover} alt="Capa" className="w-10 h-10 rounded-lg" />
-                          <div className="flex-1">
-                            <p className="text-sm font-bold leading-none mb-1">{m.title}</p>
-                            <p className="text-xs text-muted-foreground">{m.artist}</p>
+                          <img src={m.cover} alt="Capa" className="w-10 h-10 rounded-lg shadow-md" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-bold leading-none mb-1 truncate">{m.title}</p>
+                            <p className="text-xs text-muted-foreground truncate">{m.artist}</p>
                           </div>
-                          <Music className="w-4 h-4 text-muted-foreground" />
+                          <Music className={cn("w-4 h-4", data.music?.title === m.title ? "text-primary" : "text-muted-foreground")} />
                         </div>
                       ))}
+                      
+                      {musicSearch.length > 2 && musicResults.length === 0 && !isSearchingMusic && (
+                        <p className="text-center text-xs text-muted-foreground py-4">Nenhuma música encontrada.</p>
+                      )}
                     </div>
                   </div>
                 )}
@@ -370,6 +414,7 @@ export default function CriarPagina() {
               size="lg" 
               className="w-full h-14 bg-primary hover:bg-primary/90 pink-glow text-lg font-bold rounded-full mt-4"
               onClick={handleNext}
+              disabled={phase === 'dados' ? !(data.creatorName && data.partnerName && data.startDate) : false}
             >
               Continuar <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
@@ -391,13 +436,13 @@ export default function CriarPagina() {
                 <div className="px-6 flex-1 overflow-y-auto no-scrollbar space-y-6 pb-12">
                   <div className="text-center space-y-2">
                     <Heart className="w-8 h-8 text-primary fill-current mx-auto animate-pulse" />
-                    <h3 className="font-serif-elegant font-bold text-xl">{data.title || "Seu Título Aqui"}</h3>
+                    <h3 className="font-serif-elegant font-bold text-xl leading-tight">{data.title || "Seu Título Aqui"}</h3>
                     <p className="text-xs text-muted-foreground italic">Para: {data.partnerName || "Amor"}</p>
                   </div>
 
                   {/* Bloco Música */}
-                  <GlassCard className="p-4 rounded-3xl border-white/5 flex items-center gap-4">
-                    <div className="w-12 h-12 bg-white/10 rounded-xl overflow-hidden shrink-0">
+                  <GlassCard className="p-4 rounded-3xl border-white/5 flex items-center gap-4 transition-all animate-in fade-in zoom-in-95">
+                    <div className="w-12 h-12 bg-white/10 rounded-xl overflow-hidden shrink-0 shadow-inner">
                       {data.music?.cover && <img src={data.music.cover} className="w-full h-full object-cover" />}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -410,9 +455,9 @@ export default function CriarPagina() {
                   </GlassCard>
 
                   {/* Bloco Fotos */}
-                  <div className="aspect-square rounded-[2rem] bg-white/5 border border-white/5 overflow-hidden">
+                  <div className="aspect-square rounded-[2rem] bg-white/5 border border-white/5 overflow-hidden shadow-lg transition-all duration-500">
                     {data.photos[0] ? (
-                      <img src={data.photos[0]} className="w-full h-full object-cover" />
+                      <img src={data.photos[0]} className="w-full h-full object-cover animate-in fade-in duration-700" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                         <ImageIcon className="w-8 h-8 opacity-20" />
@@ -424,14 +469,14 @@ export default function CriarPagina() {
                   <div className="text-center space-y-3">
                     <p className="text-[10px] uppercase font-bold tracking-widest text-primary">Nossa História</p>
                     <div className="grid grid-cols-3 gap-2">
-                      <div className="bg-white/5 p-2 rounded-2xl"><p className="text-sm font-bold">{timeTogether.years}</p><p className="text-[8px] uppercase">Anos</p></div>
-                      <div className="bg-white/5 p-2 rounded-2xl"><p className="text-sm font-bold">{timeTogether.months}</p><p className="text-[8px] uppercase">Meses</p></div>
-                      <div className="bg-white/5 p-2 rounded-2xl"><p className="text-sm font-bold">{timeTogether.days}</p><p className="text-[8px] uppercase">Dias</p></div>
+                      <div className="bg-white/5 p-2 rounded-2xl border border-white/5"><p className="text-sm font-bold">{timeTogether.years}</p><p className="text-[8px] uppercase">Anos</p></div>
+                      <div className="bg-white/5 p-2 rounded-2xl border border-white/5"><p className="text-sm font-bold">{timeTogether.months}</p><p className="text-[8px] uppercase">Meses</p></div>
+                      <div className="bg-white/5 p-2 rounded-2xl border border-white/5"><p className="text-sm font-bold">{timeTogether.days}</p><p className="text-[8px] uppercase">Dias</p></div>
                     </div>
                   </div>
 
                   {/* Bloco Mensagem */}
-                  <div className="glass p-4 rounded-3xl text-[11px] leading-relaxed text-muted-foreground italic">
+                  <div className="glass p-4 rounded-3xl text-[11px] leading-relaxed text-muted-foreground italic border-white/5 shadow-sm">
                     {data.message || "Sua mensagem aparecerá aqui..."}
                   </div>
                 </div>
@@ -442,10 +487,11 @@ export default function CriarPagina() {
       </main>
 
       {/* Footer Mobile Button */}
-      <div className="lg:hidden p-4 border-t border-white/5 sticky bottom-0 bg-background/80 backdrop-blur-md">
+      <div className="lg:hidden p-4 border-t border-white/5 sticky bottom-0 bg-background/80 backdrop-blur-md z-50">
         <Button 
           className="w-full h-14 bg-primary hover:bg-primary/90 pink-glow text-lg font-bold rounded-full"
           onClick={handleNext}
+          disabled={phase === 'dados' ? !(data.creatorName && data.partnerName && data.startDate) : false}
         >
           Próximo Passo <ArrowRight className="ml-2 w-5 h-5" />
         </Button>
