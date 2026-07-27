@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
@@ -348,6 +347,12 @@ export default function CriarPagina() {
           </div>
         </div>
       </div>
+
+      <div className="bg-muted/30 p-6 rounded-[2rem] border border-primary/5">
+        <p className="text-center text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap font-headline">
+          {data.message || "Sua carta de amor aparecerá aqui..."}
+        </p>
+      </div>
     </div>
   );
 
@@ -368,7 +373,7 @@ export default function CriarPagina() {
         <Button 
           variant="ghost" 
           size="sm" 
-          className="fixed top-14 right-6 z-[130] text-[10px] uppercase font-bold tracking-widest text-primary bg-white/90 hover:bg-white rounded-full px-4 h-9 gap-2 transition-all hover:scale-105 pink-glow shadow-xl backdrop-blur-md border border-primary/10"
+          className="fixed top-12 right-6 z-[130] text-[10px] uppercase font-bold tracking-widest text-primary bg-white/90 hover:bg-white rounded-full px-4 h-9 gap-2 transition-all hover:scale-105 pink-glow shadow-xl backdrop-blur-md border border-primary/10"
           onClick={() => setIsPreviewOpen(true)}
         >
           <div className="absolute inset-0 bg-primary/5 animate-pulse rounded-full" />
@@ -724,7 +729,7 @@ export default function CriarPagina() {
       </main>
 
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-        <DialogContent className="max-w-none w-screen h-screen m-0 p-0 bg-white border-none overflow-hidden rounded-none shadow-none focus:outline-none">
+        <DialogContent className="max-w-[380px] h-[85vh] p-0 bg-white border-[12px] border-zinc-900 rounded-[3.5rem] overflow-hidden shadow-2xl focus:outline-none flex flex-col">
           <DialogHeader className="sr-only">
             <DialogTitle>Visualização da Página</DialogTitle>
             <DialogDescription>Uma prévia de como sua surpresa será vista pelo seu amor.</DialogDescription>
@@ -738,9 +743,11 @@ export default function CriarPagina() {
             >
               <X className="w-5 h-5" />
             </Button>
-            <div className="flex-1 overflow-hidden pt-16">
+            <div className="flex-1 overflow-hidden">
               <PreviewContent isFullScreen />
             </div>
+            {/* Elemento que simula a barra inferior do iPhone */}
+            <div className="h-1.5 w-32 bg-zinc-200 rounded-full mx-auto mb-2 mt-auto shrink-0" />
           </div>
         </DialogContent>
       </Dialog>
