@@ -43,6 +43,7 @@
     @apply bg-background text-foreground font-body antialiased;
     background-image: radial-gradient(circle at top right, rgba(255, 77, 109, 0.1), transparent),
                       radial-gradient(circle at bottom left, rgba(201, 24, 74, 0.1), transparent);
+    background-attachment: fixed;
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-headline tracking-tight;
@@ -75,4 +76,12 @@
 
 .animate-float {
   animation: float 4s ease-in-out infinite;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
