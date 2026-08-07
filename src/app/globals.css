@@ -5,35 +5,35 @@
 
 @layer base {
   :root {
-    --background: 150 15% 3%;
-    --foreground: 150 10% 97%;
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
     
-    --card: 150 15% 5%;
-    --card-foreground: 150 10% 97%;
+    --card: 240 10% 6%;
+    --card-foreground: 0 0% 98%;
     
-    --popover: 150 15% 5%;
-    --popover-foreground: 150 10% 97%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
     
-    --primary: 112 100% 71%;
-    --primary-foreground: 150 15% 3%;
+    --primary: 263 90% 65%; /* Purple from image */
+    --primary-foreground: 210 20% 98%;
     
-    --secondary: 150 15% 10%;
-    --secondary-foreground: 150 10% 97%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
     
-    --muted: 150 10% 15%;
-    --muted-foreground: 150 5% 65%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
     
-    --accent: 112 100% 71%;
-    --accent-foreground: 150 15% 3%;
+    --accent: 263 90% 65%;
+    --accent-foreground: 0 0% 98%;
     
-    --destructive: 0 100% 64%;
-    --destructive-foreground: 150 10% 97%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
     
-    --border: 150 15% 12%;
-    --input: 150 15% 12%;
-    --ring: 112 100% 71%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 263 90% 65%;
     
-    --radius: 0.75rem;
+    --radius: 1.5rem;
   }
 }
 
@@ -42,61 +42,33 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground font-sans antialiased selection:bg-primary/30 selection:text-primary;
-    background-color: #050706;
+    @apply bg-background text-foreground font-sans antialiased overflow-x-hidden;
+    background-color: #050505;
   }
 }
 
-.font-heading-cyber {
-  font-family: var(--font-space), sans-serif;
-  letter-spacing: -0.02em;
+.text-gradient-purple {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-[#A855F7] to-[#8B5CF6];
 }
 
-.glow-primary {
-  box-shadow: 0 0 20px rgba(124, 255, 107, 0.2);
+.bg-purple-glow {
+  box-shadow: 0 0 50px rgba(168, 85, 247, 0.25);
 }
 
-.glow-text {
-  text-shadow: 0 0 15px rgba(124, 255, 107, 0.5);
+@keyframes progress-matrix {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
 }
 
-.cyber-grid {
-  background-size: 40px 40px;
-  background-image: 
-    linear-gradient(to right, rgba(29, 39, 31, 0.2) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(29, 39, 31, 0.2) 1px, transparent 1px);
+.animate-matrix {
+  animation: progress-matrix 20s linear infinite;
 }
 
-@keyframes reveal-up-blur {
-  0% {
-    opacity: 0;
-    transform: translateY(10px);
-    filter: blur(10px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-    filter: blur(0);
-  }
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
 }
 
-.animate-reveal {
-  animation: reveal-up-blur 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-}
-
-/* Scanline Effect */
-.scanline {
-  width: 100%;
-  height: 100px;
-  z-index: 5;
-  background: linear-gradient(0deg, rgba(0, 0, 0, 0) 0%, rgba(124, 255, 107, 0.05) 50%, rgba(0, 0, 0, 0) 100%);
-  opacity: 0.1;
-  position: absolute;
-  bottom: 100%;
-  animation: scanline 6s linear infinite;
-}
-
-@keyframes scanline {
-  0% { bottom: 100%; }
-  100% { bottom: -100px; }
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
 }

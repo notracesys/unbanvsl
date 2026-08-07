@@ -3,13 +3,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Eye, ShieldCheck, Key, Zap, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-/**
- * Componente que revela o texto caractere por caractere com uma animação de subida e desfoque.
- */
 function RevealText({ text, delay = 0, onComplete }: { text: string; delay?: number; onComplete?: () => void }) {
   const [visibleChars, setVisibleChars] = useState(0);
   const chars = text.split('');
@@ -20,12 +17,12 @@ function RevealText({ text, delay = 0, onComplete }: { text: string; delay?: num
         setVisibleChars((prev) => {
           if (prev >= chars.length) {
             clearInterval(interval);
-            if (onComplete) setTimeout(onComplete, 1000);
+            if (onComplete) setTimeout(onComplete, 800);
             return prev;
           }
           return prev + 1;
         });
-      }, 30); // Velocidade da digitação (ms por letra)
+      }, 25);
       return () => clearInterval(interval);
     }, delay);
 
@@ -33,15 +30,15 @@ function RevealText({ text, delay = 0, onComplete }: { text: string; delay?: num
   }, [chars.length, onComplete, delay]);
 
   return (
-    <div className="flex flex-wrap justify-center leading-relaxed">
+    <div className="flex flex-wrap justify-center leading-tight">
       {chars.map((char, i) => (
         <span
           key={i}
           className={cn(
-            "inline-block transition-all duration-700 ease-out whitespace-pre",
+            "inline-block transition-all duration-500 ease-out whitespace-pre",
             i < visibleChars 
               ? "opacity-100 blur-0 translate-y-0" 
-              : "opacity-0 blur-sm translate-y-4"
+              : "opacity-0 blur-md translate-y-6"
           )}
         >
           {char}
@@ -54,18 +51,32 @@ function RevealText({ text, delay = 0, onComplete }: { text: string; delay?: num
 export default function LandingPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
-  const [showButton, setShowButton] = useState(false);
+  const [showCard, setShowCard] = useState(false);
+
+  // Get current weekday in Portuguese
+  const getWeekday = () => {
+    const days = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'];
+    return days[new Date().getDay()];
+  };
 
   return (
-    <div className="min-h-screen bg-[#050706] text-white flex items-center justify-center p-6 overflow-hidden">
-      <div className="max-w-4xl w-full text-center relative z-10">
-        <div className="min-h-[450px] flex flex-col items-center justify-center gap-16">
-          
+    <div className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center p-4 relative overflow-hidden">
+      {/* Matrix-like Background Pattern */}
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none select-none overflow-hidden flex justify-around text-[10px] font-mono leading-none">
+        {[...Array(10)].map((_, i) => (
+          <div key={i} className="animate-matrix whitespace-pre">
+            {Array(50).fill("STALKEA LOCALIZA PRIVATE SECURE DATA SCAN ").join("\n")}
+          </div>
+        ))}
+      </div>
+
+      {!showCard ? (
+        <div className="max-w-2xl w-full text-center relative z-10 px-4 space-y-12">
           {step >= 1 && (
-            <div className={cn("transition-all duration-1000", step > 1 ? "opacity-30 scale-95" : "opacity-100")}>
-              <h1 className="text-2xl md:text-3xl font-medium tracking-tight italic">
+            <div className={cn("transition-all duration-1000", step > 1 ? "opacity-20 scale-95 blur-sm" : "opacity-100")}>
+              <h1 className="text-xl md:text-2xl font-medium tracking-tight italic text-zinc-400">
                 <RevealText 
-                  text="Você sabia que seus dados pessoais podem estar visíveis para qualquer pessoa agora mesmo?" 
+                  text="Você sabia que seus dados podem estar visíveis para todo mundo enquanto você está navegando nas redes sociais?" 
                   onComplete={() => setStep(2)} 
                 />
               </h1>
@@ -73,10 +84,10 @@ export default function LandingPage() {
           )}
 
           {step >= 2 && (
-            <div className={cn("transition-all duration-1000", step > 2 ? "opacity-30 scale-95" : "opacity-100")}>
-              <h2 className="text-3xl md:text-5xl font-bold text-primary tracking-tighter italic leading-tight">
+            <div className={cn("transition-all duration-1000", step > 3 ? "opacity-20 scale-95 blur-sm" : "opacity-100")}>
+              <h2 className="text-3xl md:text-5xl font-black tracking-tighter leading-[0.95] text-white">
                 <RevealText 
-                  text="Enquanto você navega nas redes sociais, 8 de cada 10 brasileiros têm sua privacidade exposta sem saber." 
+                  text="Isso é o que acontece com 8 de cada 10 brasileiros e eles nem sabem disso." 
                   onComplete={() => setStep(3)} 
                 />
               </h2>
@@ -85,31 +96,80 @@ export default function LandingPage() {
 
           {step >= 3 && (
             <div className="transition-all duration-1000">
-              <h3 className="text-2xl md:text-3xl font-medium tracking-tight italic">
+              <h3 className="text-2xl md:text-3xl font-bold tracking-tight text-[#A855F7] italic">
                 <RevealText 
                   text="A internet não esquece... e ela sabe mais sobre você do que deveria." 
-                  onComplete={() => setShowButton(true)} 
+                  onComplete={() => setShowCard(true)} 
                 />
               </h3>
             </div>
           )}
         </div>
+      ) : (
+        <div className="w-full max-w-[400px] animate-in fade-in zoom-in-95 slide-in-from-bottom-12 duration-1000 z-20">
+          {/* Main Card - Style inspired by STALKEA.AI */}
+          <div className="bg-[#0D0D0D] border border-zinc-800/50 rounded-[2.5rem] p-8 md:p-10 shadow-[0_0_80px_rgba(168,85,247,0.15)] flex flex-col items-center text-center space-y-8">
+            
+            {/* Logo */}
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#A855F7] to-[#6366F1] flex items-center justify-center shadow-lg shadow-purple-500/20">
+                <Search className="w-6 h-6 text-white" />
+              </div>
+              <span className="font-black text-xs tracking-[0.3em] uppercase text-zinc-400">
+                LOCALIZA<span className="text-[#A855F7]">.AI</span>
+              </span>
+            </div>
 
-        {showButton && (
-          <div className="mt-20 animate-in fade-in slide-in-from-bottom-8 duration-1000 flex flex-col items-center">
+            {/* Headline */}
+            <h1 className="text-[2.8rem] leading-[0.9] font-black text-white tracking-tighter">
+              O que seus <br />
+              <span className="text-[#A855F7]">Dados</span> revelam <br />
+              sobre você?
+            </h1>
+
+            {/* Subheadline */}
+            <p className="text-zinc-400 text-sm font-medium leading-tight px-4">
+              Descubra a verdade sobre sua <span className="text-white font-bold">exposição digital</span>, acessando seu relatório completo!
+            </p>
+
+            {/* Main Button */}
             <Button 
               size="lg"
               onClick={() => router.push('/scan')}
-              className="bg-primary hover:bg-primary/90 text-black font-black px-16 h-20 rounded-2xl transition-all hover:scale-105 active:scale-95 text-xl shadow-[0_0_50px_rgba(124,255,107,0.3)]"
+              className="w-full h-20 bg-gradient-to-r from-[#A855F7] to-[#7C3AED] hover:opacity-90 text-white font-black text-xl rounded-3xl transition-all hover:scale-[1.02] active:scale-95 shadow-xl shadow-purple-500/20 gap-3"
             >
-              ESCANEAR MINHA EXPOSIÇÃO <ArrowRight className="ml-3 w-6 h-6" />
+              <Eye className="w-6 h-6" /> Escanear Agora
             </Button>
-            <p className="mt-6 text-[10px] text-white/20 uppercase tracking-[0.5em] font-bold">
-              Iniciando Protocolo de Análise Digital
-            </p>
+
+            {/* Trust Indicators */}
+            <div className="flex items-center justify-between w-full px-2">
+              <div className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-500 uppercase tracking-tighter">
+                <ShieldCheck className="w-3.5 h-3.5 text-[#A855F7]" /> 100% Seguro
+              </div>
+              <div className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-500 uppercase tracking-tighter">
+                <Key className="w-3.5 h-3.5 text-[#A855F7]" /> Sem Cadastro
+              </div>
+              <div className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-500 uppercase tracking-tighter">
+                <Zap className="w-3.5 h-3.5 text-[#A855F7]" /> Análise Grátis
+              </div>
+            </div>
           </div>
-        )}
-      </div>
+
+          {/* Social Proof Counter */}
+          <div className="mt-8 text-center space-y-1">
+            <p className="text-[12px] font-bold text-zinc-500 tracking-tight">
+              <span className="text-[#A855F7]">+85.234</span> scans realizados hoje ({getWeekday()})
+            </p>
+            <div className="flex justify-center -space-x-2">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="w-6 h-6 rounded-full border-2 border-[#050505] overflow-hidden bg-zinc-800">
+                  <img src={`https://picsum.photos/seed/${i + 20}/50/50`} alt="User" className="w-full h-full object-cover" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
