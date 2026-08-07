@@ -5,70 +5,36 @@
 
 @layer base {
   :root {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
+    --background: 140 10% 2%;
+    --foreground: 120 100% 70%;
     
-    --card: 240 10% 6%;
-    --card-foreground: 0 0% 98%;
+    --primary: 116 100% 71%;
+    --primary-foreground: 140 10% 2%;
     
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    
-    --primary: 263 90% 65%; /* Purple from image */
-    --primary-foreground: 210 20% 98%;
-    
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    
-    --accent: 263 90% 65%;
-    --accent-foreground: 0 0% 98%;
-    
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 263 90% 65%;
-    
-    --radius: 1.5rem;
+    --border: 140 10% 10%;
+    --radius: 0rem;
   }
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
   body {
-    @apply bg-background text-foreground font-sans antialiased overflow-x-hidden;
-    background-color: #050505;
+    @apply bg-[#050505] text-[#7CFF6B] antialiased selection:bg-[#7CFF6B] selection:text-[#050505];
   }
 }
 
-.text-gradient-purple {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-[#A855F7] to-[#8B5CF6];
+/* Animações de Radar e Scan sutil */
+@keyframes scan {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
 }
 
-.bg-purple-glow {
-  box-shadow: 0 0 50px rgba(168, 85, 247, 0.25);
-}
-
-@keyframes progress-matrix {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(-50%); }
-}
-
-.animate-matrix {
-  animation: progress-matrix 20s linear infinite;
-}
-
-@keyframes pulse-soft {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
-}
-
-.animate-pulse-soft {
-  animation: pulse-soft 2s ease-in-out infinite;
+.scanline::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent, rgba(124, 255, 107, 0.05), transparent);
+  height: 100px;
+  width: 100%;
+  animation: scan 4s linear infinite;
+  pointer-events: none;
 }
