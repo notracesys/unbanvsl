@@ -3,14 +3,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Lock, Activity } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 /**
- * Componente que revela o texto palavra por palavra com animação suave.
+ * Componente que revela o texto palavra por palavra com uma animação suave de baixo para cima e desfoque que limpa.
  */
-function SoftReveal({ text, onComplete, delay = 0 }: { text: string; onComplete?: () => void; delay?: number }) {
+function RevealText({ text, delay = 0, onComplete }: { text: string; delay?: number; onComplete?: () => void }) {
   const words = text.split(' ');
   const [visibleCount, setVisibleCount] = useState(0);
 
@@ -25,7 +25,7 @@ function SoftReveal({ text, onComplete, delay = 0 }: { text: string; onComplete?
           }
           return prev + 1;
         });
-      }, 100); // Velocidade da revelação das palavras
+      }, 120); // Velocidade de entrada de cada palavra
       return () => clearInterval(interval);
     }, delay);
 
@@ -33,15 +33,16 @@ function SoftReveal({ text, onComplete, delay = 0 }: { text: string; onComplete?
   }, [words.length, onComplete, delay]);
 
   return (
-    <div className="flex flex-wrap justify-center gap-x-2 gap-y-1">
+    <div className="flex flex-wrap justify-center gap-x-2 gap-y-2">
       {words.map((word, i) => (
         <span
           key={i}
           className={cn(
-            "opacity-0 blur-md translate-y-2 transition-all duration-700",
-            i < visibleCount && "opacity-100 blur-0 translate-y-0"
+            "inline-block transition-all duration-[1200ms] cubic-bezier(0.2, 0.8, 0.2, 1)",
+            i < visibleCount 
+              ? "opacity-100 blur-0 translate-y-0" 
+              : "opacity-0 blur-2xl translate-y-8 pointer-events-none"
           )}
-          style={{ transitionDelay: `${i * 30}ms` }}
         >
           {word}
         </span>
@@ -55,25 +56,16 @@ export default function LandingPage() {
   const [step, setStep] = useState(1);
   const [showButton, setShowButton] = useState(false);
 
-  const introTexts = [
-    "Você sabia que seus dados pessoais podem estar visíveis para qualquer pessoa agora mesmo?",
-    "Enquanto você navega nas redes sociais, 8 de cada 10 brasileiros têm sua privacidade exposta sem saber.",
-    "A internet não esquece... e ela sabe mais sobre você do que deveria."
-  ];
-
   return (
-    <div className="min-h-screen bg-[#050706] text-foreground flex items-center justify-center p-6 relative overflow-hidden">
-      {/* Grid de fundo muito sutil */}
-      <div className="absolute inset-0 cyber-grid opacity-10 pointer-events-none" />
-      
-      <div className="max-w-4xl w-full z-10 text-center">
-        <div className="min-h-[300px] flex flex-col items-center justify-center gap-12">
+    <div className="min-h-screen bg-[#050706] text-white flex items-center justify-center p-6 overflow-hidden">
+      <div className="max-w-4xl w-full text-center relative z-10">
+        <div className="min-h-[400px] flex flex-col items-center justify-center gap-16">
           
           {step >= 1 && (
-            <div className={cn("transition-all duration-1000", step > 1 ? "opacity-30 blur-sm scale-95" : "opacity-100")}>
-              <h1 className="text-2xl md:text-4xl font-heading-cyber font-medium leading-tight text-white/90 tracking-tight italic">
-                <SoftReveal 
-                  text={introTexts[0]} 
+            <div className={cn("transition-all duration-1000", step > 1 ? "opacity-10 scale-95 blur-sm" : "opacity-100")}>
+              <h1 className="text-2xl md:text-3xl font-medium leading-tight tracking-tight italic">
+                <RevealText 
+                  text="Você sabia que seus dados pessoais podem estar visíveis para qualquer pessoa agora mesmo?" 
                   onComplete={() => setStep(2)} 
                 />
               </h1>
@@ -81,10 +73,10 @@ export default function LandingPage() {
           )}
 
           {step >= 2 && (
-            <div className={cn("transition-all duration-1000", step > 2 ? "opacity-30 blur-sm scale-95" : "opacity-100")}>
-              <h2 className="text-3xl md:text-5xl font-heading-cyber font-bold leading-tight text-primary glow-text tracking-tighter italic">
-                <SoftReveal 
-                  text={introTexts[1]} 
+            <div className={cn("transition-all duration-1000", step > 2 ? "opacity-10 scale-95 blur-sm" : "opacity-100")}>
+              <h2 className="text-3xl md:text-5xl font-bold text-primary tracking-tighter italic leading-tight">
+                <RevealText 
+                  text="Enquanto você navega nas redes sociais, 8 de cada 10 brasileiros têm sua privacidade exposta sem saber." 
                   onComplete={() => setStep(3)} 
                 />
               </h2>
@@ -93,9 +85,9 @@ export default function LandingPage() {
 
           {step >= 3 && (
             <div className="transition-all duration-1000">
-              <h3 className="text-2xl md:text-4xl font-heading-cyber font-medium leading-tight text-white/90 tracking-tight italic">
-                <SoftReveal 
-                  text={introTexts[2]} 
+              <h3 className="text-2xl md:text-3xl font-medium leading-tight tracking-tight italic">
+                <RevealText 
+                  text="A internet não esquece... e ela sabe mais sobre você do que deveria." 
                   onComplete={() => setShowButton(true)} 
                 />
               </h3>
@@ -104,19 +96,14 @@ export default function LandingPage() {
         </div>
 
         {showButton && (
-          <div className="mt-16 animate-in fade-in slide-in-from-bottom-8 duration-1000 flex flex-col items-center gap-6">
+          <div className="mt-20 animate-in fade-in zoom-in-95 duration-1000 flex flex-col items-center">
             <Button 
               size="lg"
               onClick={() => router.push('/scan')}
-              className="bg-primary hover:bg-primary/90 text-black font-black px-12 h-16 rounded-2xl transition-all hover:scale-105 active:scale-95 text-lg glow-primary"
+              className="bg-primary hover:bg-primary/90 text-black font-black px-16 h-20 rounded-2xl transition-all hover:scale-105 active:scale-95 text-xl shadow-[0_0_50px_rgba(124,255,107,0.4)]"
             >
-              ESCANEAR MINHA EXPOSIÇÃO <ArrowRight className="ml-2 w-5 h-5" />
+              ESCANEAR MINHA EXPOSIÇÃO <ArrowRight className="ml-3 w-6 h-6" />
             </Button>
-            
-            <div className="flex gap-8 text-[9px] font-bold text-muted-foreground uppercase tracking-[0.4em] opacity-40">
-               <span className="flex items-center gap-1.5"><Lock className="w-3 h-3" /> Secure Protocol</span>
-               <span className="flex items-center gap-1.5"><Activity className="w-3 h-3" /> Live Analysis</span>
-            </div>
           </div>
         )}
       </div>
