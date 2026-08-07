@@ -1,39 +1,34 @@
-
 {
   "entities": {
     "Scan": {
       "title": "Scan",
-      "description": "Uma sessão de análise de exposição digital.",
+      "description": "Uma sessão de análise de inteligência de dados Atlas.",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
-        "identifier": { "type": "string", "description": "E-mail, telefone ou username analisado" },
-        "type": { "type": "string", "enum": ["email", "phone", "username"] },
-        "status": { "type": "string", "enum": ["queued", "searching", "analyzing", "complete", "failed"] },
+        "query": { "type": "string", "description": "O dado consultado pelo usuário" },
+        "type": { "type": "string", "enum": ["email", "phone", "cpf", "cnpj", "name", "username", "other"] },
+        "status": { "type": "string", "enum": ["processing", "completed", "failed"] },
         "exposureScore": { "type": "number", "minimum": 0, "maximum": 100 },
         "findingsCount": { "type": "number" },
         "isPaid": { "type": "boolean" },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "expiresAt": { "type": "string", "format": "date-time" }
+        "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["identifier", "type", "status", "createdAt"]
+      "required": ["query", "type", "status", "createdAt"]
     },
     "Finding": {
       "title": "Finding",
-      "description": "Uma ocorrência confirmada de exposição.",
+      "description": "Uma ocorrência de dado localizada em fonte pública.",
       "type": "object",
       "properties": {
         "scanId": { "type": "string" },
-        "type": { "type": "string", "description": "Tipo do dado exposto" },
-        "sourceUrl": { "type": "string" },
-        "sourceTitle": { "type": "string" },
-        "sourceDomain": { "type": "string" },
-        "confidenceScore": { "type": "number", "minimum": 0, "maximum": 100 },
-        "riskLevel": { "type": "string", "enum": ["low", "moderate", "high", "critical"] },
+        "type": { "type": "string", "description": "Categoria do dado (Ex: Profissional, Jurídico)" },
+        "source": { "type": "string" },
+        "relevance": { "type": "string", "enum": ["low", "moderate", "high"] },
         "snippet": { "type": "string" },
         "verifiedAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["scanId", "type", "sourceUrl", "confidenceScore", "riskLevel"]
+      "required": ["scanId", "type", "source", "relevance"]
     }
   },
   "auth": {
@@ -42,11 +37,11 @@
   "firestore": {
     "/scans/{scanId}": {
       "schema": "Scan",
-      "description": "Coleção de scans realizados."
+      "description": "Coleção de análises Atlas realizadas."
     },
     "/scans/{scanId}/findings/{findingId}": {
       "schema": "Finding",
-      "description": "Resultados detalhados de cada scan."
+      "description": "Resultados detalhados de cada análise."
     }
   }
 }

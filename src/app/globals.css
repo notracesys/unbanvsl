@@ -1,46 +1,69 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 140 10% 2%;
-    --foreground: 120 10% 95%;
+    --background: 226 50% 9%;
+    --foreground: 210 40% 98%;
     
-    --primary: 112 100% 68%;
-    --primary-foreground: 140 10% 2%;
+    --card: 226 44% 12%;
+    --card-foreground: 210 40% 98%;
     
-    --card: 145 15% 5%;
-    --card-foreground: 120 10% 95%;
+    --popover: 226 44% 12%;
+    --popover-foreground: 210 40% 98%;
     
-    --border: 145 10% 12%;
-    --radius: 1.5rem;
+    --primary: 211 100% 65%;
+    --primary-foreground: 210 40% 98%;
+    
+    --secondary: 248 100% 71%;
+    --secondary-foreground: 210 40% 98%;
+    
+    --muted: 226 33% 23%;
+    --muted-foreground: 217 33% 75%;
+    
+    --accent: 194 100% 69%;
+    --accent-foreground: 226 50% 9%;
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 226 33% 23%;
+    --input: 226 33% 23%;
+    --ring: 211 100% 65%;
+    
+    --radius: 1rem;
   }
 }
 
 @layer base {
   body {
-    @apply bg-[#050706] text-[#F2F5F2] antialiased selection:bg-[#72FF5D] selection:text-[#050706] font-sans;
+    @apply bg-[#0B1020] text-[#F5F7FB] antialiased selection:bg-[#4DA3FF]/30 font-sans;
   }
 }
 
-.tech-grid {
+.atlas-grid {
   background-image: 
-    linear-gradient(to right, rgba(114, 255, 93, 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(114, 255, 93, 0.05) 1px, transparent 1px);
-  background-size: 40px 40px;
+    linear-gradient(to right, rgba(77, 163, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(77, 163, 255, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
 }
 
-@keyframes scan-radar {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+.glass-morphism {
+  background: rgba(22, 31, 56, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(39, 49, 79, 0.5);
 }
 
-.animate-scan-radar {
-  animation: scan-radar 8s linear infinite;
+.text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-[#4DA3FF] via-[#61D9FF] to-[#7C6CFF];
 }
 
-.green-glow {
-  box-shadow: 0 0 40px -10px rgba(114, 255, 93, 0.15);
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.05); }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 8s ease-in-out infinite;
 }
