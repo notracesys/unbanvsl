@@ -59,15 +59,6 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center p-4 relative overflow-hidden">
-      {/* Matrix Background */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none select-none overflow-hidden flex justify-around text-[10px] font-mono leading-none">
-        {[...Array(10)].map((_, i) => (
-          <div key={i} className="animate-matrix whitespace-pre">
-            {Array(50).fill("LOCALIZA PRIVATE SECURE DATA SCAN ").join("\n")}
-          </div>
-        ))}
-      </div>
-
       <div className="w-full max-w-[420px] z-20">
         <div className={cn(
           "bg-[#0D0D0D] border border-zinc-800/50 rounded-[2.5rem] p-8 md:p-10 transition-all duration-1000 flex flex-col items-center text-center",
