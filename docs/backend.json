@@ -1,46 +1,52 @@
 
 {
   "entities": {
-    "LovePage": {
-      "title": "LovePage",
-      "description": "Uma página personalizada criada por um casal.",
+    "Scan": {
+      "title": "Scan",
+      "description": "Uma sessão de análise de exposição digital.",
       "type": "object",
       "properties": {
-        "slug": { "type": "string", "description": "URL única da página" },
-        "userId": { "type": "string", "description": "ID do proprietário" },
-        "creatorName": { "type": "string", "description": "Nome de quem criou" },
-        "partnerName": { "type": "string", "description": "Nome do parceiro(a)" },
-        "startDate": { "type": "string", "format": "date", "description": "Data de início do relacionamento" },
-        "message": { "type": "string", "description": "Carta de amor" },
-        "theme": { "type": "string", "enum": ["classic", "starry", "elegant", "minimal"], "description": "Tema visual escolhido" },
-        "musicUrl": { "type": "string", "description": "Link do Spotify ou YouTube" },
-        "paymentStatus": { "type": "string", "enum": ["pending", "paid"], "description": "Status do pagamento" },
-        "createdAt": { "type": "string", "format": "date-time" }
+        "id": { "type": "string" },
+        "identifier": { "type": "string", "description": "E-mail, telefone ou username analisado" },
+        "type": { "type": "string", "enum": ["email", "phone", "username"] },
+        "status": { "type": "string", "enum": ["queued", "searching", "analyzing", "complete", "failed"] },
+        "exposureScore": { "type": "number", "minimum": 0, "maximum": 100 },
+        "findingsCount": { "type": "number" },
+        "isPaid": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "expiresAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["slug", "userId", "creatorName", "partnerName", "startDate", "theme", "paymentStatus"]
+      "required": ["identifier", "type", "status", "createdAt"]
     },
-    "Photo": {
-      "title": "Photo",
-      "description": "Uma foto enviada para a página de amor.",
+    "Finding": {
+      "title": "Finding",
+      "description": "Uma ocorrência confirmada de exposição.",
       "type": "object",
       "properties": {
-        "url": { "type": "string", "description": "URL da imagem no storage" },
-        "order": { "type": "number", "description": "Ordem de exibição" }
+        "scanId": { "type": "string" },
+        "type": { "type": "string", "description": "Tipo do dado exposto" },
+        "sourceUrl": { "type": "string" },
+        "sourceTitle": { "type": "string" },
+        "sourceDomain": { "type": "string" },
+        "confidenceScore": { "type": "number", "minimum": 0, "maximum": 100 },
+        "riskLevel": { "type": "string", "enum": ["low", "moderate", "high", "critical"] },
+        "snippet": { "type": "string" },
+        "verifiedAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["url", "order"]
+      "required": ["scanId", "type", "sourceUrl", "confidenceScore", "riskLevel"]
     }
   },
   "auth": {
-    "providers": ["google.com", "password"]
+    "providers": ["google.com", "anonymous"]
   },
   "firestore": {
-    "/love_pages/{pageId}": {
-      "schema": "LovePage",
-      "description": "Coleção principal de páginas de amor."
+    "/scans/{scanId}": {
+      "schema": "Scan",
+      "description": "Coleção de scans realizados."
     },
-    "/love_pages/{pageId}/photos/{photoId}": {
-      "schema": "Photo",
-      "description": "Sub-coleção de fotos de cada página."
+    "/scans/{scanId}/findings/{findingId}": {
+      "schema": "Finding",
+      "description": "Resultados detalhados de cada scan."
     }
   }
 }

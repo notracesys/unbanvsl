@@ -1,36 +1,39 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* Background: Soft White / Rose Tint */
-    --background: 340 30% 98%;
-    --foreground: 340 50% 15%;
-
-    /* Primary: Romantic Pink #FF4D6D */
-    --primary: 349 100% 65%;
-    --primary-foreground: 0 0% 100%;
-
-    /* Accent: Gold #D4AF37 for premium feel */
-    --accent: 46 65% 52%;
-    --accent-foreground: 0 0% 10%;
-
-    /* Secondary: Soft Purple #C9184A */
-    --secondary: 343 79% 44%;
-    --secondary-foreground: 0 0% 100%;
-
-    --card: 0 0% 100%;
-    --card-foreground: 340 50% 15%;
+    --background: 150 15% 3%;
+    --foreground: 150 10% 97%;
     
-    --muted: 340 20% 94%;
-    --muted-foreground: 340 10% 45%;
+    --card: 150 15% 5%;
+    --card-foreground: 150 10% 97%;
     
-    --border: 340 20% 88%;
-    --input: 340 20% 88%;
-    --ring: 349 100% 65%;
+    --popover: 150 15% 5%;
+    --popover-foreground: 150 10% 97%;
     
-    --radius: 1.5rem;
+    --primary: 112 100% 71%;
+    --primary-foreground: 150 15% 3%;
+    
+    --secondary: 150 15% 10%;
+    --secondary-foreground: 150 10% 97%;
+    
+    --muted: 150 10% 15%;
+    --muted-foreground: 150 5% 65%;
+    
+    --accent: 112 100% 71%;
+    --accent-foreground: 150 15% 3%;
+    
+    --destructive: 0 100% 64%;
+    --destructive-foreground: 150 10% 97%;
+    
+    --border: 150 15% 12%;
+    --input: 150 15% 12%;
+    --ring: 112 100% 71%;
+    
+    --radius: 0.75rem;
   }
 }
 
@@ -39,101 +42,65 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground font-body antialiased;
-    background-image: radial-gradient(circle at top right, rgba(255, 77, 109, 0.05), transparent),
-                      radial-gradient(circle at bottom left, rgba(201, 24, 74, 0.05), transparent);
+    @apply bg-background text-foreground font-sans antialiased selection:bg-primary/30 selection:text-primary;
+    background-image: 
+      radial-gradient(circle at 50% -20%, rgba(124, 255, 107, 0.08), transparent),
+      linear-gradient(to bottom, rgba(5, 7, 6, 1), rgba(10, 13, 11, 1));
     background-attachment: fixed;
   }
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-headline tracking-tight;
-  }
 }
 
-.font-serif-elegant {
-  font-family: 'Playfair Display', serif;
+/* Custom Typography classes */
+.font-mono-tech {
+  font-family: 'JetBrains Mono', monospace;
 }
 
-.glass {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 77, 109, 0.1);
-  box-shadow: 0 8px 32px rgba(255, 77, 109, 0.05);
+.font-heading-cyber {
+  font-family: 'Space Grotesk', sans-serif;
+  letter-spacing: -0.02em;
 }
 
-.pink-glow {
-  box-shadow: 0 10px 25px rgba(255, 77, 109, 0.2);
+/* Cyber effects */
+.glow-primary {
+  box-shadow: 0 0 20px rgba(124, 255, 107, 0.2);
 }
 
-.text-gradient {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-[#FF4D6D] to-[#C9184A];
+.glow-text {
+  text-shadow: 0 0 10px rgba(124, 255, 107, 0.4);
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+.cyber-grid {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(29, 39, 31, 0.3) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(29, 39, 31, 0.3) 1px, transparent 1px);
 }
 
-@keyframes float-up-down {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-30px) rotate(5deg); }
+.scanline {
+  width: 100%;
+  height: 2px;
+  background: rgba(124, 255, 107, 0.1);
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  animation: scanline 6s linear infinite;
 }
 
-@keyframes envelope-open {
-  0% { transform: perspective(1000px) rotateX(0deg); }
-  100% { transform: perspective(1000px) rotateX(-160deg); }
+@keyframes scanline {
+  0% { top: 0; }
+  100% { top: 100%; }
 }
 
-@keyframes letter-out {
-  0% { transform: translateY(0) scale(0.5); opacity: 0; }
-  30% { transform: translateY(-50px) scale(0.8); opacity: 1; }
-  60% { transform: translateY(-150px) scale(1.5); opacity: 1; }
-  100% { transform: translateY(-300px) scale(4); opacity: 0; }
+@keyframes radar-pulse {
+  0% { transform: scale(0.8); opacity: 0; }
+  50% { opacity: 0.5; }
+  100% { transform: scale(1.5); opacity: 0; }
 }
 
-@keyframes heart-beat-glow {
-  0%, 100% { transform: scale(1); opacity: 0.5; }
-  50% { transform: scale(1.5); opacity: 0.8; }
-}
-
-@keyframes content-reveal {
-  0% { opacity: 0; transform: scale(0.95); filter: blur(10px); }
-  100% { opacity: 1; transform: scale(1); filter: blur(0); }
-}
-
-.animate-float {
-  animation: float 4s ease-in-out infinite;
-}
-
-.animate-float-up-down {
-  animation: float-up-down 6s ease-in-out infinite;
-}
-
-.animate-envelope-open {
-  animation: envelope-open 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  transform-origin: top;
-}
-
-.animate-letter-out {
-  animation: letter-out 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s forwards;
-}
-
-.animate-heart-glow {
-  animation: heart-beat-glow 2s ease-in-out infinite;
-}
-
-.animate-content-reveal {
-  animation: content-reveal 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.perspective-1000 {
-  perspective: 1000px;
+.animate-radar {
+  position: absolute;
+  border: 1px solid rgba(124, 255, 107, 0.3);
+  border-radius: 50%;
+  animation: radar-pulse 4s cubic-bezier(0, 0, 0.2, 1) infinite;
 }

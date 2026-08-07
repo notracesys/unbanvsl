@@ -1,10 +1,15 @@
 
 import type { Metadata } from 'next';
 import './globals.css';
+import { Inter, Space_Grotesk, JetBrains_Mono } from 'next/font/google';
+
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-space' });
+const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono' });
 
 export const metadata: Metadata = {
-  title: 'Love Link - Transforme sua história de amor em um presente digital',
-  description: 'Crie uma página romântica personalizada para surpreender quem você ama. Com contador de tempo, galeria de fotos e música.',
+  title: 'Localiza.AI | Inteligência de Privacidade Digital',
+  description: 'Descubra onde seus dados aparecem publicamente e reduza sua exposição digital com o Localiza.AI.',
 };
 
 export default function RootLayout({
@@ -13,13 +18,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" className="dark">
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet" />
+        <link rel="icon" href="/favicon.ico" />
       </head>
-      <body className="font-body selection:bg-primary/30">
+      <body className={`${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} font-sans`}>
         {children}
       </body>
     </html>
