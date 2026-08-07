@@ -6,35 +6,41 @@
 @layer base {
   :root {
     --background: 140 10% 2%;
-    --foreground: 120 100% 70%;
+    --foreground: 120 10% 95%;
     
-    --primary: 116 100% 71%;
+    --primary: 112 100% 68%;
     --primary-foreground: 140 10% 2%;
     
-    --border: 140 10% 10%;
-    --radius: 0rem;
+    --card: 145 15% 5%;
+    --card-foreground: 120 10% 95%;
+    
+    --border: 145 10% 12%;
+    --radius: 1.5rem;
   }
 }
 
 @layer base {
   body {
-    @apply bg-[#050505] text-[#7CFF6B] antialiased selection:bg-[#7CFF6B] selection:text-[#050505];
+    @apply bg-[#050706] text-[#F2F5F2] antialiased selection:bg-[#72FF5D] selection:text-[#050706] font-sans;
   }
 }
 
-/* Animações de Radar e Scan sutil */
-@keyframes scan {
-  0% { transform: translateY(-100%); }
-  100% { transform: translateY(100%); }
+.tech-grid {
+  background-image: 
+    linear-gradient(to right, rgba(114, 255, 93, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(114, 255, 93, 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
 }
 
-.scanline::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom, transparent, rgba(124, 255, 107, 0.05), transparent);
-  height: 100px;
-  width: 100%;
-  animation: scan 4s linear infinite;
-  pointer-events: none;
+@keyframes scan-radar {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-scan-radar {
+  animation: scan-radar 8s linear infinite;
+}
+
+.green-glow {
+  box-shadow: 0 0 40px -10px rgba(114, 255, 93, 0.15);
 }
