@@ -29,13 +29,12 @@ function DigitalRain() {
       ctx!.fillStyle = 'rgba(5, 5, 5, 0.1)';
       ctx!.fillRect(0, 0, canvas!.width, canvas!.height);
 
-      ctx!.fillStyle = '#1a331a'; // Verde bem escuro para o rastro
+      ctx!.fillStyle = '#1a331a';
       ctx!.font = `${fontSize}px JetBrains Mono`;
 
       for (let i = 0; i < drops.length; i++) {
         const text = characters.charAt(Math.floor(Math.random() * characters.length));
         
-        // Algumas letras brilham mais (verde primário)
         if (Math.random() > 0.95) {
           ctx!.fillStyle = '#7CFF6B';
         } else {
@@ -72,7 +71,7 @@ function DigitalRain() {
   );
 }
 
-// --- Reveal Text Component ---
+// --- Reveal Text Component with Word Wrapping Fix ---
 function RevealText({ 
   text, 
   highlightWords = [], 
@@ -85,14 +84,14 @@ function RevealText({
   onComplete?: () => void 
 }) {
   const [visibleChars, setVisibleChars] = useState(0);
-  const chars = text.split('');
+  const charsCount = text.length;
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
     const startTimeout = setTimeout(() => {
       intervalId = setInterval(() => {
         setVisibleChars((prev) => {
-          if (prev < chars.length) return prev + 1;
+          if (prev < charsCount) return prev + 1;
           clearInterval(intervalId);
           return prev;
         });
@@ -103,54 +102,64 @@ function RevealText({
       clearTimeout(startTimeout);
       if (intervalId) clearInterval(intervalId);
     };
-  }, [chars.length, delay]);
+  }, [charsCount, delay]);
 
   useEffect(() => {
-    if (visibleChars === chars.length && onComplete) {
+    if (visibleChars === charsCount && onComplete) {
       const timer = setTimeout(onComplete, 1000);
       return () => clearTimeout(timer);
     }
-  }, [visibleChars, chars.length, onComplete]);
+  }, [visibleChars, charsCount, onComplete]);
 
-  // Função para verificar se o caractere atual faz parte de uma palavra destacada
-  const renderText = () => {
-    let currentText = '';
-    return chars.map((char, i) => {
-      if (i >= visibleChars) return null;
-      
-      currentText += char;
-      let isHighlighted = false;
-      
-      // Checagem simples de highlight por palavras
-      for (const word of highlightWords) {
-        if (text.includes(word)) {
-          const startIndex = text.indexOf(word);
-          const endIndex = startIndex + word.length;
-          if (i >= startIndex && i < endIndex) {
-            isHighlighted = true;
-            break;
-          }
-        }
-      }
-
-      return (
-        <span
-          key={i}
-          className={cn(
-            "inline-block transition-all duration-300 ease-out whitespace-pre transform",
-            isHighlighted ? "text-[#7CFF6B] font-bold" : "text-white",
-            i < visibleChars ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
-          )}
-        >
-          {char}
-        </span>
-      );
+  // Function to check if a specific index is highlighted
+  const isHighlighted = (index: number) => {
+    return highlightWords.some(phrase => {
+      const start = text.indexOf(phrase);
+      if (start === -1) return false;
+      const end = start + phrase.length;
+      return index >= start && index < end;
     });
   };
 
+  // Split text by spaces but keep the words together as inline-blocks
+  const parts = text.split(/(\s+)/);
+  let globalIdx = 0;
+
   return (
-    <div className="flex flex-wrap justify-center leading-tight text-lg md:text-xl font-medium tracking-tight px-2">
-      {renderText()}
+    <div className="flex flex-wrap justify-center leading-relaxed text-lg md:text-xl font-medium tracking-tight px-2 text-center">
+      {parts.map((part, pIdx) => {
+        if (/^\s+$/.test(part)) {
+          // It's a space or group of spaces
+          return part.split('').map((space, sIdx) => {
+            const currentGlobalIdx = globalIdx++;
+            if (currentGlobalIdx >= visibleChars) return null;
+            return <span key={`${pIdx}-${sIdx}`} className="whitespace-pre"> </span>;
+          });
+        } else {
+          // It's a word
+          const wordChars = part.split('').map((char, cIdx) => {
+            const currentGlobalIdx = globalIdx++;
+            if (currentGlobalIdx >= visibleChars) return null;
+            const highlighted = isHighlighted(currentGlobalIdx);
+            return (
+              <span
+                key={cIdx}
+                className={cn(
+                  "inline-block transition-all duration-300 ease-out transform",
+                  highlighted ? "text-[#7CFF6B] font-bold" : "text-white"
+                )}
+              >
+                {char}
+              </span>
+            );
+          });
+          return (
+            <span key={pIdx} className="inline-block whitespace-nowrap">
+              {wordChars}
+            </span>
+          );
+        }
+      })}
     </div>
   );
 }
@@ -163,39 +172,41 @@ export default function LandingPage() {
       <DigitalRain />
 
       {/* Main Container com Glow Esverdeado */}
-      <div className="w-full max-w-sm md:max-w-md bg-black/60 backdrop-blur-md border border-[#7CFF6B]/20 rounded-[2rem] p-8 md:p-10 shadow-[0_0_50px_-12px_rgba(124,255,107,0.15)] relative z-10 space-y-8 animate-in fade-in zoom-in duration-1000">
+      <div className="w-full max-w-sm md:max-w-md bg-black/80 backdrop-blur-xl border border-[#7CFF6B]/30 rounded-[2.5rem] p-8 md:p-12 shadow-[0_0_60px_-15px_rgba(124,255,107,0.25)] relative z-10 space-y-10 animate-in fade-in zoom-in duration-1000">
         
-        {step >= 1 && (
-          <RevealText 
-            text="Você sabia que seus dados podem estar visíveis para todo mundo enquanto você navega?" 
-            highlightWords={["visíveis para todo mundo"]}
-            onComplete={() => setStep(2)} 
-          />
-        )}
+        <div className="min-h-[300px] flex flex-col justify-center gap-8">
+          {step >= 1 && (
+            <RevealText 
+              text="Você sabia que seus dados podem estar visíveis para todo mundo enquanto você navega?" 
+              highlightWords={["visíveis para todo mundo"]}
+              onComplete={() => setStep(2)} 
+            />
+          )}
 
-        {step >= 2 && (
-          <RevealText 
-            text="Isso acontece com 8 de cada 10 brasileiros agora mesmo... e eles nem imaginam o risco." 
-            highlightWords={["8 de cada 10 brasileiros"]}
-            delay={300}
-            onComplete={() => setStep(3)} 
-          />
-        )}
+          {step >= 2 && (
+            <RevealText 
+              text="Isso acontece com 8 de cada 10 brasileiros agora mesmo... e eles nem imaginam o risco." 
+              highlightWords={["8 de cada 10 brasileiros"]}
+              delay={300}
+              onComplete={() => setStep(3)} 
+            />
+          )}
 
-        {step >= 3 && (
-          <RevealText 
-            text="A internet não esquece. E ela sabe muito mais sobre você do que deveria." 
-            highlightWords={["sabe muito mais sobre você"]}
-            delay={300}
-            onComplete={() => setStep(4)}
-          />
-        )}
+          {step >= 3 && (
+            <RevealText 
+              text="A internet não esquece. E ela sabe muito mais sobre você do que deveria." 
+              highlightWords={["sabe muito mais sobre você"]}
+              delay={300}
+              onComplete={() => setStep(4)}
+            />
+          )}
+        </div>
 
         {step >= 4 && (
-          <div className="pt-6 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+          <div className="pt-4 animate-in fade-in slide-in-from-bottom-8 duration-1000">
             <button 
               onClick={() => window.location.href = '/scan'}
-              className="w-full py-5 bg-[#7CFF6B] text-[#050505] font-black text-sm uppercase italic tracking-widest rounded-2xl hover:scale-[1.02] transition-all shadow-[0_0_30px_rgba(124,255,107,0.4)] active:scale-95 flex items-center justify-center gap-2 group"
+              className="w-full py-5 bg-[#7CFF6B] text-[#050505] font-black text-sm uppercase italic tracking-widest rounded-2xl hover:scale-[1.02] transition-all shadow-[0_0_40px_rgba(124,255,107,0.5)] active:scale-95 flex items-center justify-center gap-2 group"
             >
               Iniciar Análise agora
               <span className="group-hover:translate-x-1 transition-transform">→</span>
