@@ -49,16 +49,18 @@ export default function ScanWizard() {
     setStep('finalizing');
     setProgress(0);
     
+    let currentProgress = 0;
     const interval = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          const scanId = Math.random().toString(36).substring(7);
-          router.push(`/scan/${scanId}?q=${encodeURIComponent(name)}&age=${ageRange}`);
-          return 100;
-        }
-        return prev + 4;
-      });
+      currentProgress += 4;
+      if (currentProgress >= 100) {
+        clearInterval(interval);
+        setProgress(100);
+        // O redirecionamento ocorre fora do setProgress para evitar erro de ciclo de vida do React
+        const scanId = Math.random().toString(36).substring(7);
+        router.push(`/scan/${scanId}?q=${encodeURIComponent(name)}&age=${ageRange}`);
+      } else {
+        setProgress(currentProgress);
+      }
     }, 40);
   };
 
