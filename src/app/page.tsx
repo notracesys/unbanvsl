@@ -154,12 +154,6 @@ export default function PresentationPage() {
           </div>
         </div>
       </main>
-
-      <footer className="absolute bottom-0 w-full p-6 text-center">
-        <p className="text-[10px] font-mono font-bold text-[#AAB4D0]/30 uppercase tracking-[0.5em]">
-          Localiza.AI // Secure Intelligence Protocol
-        </p>
-      </footer>
     </div>
   );
 }
