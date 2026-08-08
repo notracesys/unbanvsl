@@ -53,15 +53,15 @@ export default function ScanWizard() {
     <div className="min-h-screen bg-[#0B1020] text-[#F5F7FB] flex flex-col relative overflow-hidden font-sans">
       <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#4DA3FF 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
 
-      <header className="px-6 py-8 border-b border-[#27314F] flex items-center justify-between relative z-10">
+      <header className="px-6 py-4 border-b border-[#27314F] flex items-center justify-between relative z-10">
         <div className="flex items-center gap-2">
-          <div className="w-12 h-12 rounded-xl bg-[#4DA3FF] flex items-center justify-center">
+          <div className="w-24 md:w-32 h-auto flex items-center justify-center">
             <Image 
               src="/localiza.png" 
               alt="Logo Header" 
-              width={36} 
-              height={36} 
-              className="w-9 h-9 object-contain brightness-0 invert"
+              width={100} 
+              height={100} 
+              className="w-full h-auto object-contain brightness-0 invert"
             />
           </div>
         </div>

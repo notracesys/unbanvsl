@@ -90,14 +90,14 @@ export default function PresentationPage() {
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#0B1020] text-[#F5F7FB] p-6 relative overflow-hidden font-sans">
       <TechBackground />
 
-      <header className="absolute top-0 left-0 w-full p-12 flex justify-center z-10">
+      <header className="absolute top-0 left-0 w-full p-8 flex justify-center z-10">
         <div className="flex items-center gap-2">
           <Image 
             src="/localiza.png" 
             alt="Localiza.AI Logo" 
-            width={100} 
-            height={100} 
-            className="w-24 h-24 object-contain"
+            width={180} 
+            height={180} 
+            className="w-32 md:w-44 h-auto object-contain"
           />
         </div>
       </header>

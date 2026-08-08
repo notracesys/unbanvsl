@@ -50,21 +50,21 @@ export default function SearchLandingPage() {
         />
       </div>
 
-      <nav className="relative z-10 w-full px-6 py-8 flex items-center justify-between max-w-7xl mx-auto">
+      <nav className="relative z-10 w-full px-6 py-4 flex items-center justify-between max-w-7xl mx-auto">
         <div className="flex items-center gap-2">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#4DA3FF] to-[#7C6CFF] flex items-center justify-center shadow-lg shadow-blue-500/20">
+          <div className="w-24 md:w-32 h-24 md:h-32 rounded-2xl flex items-center justify-center">
             <Image 
               src="/localiza.png" 
               alt="Logo" 
-              width={48} 
-              height={48} 
-              className="w-12 h-12 object-contain"
+              width={120} 
+              height={120} 
+              className="w-full h-auto object-contain"
             />
           </div>
         </div>
       </nav>
 
-      <main className="flex-1 relative z-10 flex flex-col items-center pt-24 px-6 animate-in fade-in slide-in-from-bottom-6 duration-1000">
+      <main className="flex-1 relative z-10 flex flex-col items-center pt-8 px-6 animate-in fade-in slide-in-from-bottom-6 duration-1000">
         <section className="w-full max-w-4xl text-center space-y-8 mb-24">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#11182D] border border-[#27314F]">
             <Activity className="w-3.5 h-3.5 text-[#4DA3FF]" />
@@ -122,14 +122,14 @@ export default function SearchLandingPage() {
         </section>
       </main>
 
-      <footer className="relative z-10 w-full border-t border-[#27314F] py-12 px-6 flex flex-col md:flex-row items-center justify-between max-w-7xl mx-auto gap-6">
+      <footer className="relative z-10 w-full border-t border-[#27314F] py-8 px-6 flex flex-col md:flex-row items-center justify-between max-w-7xl mx-auto gap-6">
         <div className="flex items-center gap-2 opacity-50">
           <Image 
             src="/localiza.png" 
             alt="Logo Footer" 
-            width={48} 
-            height={48} 
-            className="w-12 h-12 object-contain"
+            width={80} 
+            height={80} 
+            className="w-20 h-auto object-contain"
           />
         </div>
         <p className="text-xs text-[#AAB4D0]/50 font-medium">
