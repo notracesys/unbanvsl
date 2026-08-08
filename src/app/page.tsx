@@ -1,9 +1,8 @@
-
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, ChevronRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
@@ -77,7 +76,6 @@ export default function PresentationPage() {
   const [dayOfWeek, setDayOfWeek] = useState<string | null>(null);
 
   useEffect(() => {
-    // Determine the day of the week only on the client side to avoid hydration mismatches
     const days = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'];
     setDayOfWeek(days[new Date().getDay()]);
 
@@ -151,9 +149,6 @@ export default function PresentationPage() {
           <div className="flex flex-col items-center gap-2">
             <p className="text-[11px] font-bold text-[#AAB4D0] tracking-tight">
               <span className="text-[#7C6CFF]">+{counter.toLocaleString('pt-BR')}</span> perfis analisados hoje {dayOfWeek ? `(${dayOfWeek})` : ''}
-            </p>
-            <p className="text-xs text-[#AAB4D0]/40 font-medium flex items-center gap-2">
-              Verificação Privada <ChevronRight className="w-3 h-3" /> Inteligência de Dados
             </p>
           </div>
         </div>
