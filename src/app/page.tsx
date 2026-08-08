@@ -1,6 +1,7 @@
+
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowRight, ShieldAlert, Network, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -21,9 +22,16 @@ function TechBackground() {
   );
 }
 
-function RevealText({ text, delay = 0, onComplete }: { text: string; delay?: number; onComplete?: () => void }) {
+const RevealText = React.memo(({ text, delay = 0, onComplete }: { text: string; delay?: number; onComplete?: () => void }) => {
   const [visibleText, setVisibleText] = useState('');
   const [isStarted, setIsStarted] = useState(false);
+  const [isFinished, setIsFinished] = useState(false);
+  const onCompleteRef = useRef(onComplete);
+
+  // Mantém o callback atualizado sem disparar o efeito
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
 
   useEffect(() => {
     const startTimeout = setTimeout(() => setIsStarted(true), delay);
@@ -31,7 +39,7 @@ function RevealText({ text, delay = 0, onComplete }: { text: string; delay?: num
   }, [delay]);
 
   useEffect(() => {
-    if (!isStarted) return;
+    if (!isStarted || isFinished) return;
 
     let index = 0;
     const interval = setInterval(() => {
@@ -40,28 +48,39 @@ function RevealText({ text, delay = 0, onComplete }: { text: string; delay?: num
         index++;
       } else {
         clearInterval(interval);
-        if (onComplete) {
-          setTimeout(onComplete, 500);
+        setIsFinished(true);
+        if (onCompleteRef.current) {
+          setTimeout(() => onCompleteRef.current?.(), 500);
         }
       }
     }, 35);
     return () => clearInterval(interval);
-  }, [text, isStarted, onComplete]);
+  }, [text, isStarted, isFinished]);
 
   return (
     <span className="inline-block transition-all duration-300">
       {visibleText}
-      {isStarted && visibleText.length < text.length && (
+      {!isFinished && isStarted && (
         <span className="inline-block w-1.5 h-6 bg-[#4DA3FF] ml-1 animate-pulse align-middle" />
       )}
     </span>
   );
-}
+});
+
+RevealText.displayName = 'RevealText';
 
 export default function PresentationPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [showButton, setShowButton] = useState(false);
+
+  const handleStep1Complete = useCallback(() => {
+    setStep(2);
+  }, []);
+
+  const handleStep2Complete = useCallback(() => {
+    setShowButton(true);
+  }, []);
 
   const handleProceed = () => {
     router.push('/busca');
@@ -85,7 +104,7 @@ export default function PresentationPage() {
           <h1 className="text-2xl md:text-3xl lg:text-4xl font-space font-bold leading-tight tracking-tight text-[#F5F7FB]">
             <RevealText 
               text="Você sabia que seus dados podem estar visíveis para todo mundo enquanto você está navegando nas redes sociais?" 
-              onComplete={() => setStep(2)}
+              onComplete={handleStep1Complete}
             />
           </h1>
           
@@ -93,8 +112,8 @@ export default function PresentationPage() {
             <p className="mt-8 text-xl md:text-2xl font-space font-bold text-[#4DA3FF] italic">
               <RevealText 
                 text="Isso é o que acontece com 80% dos brasileiros e eles nem sabem disso." 
-                delay={500}
-                onComplete={() => setShowButton(true)}
+                delay={300}
+                onComplete={handleStep2Complete}
               />
             </p>
           )}
