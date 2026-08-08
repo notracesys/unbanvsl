@@ -149,7 +149,7 @@ export default function PresentationPage() {
 
           <div className="flex flex-col items-center gap-2">
             <p className="text-[11px] font-bold text-[#AAB4D0] tracking-tight">
-              <span className="text-[#7C6CFF]">+{counter.toLocaleString('pt-BR')}</span> perfis analisados hoje {dayOfWeek ? `(${dayOfWeek})` : ''}
+              <span className="text-[#4DA3FF]">+{counter.toLocaleString('pt-BR')}</span> perfis analisados hoje {dayOfWeek ? `(${dayOfWeek})` : ''}
             </p>
           </div>
         </div>
