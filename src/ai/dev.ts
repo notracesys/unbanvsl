@@ -3,3 +3,4 @@ config();
 
 import '@/ai/flows/automatic-folder-summary-flow.ts';
 import '@/ai/flows/smart-tutor-recommendations-flow.ts';
+import '@/ai/flows/perform-scan-flow.ts';

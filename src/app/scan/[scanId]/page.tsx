@@ -3,104 +3,81 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { 
-  Loader2, 
-  CheckCircle2, 
-  ShieldCheck, 
-  BarChart3, 
   Search, 
-  Database,
+  MoreVertical, 
+  Image as ImageIcon, 
+  PlaySquare, 
+  ShoppingBag, 
+  Newspaper, 
+  Settings,
+  Grid,
+  Lock,
+  ChevronDown,
+  AlertTriangle,
+  Loader2,
+  CheckCircle2,
   ArrowRight,
-  Unlock,
-  Activity,
-  Network,
-  Globe,
-  MapPin,
-  Zap
+  ShieldAlert
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
+import { performScan, type PerformScanOutput } from '@/ai/flows/perform-scan-flow';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
-type ScanStatus = 'processing' | 'result';
-
-export default function ScanResultPage() {
+export default function GoogleScanResultPage() {
   const searchParams = useSearchParams();
-  const query = searchParams.get('q') || '';
-  const [status, setStatus] = useState<ScanStatus>('processing');
+  const query = searchParams.get('q') || searchParams.get('identifier') || '';
+  
+  const [loading, setLoading] = useState(true);
+  const [scanData, setScanData] = useState<PerformScanOutput | null>(null);
   const [progress, setProgress] = useState(0);
-  const [stepIndex, setStepIndex] = useState(0);
-
-  const steps = [
-    "Interpretando consulta",
-    "Pesquisando fontes públicas",
-    "Validando ocorrências",
-    "Correlacionando resultados",
-    "Eliminando duplicatas",
-    "Gerando análise final"
-  ];
 
   useEffect(() => {
-    if (status === 'processing') {
+    const runScan = async () => {
+      // Simulação de progresso para tensão
       const interval = setInterval(() => {
-        setProgress(prev => {
-          if (prev >= 100) {
-            clearInterval(interval);
-            setTimeout(() => setStatus('result'), 500);
-            return 100;
-          }
-          return prev + 1.5;
-        });
+        setProgress(prev => (prev < 90 ? prev + 1 : prev));
       }, 50);
 
-      const stepInterval = setInterval(() => {
-        setStepIndex(prev => (prev < steps.length - 1 ? prev + 1 : prev));
-      }, 1000);
+      try {
+        const result = await performScan({ query });
+        setScanData(result);
+        setProgress(100);
+        setTimeout(() => setLoading(false), 800);
+      } catch (error) {
+        console.error(error);
+        setLoading(false);
+      }
+      return () => clearInterval(interval);
+    };
+    runScan();
+  }, [query]);
 
-      return () => {
-        clearInterval(interval);
-        clearInterval(stepInterval);
-      };
-    }
-  }, [status]);
-
-  if (status === 'processing') {
+  if (loading) {
     return (
-      <div className="min-h-screen bg-[#0B1020] flex flex-col items-center justify-center p-6 relative overflow-hidden">
-        <div className="absolute inset-0 atlas-grid opacity-10" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#4DA3FF]/5 blur-[100px] rounded-full" />
-
-        <div className="w-full max-w-lg space-y-12 relative z-10">
-          <div className="text-center space-y-4">
-            <h1 className="text-3xl font-space font-bold text-[#F5F7FB]">Processando sua consulta</h1>
-            <p className="text-[#AAB4D0]">Analisando fontes públicas e correlacionando ocorrências para {query}.</p>
+      <div className="min-h-screen bg-[#0B1020] flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-full max-w-md space-y-8 animate-in fade-in zoom-in duration-500">
+          <div className="relative w-48 h-12 mx-auto mb-8">
+            <Image src="/localiza.png" alt="Localiza Logo" fill className="object-contain" />
           </div>
-
-          <div className="space-y-6">
-            <div className="space-y-2">
-              <div className="flex justify-between text-xs font-mono font-bold text-[#AAB4D0] uppercase tracking-widest">
-                <span>{steps[stepIndex]}</span>
-                <span>{Math.round(progress)}%</span>
-              </div>
-              <Progress value={progress} className="h-2 bg-[#161F38]" />
+          <div className="space-y-4">
+            <h2 className="text-2xl font-bold text-white tracking-tight">Rastreando pegada digital...</h2>
+            <p className="text-[#AAB4D0] text-sm">Consultando fontes governamentais, redes sociais e bancos de dados públicos.</p>
+          </div>
+          <div className="relative h-1 w-full bg-[#161F38] rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-[#4DA3FF] transition-all duration-300 shadow-[0_0_15px_rgba(77,163,255,0.5)]"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4 text-[10px] font-bold text-[#AAB4D0]/40 uppercase tracking-widest">
+            <div className="flex items-center gap-2 justify-center">
+              <div className={cn("w-1.5 h-1.5 rounded-full", progress > 30 ? "bg-green-500" : "bg-[#27314F]")} />
+              Protocolos de Rede
             </div>
-
-            <div className="grid grid-cols-1 gap-3">
-              {steps.map((step, i) => (
-                <div 
-                  key={i} 
-                  className={cn(
-                    "flex items-center gap-3 p-4 rounded-xl border transition-all",
-                    i < stepIndex ? "bg-[#161F38]/50 border-green-500/20 text-[#F5F7FB]" :
-                    i === stepIndex ? "bg-[#161F38] border-[#4DA3FF]/30 text-[#4DA3FF] shadow-lg shadow-blue-500/5" :
-                    "opacity-30 border-transparent text-[#AAB4D0]"
-                  )}
-                >
-                  {i < stepIndex ? <CheckCircle2 className="w-4 h-4 text-green-500" /> :
-                   i === stepIndex ? <Loader2 className="w-4 h-4 animate-spin" /> :
-                   <div className="w-4 h-4 rounded-full border border-current opacity-20" />}
-                  <span className="text-sm font-medium">{step}</span>
-                </div>
-              ))}
+            <div className="flex items-center gap-2 justify-center">
+              <div className={cn("w-1.5 h-1.5 rounded-full", progress > 60 ? "bg-green-500" : "bg-[#27314F]")} />
+              Deep Web Scraper
             </div>
           </div>
         </div>
@@ -109,130 +86,220 @@ export default function ScanResultPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0B1020] text-[#F5F7FB] p-6 lg:p-12 relative">
-      <div className="absolute inset-0 atlas-grid opacity-10 pointer-events-none" />
-      
-      <div className="max-w-6xl mx-auto space-y-12 relative z-10">
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-[#27314F] pb-12">
-          <div className="space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-500/10 border border-green-500/20 rounded-full">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <span className="text-[10px] font-bold text-green-500 uppercase tracking-widest">Análise Concluída</span>
-            </div>
-            <h1 className="text-4xl lg:text-5xl font-space font-bold tracking-tight">Relatório de Inteligência</h1>
-            <p className="text-[#AAB4D0]">Ocorrências públicas localizadas para: <span className="text-[#F5F7FB] font-semibold">{query}</span></p>
+    <div className="min-h-screen bg-[#171717] text-[#e8eaed] font-sans selection:bg-[#4DA3FF]/30">
+      {/* Header Estilo Google */}
+      <header className="sticky top-0 z-50 bg-[#171717] border-b border-[#3c4043] md:px-8 py-4">
+        <div className="flex flex-col md:flex-row items-center gap-4 md:gap-8">
+          <div className="flex items-center w-full md:w-auto px-4 md:px-0">
+             <div className="relative w-28 h-8 cursor-pointer" onClick={() => window.location.href = '/'}>
+                <Image src="/localiza.png" alt="Localiza Logo" fill className="object-contain" />
+             </div>
+             <div className="md:hidden ml-auto flex gap-4">
+                <Grid className="w-5 h-5 text-[#bdc1c6]" />
+                <div className="w-8 h-8 rounded-full bg-[#4DA3FF] flex items-center justify-center text-[#171717] font-bold text-xs">U</div>
+             </div>
           </div>
-          <div className="flex gap-4">
-            <div className="glass-morphism px-6 py-4 rounded-2xl border-none">
-              <p className="text-[10px] font-bold text-[#AAB4D0] uppercase tracking-widest mb-1">Score de Exposição</p>
-              <p className="text-3xl font-space font-bold text-[#4DA3FF]">64<span className="text-sm opacity-50">/100</span></p>
-            </div>
-          </div>
-        </header>
 
-        <section className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-          {[
-            { label: 'Ocorrências', value: '14', icon: Search },
-            { label: 'Fontes Analisadas', value: '2.4k', icon: Database },
-            { label: 'Confiança', value: 'Alta', icon: ShieldCheck },
-            { label: 'Status', value: 'Público', icon: Activity }
-          ].map((item, i) => (
-            <div key={i} className="glass-morphism p-6 rounded-2xl space-y-3">
-              <item.icon className="w-5 h-5 text-[#4DA3FF]" />
-              <div>
-                <p className="text-[10px] font-bold text-[#AAB4D0] uppercase tracking-widest">{item.label}</p>
-                <p className="text-2xl font-space font-bold">{item.value}</p>
+          <div className="w-full max-w-[692px] px-4 md:px-0">
+            <div className="group relative flex items-center w-full h-11 bg-[#303134] hover:bg-[#3c4043] border border-transparent focus-within:bg-[#303134] focus-within:shadow-[0_1px_6px_rgba(32,33,36,0.28)] rounded-full transition-all">
+              <input 
+                type="text" 
+                defaultValue={query} 
+                className="w-full bg-transparent pl-5 pr-12 text-sm focus:outline-none"
+              />
+              <div className="absolute right-4 flex items-center gap-3">
+                <Search className="w-5 h-5 text-[#4DA3FF]" />
               </div>
+            </div>
+          </div>
+
+          <div className="hidden md:flex items-center gap-6 ml-auto">
+            <Settings className="w-5 h-5 text-[#bdc1c6]" />
+            <Grid className="w-5 h-5 text-[#bdc1c6]" />
+            <div className="w-8 h-8 rounded-full bg-[#4DA3FF] flex items-center justify-center text-[#171717] font-bold text-sm shadow-lg">U</div>
+          </div>
+        </div>
+
+        {/* Tabs Estilo Google */}
+        <div className="flex items-center gap-4 md:ml-[164px] mt-4 px-4 md:px-0 overflow-x-auto no-scrollbar text-sm text-[#bdc1c6]">
+          <div className="flex items-center gap-1 pb-3 border-b-[3px] border-[#4DA3FF] text-[#4DA3FF] font-medium whitespace-nowrap">
+            <Search className="w-4 h-4" /> Todas
+          </div>
+          <div className="flex items-center gap-1 pb-3 hover:text-white cursor-pointer whitespace-nowrap">
+            <ImageIcon className="w-4 h-4" /> Imagens
+          </div>
+          <div className="flex items-center gap-1 pb-3 hover:text-white cursor-pointer whitespace-nowrap">
+            <PlaySquare className="w-4 h-4" /> Vídeos
+          </div>
+          <div className="flex items-center gap-1 pb-3 hover:text-white cursor-pointer whitespace-nowrap">
+            <ShoppingBag className="w-4 h-4" /> Shopping
+          </div>
+          <div className="flex items-center gap-1 pb-3 hover:text-white cursor-pointer whitespace-nowrap">
+            <Newspaper className="w-4 h-4" /> Notícias
+          </div>
+          <div className="flex items-center gap-1 pb-3 hover:text-white cursor-pointer whitespace-nowrap">
+            <MoreVertical className="w-4 h-4" /> Mais
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-[1200px] mx-auto px-4 md:pl-[164px] py-4 space-y-8 pb-32">
+        <p className="text-sm text-[#969ba1]">
+          Aproximadamente {scanData?.findingsCount} resultados encontrados (0,48 segundos)
+        </p>
+
+        {/* AI Overview Section */}
+        <div className="bg-[#1e1f24] border border-[#3c4043] rounded-[24px] p-6 space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+          <div className="flex items-center gap-2 text-[#4DA3FF]">
+            <div className="w-5 h-5 bg-[#4DA3FF] rounded-full flex items-center justify-center">
+               <ShieldAlert className="w-3 h-3 text-[#171717]" />
+            </div>
+            <span className="text-sm font-bold uppercase tracking-widest">AI Overview // Localiza.AI</span>
+          </div>
+          <div className="space-y-4">
+            <h3 className="text-xl font-medium leading-relaxed">
+              Resumo da exposição detectada para <span className="text-[#4DA3FF]">{query}</span>:
+            </h3>
+            <p className="text-[#e8eaed] leading-relaxed text-[16px]">
+              {scanData?.aiOverview}
+            </p>
+            <div className="flex items-center gap-2 text-[#9aa0a6] text-xs pt-2">
+              <CheckCircle2 className="w-3.5 h-3.5 text-green-500" /> Fontes verificadas em tempo real
+              <span className="mx-2">•</span>
+              <span className="cursor-pointer hover:underline flex items-center gap-1">Show more <ChevronDown className="w-3 h-3" /></span>
+            </div>
+          </div>
+        </div>
+
+        {/* Imagens Simuladas */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-medium">Imagens</h2>
+          <div className="flex gap-3 overflow-x-auto no-scrollbar">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="min-w-[160px] md:min-w-[200px] aspect-square bg-[#303134] rounded-xl overflow-hidden relative group cursor-pointer border border-[#3c4043]">
+                <img 
+                  src={`https://picsum.photos/seed/${query}-${i}/400/400`} 
+                  alt={`Result ${i}`} 
+                  className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                />
+                <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
+                  <p className="text-[10px] text-white/60 truncate">{query} - Fonte {i}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <Button variant="outline" className="rounded-full border-[#3c4043] text-sm h-9 px-6 bg-[#303134] hover:bg-[#3c4043] text-[#e8eaed]">
+            Ver mais imagens
+          </Button>
+        </div>
+
+        {/* Resultados Principais */}
+        <div className="space-y-8 max-w-[652px]">
+          {scanData?.results.map((result, index) => (
+            <div key={index} className="group space-y-1 animate-in fade-in slide-in-from-bottom-2 duration-700" style={{ animationDelay: `${index * 100}ms` }}>
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-full bg-[#303134] flex items-center justify-center border border-[#3c4043]">
+                  <GlobeIcon className="w-4 h-4 text-[#bdc1c6]" />
+                </div>
+                <div>
+                  <div className="text-[12px] text-[#bdc1c6] leading-tight flex items-center gap-1">
+                    {result.source}
+                    <ChevronDown className="w-3 h-3" />
+                  </div>
+                  <div className="text-[12px] text-[#bdc1c6] leading-tight truncate max-w-[200px] md:max-w-none">
+                    {result.url}
+                  </div>
+                </div>
+                <MoreVertical className="w-4 h-4 text-[#bdc1c6] ml-auto opacity-0 group-hover:opacity-100 cursor-pointer" />
+              </div>
+              <h3 className={cn(
+                "text-xl cursor-pointer hover:underline transition-colors",
+                result.isSensitive ? "text-[#ff6b6b] font-bold" : "text-[#8ab4f8]"
+              )}>
+                {result.isSensitive && <ShieldAlert className="w-4 h-4 inline mr-2 align-text-bottom" />}
+                {result.title}
+              </h3>
+              <p className="text-sm text-[#bdc1c6] leading-relaxed line-clamp-2">
+                {result.snippet}
+              </p>
+              {result.isSensitive && (
+                <div className="mt-2 inline-flex items-center gap-2 px-3 py-1 bg-[#ff6b6b]/10 border border-[#ff6b6b]/20 rounded-lg text-[10px] font-bold text-[#ff6b6b] uppercase tracking-wider">
+                  <AlertTriangle className="w-3 h-3" /> Dado Sensível Detectado
+                </div>
+              )}
             </div>
           ))}
-        </section>
 
-        <section className="grid lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-6">
-            <h2 className="text-xl font-space font-bold flex items-center gap-2">
-              <Network className="w-5 h-5 text-[#4DA3FF]" />
-              Resultados de Verificação
-            </h2>
+          {/* Call to Action Final */}
+          <div className="mt-16 p-8 bg-gradient-to-br from-[#1e1f24] to-[#171717] border-[2px] border-[#4DA3FF]/20 rounded-[32px] space-y-6 text-center shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#4DA3FF]/5 blur-3xl rounded-full" />
             
-            <div className="space-y-4">
-              {[
-                { type: 'Cadastro Digital', source: 'linkedin.com', risk: 'Moderado', date: 'Há 2 dias' },
-                { type: 'Registro Comercial', source: 'gov.br/receita', risk: 'Baixo', date: 'Há 5 meses' },
-                { type: 'Menção Pública', source: 'jusbrasil.com.br', risk: 'Alta', date: 'Há 1 ano' }
-              ].map((res, i) => (
-                <div key={i} className="glass-morphism p-6 rounded-2xl flex items-center justify-between group hover:border-[#4DA3FF]/20 transition-all">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-[#161F38] flex items-center justify-center text-[#AAB4D0]">
-                      <Globe className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="font-bold">{res.type}</p>
-                      <p className="text-xs text-[#AAB4D0]">{res.source} • {res.date}</p>
-                    </div>
-                  </div>
-                  <Button variant="ghost" className="text-[#4DA3FF] text-xs font-bold gap-2 hover:bg-[#4DA3FF]/10">
-                    VER <ArrowRight className="w-3 h-3" />
-                  </Button>
-                </div>
-              ))}
-              
-              <div className="p-12 border-2 border-dashed border-[#27314F] rounded-[2.5rem] flex flex-col items-center text-center space-y-6 bg-gradient-to-b from-transparent to-[#161F38]/20">
-                <div className="w-16 h-16 rounded-full bg-[#161F38] flex items-center justify-center">
-                  <Unlock className="w-8 h-8 text-[#7C6CFF]" />
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-2xl font-space font-bold text-[#F5F7FB]">Relatório Completo Localiza.AI</h3>
-                  <p className="text-sm text-[#AAB4D0] max-w-sm">Desbloqueie os detalhes de todas as 14 fontes localizadas e receba a análise estruturada completa.</p>
-                </div>
-                <div className="space-y-4 w-full max-w-xs">
-                   <div className="flex justify-between items-end pb-2">
-                      <span className="text-[10px] font-bold text-[#AAB4D0] uppercase tracking-widest">Acesso vitalício</span>
-                      <p className="text-3xl font-space font-bold text-[#F5F7FB]">R$ 19,90</p>
-                   </div>
-                   <Button className="w-full h-14 bg-[#4DA3FF] hover:bg-[#3d8be0] text-[#0B1020] font-bold rounded-xl shadow-lg shadow-blue-500/10">
-                     DESBLOQUEAR RELATÓRIO
-                   </Button>
-                </div>
+            <div className="w-16 h-16 rounded-2xl bg-[#4DA3FF]/10 flex items-center justify-center mx-auto border border-[#4DA3FF]/20">
+              <Lock className="w-8 h-8 text-[#4DA3FF]" />
+            </div>
+            
+            <div className="space-y-2">
+              <h3 className="text-2xl font-bold text-white">Relatório de Inteligência Completo</h3>
+              <p className="text-[#969ba1] text-sm max-w-sm mx-auto">
+                Desbloqueie os detalhes de todas as fontes sensíveis e receba o guia de remoção de dados.
+              </p>
+            </div>
+
+            <div className="pt-4 space-y-4">
+              <div className="flex items-center justify-center gap-3">
+                <span className="text-xs text-[#969ba1] line-through">R$ 57,00</span>
+                <span className="text-3xl font-bold text-white">R$ 19,90</span>
               </div>
+              <Button className="w-full h-14 bg-[#4DA3FF] hover:bg-[#3d8be0] text-[#171717] font-bold text-md rounded-2xl shadow-xl shadow-blue-500/10 group">
+                DESBLOQUEAR TUDO AGORA <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
+              </Button>
+            </div>
+            
+            <div className="flex items-center justify-center gap-4 text-[10px] font-bold text-[#969ba1]/50 uppercase tracking-widest pt-4">
+              <span>Acesso Vitalício</span>
+              <span>•</span>
+              <span>Download PDF</span>
+              <span>•</span>
+              <span>100% Seguro</span>
             </div>
           </div>
+        </div>
+      </main>
 
-          <aside className="space-y-6">
-            <h2 className="text-xl font-space font-bold flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-[#4DA3FF]" />
-              Insights de Exposição
-            </h2>
-            <div className="glass-morphism p-8 rounded-[2.5rem] space-y-8">
-              <div className="space-y-4">
-                <p className="text-xs font-bold text-[#AAB4D0] uppercase tracking-widest">Distribuição por Categoria</p>
-                <div className="space-y-3">
-                  {[
-                    { label: 'Profissional', p: 40, c: 'bg-[#4DA3FF]' },
-                    { label: 'Jurídico', p: 25, c: 'bg-[#7C6CFF]' },
-                    { label: 'Social', p: 35, c: 'bg-[#61D9FF]' }
-                  ].map((cat, i) => (
-                    <div key={i} className="space-y-1">
-                      <div className="flex justify-between text-[10px] font-bold">
-                        <span className="text-[#AAB4D0]">{cat.label}</span>
-                        <span className="text-[#F5F7FB]">{cat.p}%</span>
-                      </div>
-                      <div className="h-1 w-full bg-[#161F38] rounded-full overflow-hidden">
-                        <div className={cn("h-full rounded-full transition-all duration-1000", cat.c)} style={{ width: `${cat.p}%` }} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              
-              <div className="pt-6 border-t border-[#27314F]">
-                <p className="text-sm italic text-[#AAB4D0] leading-relaxed">
-                  "O volume de dados correlacionados sugere uma presença digital estruturada, porém com pontos de exposição em registros antigos que podem ser remediados."
-                </p>
-              </div>
-            </div>
-          </aside>
-        </section>
-      </div>
+      {/* Footer Estilo Google */}
+      <footer className="bg-[#171717] border-t border-[#3c4043] px-8 py-4 text-sm text-[#969ba1]">
+        <div className="max-w-[1200px] mx-auto md:pl-[164px] flex flex-wrap gap-x-8 gap-y-4">
+          <span className="cursor-pointer hover:underline">Ajuda</span>
+          <span className="cursor-pointer hover:underline">Privacidade</span>
+          <span className="cursor-pointer hover:underline">Termos</span>
+          <span className="ml-auto flex items-center gap-1">
+            <div className="w-2 h-2 bg-green-500 rounded-full" /> Localiza.AI Intelligence Server 04
+          </span>
+        </div>
+      </footer>
+
+      <style jsx global>{`
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
     </div>
+  );
+}
+
+function GlobeIcon({ className }: { className?: string }) {
+  return (
+    <svg 
+      viewBox="0 0 24 24" 
+      fill="none" 
+      stroke="currentColor" 
+      strokeWidth="2" 
+      strokeLinecap="round" 
+      strokeLinejoin="round" 
+      className={className}
+    >
+      <circle cx="12" cy="12" r="10" />
+      <line x1="2" y1="12" x2="22" y2="12" />
+      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+    </svg>
   );
 }
