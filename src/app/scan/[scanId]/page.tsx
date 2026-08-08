@@ -5,7 +5,6 @@ import { useSearchParams } from 'next/navigation';
 import { 
   Loader2, 
   CheckCircle2, 
-  AlertCircle, 
   ShieldCheck, 
   BarChart3, 
   Search, 
@@ -13,10 +12,14 @@ import {
   ArrowRight,
   Unlock,
   Activity,
-  Network
+  Network,
+  Globe,
+  MapPin,
+  Zap
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { cn } from '@/lib/utils';
 
 type ScanStatus = 'processing' | 'result';
 
@@ -68,7 +71,7 @@ export default function ScanResultPage() {
 
         <div className="w-full max-w-lg space-y-12 relative z-10">
           <div className="text-center space-y-4">
-            <h1 className="text-3xl font-space font-bold">Processando sua consulta</h1>
+            <h1 className="text-3xl font-space font-bold text-[#F5F7FB]">Processando sua consulta</h1>
             <p className="text-[#AAB4D0]">Analisando fontes públicas e correlacionando ocorrências para {query}.</p>
           </div>
 
@@ -155,7 +158,7 @@ export default function ScanResultPage() {
               {[
                 { type: 'Cadastro Digital', source: 'linkedin.com', risk: 'Moderado', date: 'Há 2 dias' },
                 { type: 'Registro Comercial', source: 'gov.br/receita', risk: 'Baixo', date: 'Há 5 meses' },
-                { type: 'Mencao Pública', source: 'jusbrasil.com.br', risk: 'Alta', date: 'Há 1 ano' }
+                { type: 'Menção Pública', source: 'jusbrasil.com.br', risk: 'Alta', date: 'Há 1 ano' }
               ].map((res, i) => (
                 <div key={i} className="glass-morphism p-6 rounded-2xl flex items-center justify-between group hover:border-[#4DA3FF]/20 transition-all">
                   <div className="flex items-center gap-4">
@@ -167,7 +170,7 @@ export default function ScanResultPage() {
                       <p className="text-xs text-[#AAB4D0]">{res.source} • {res.date}</p>
                     </div>
                   </div>
-                  <Button variant="ghost" className="text-[#4DA3FF] text-xs font-bold gap-2">
+                  <Button variant="ghost" className="text-[#4DA3FF] text-xs font-bold gap-2 hover:bg-[#4DA3FF]/10">
                     VER <ArrowRight className="w-3 h-3" />
                   </Button>
                 </div>
@@ -178,13 +181,13 @@ export default function ScanResultPage() {
                   <Unlock className="w-8 h-8 text-[#7C6CFF]" />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-2xl font-space font-bold">Relatório Completo Atlas.AI</h3>
+                  <h3 className="text-2xl font-space font-bold text-[#F5F7FB]">Relatório Completo Atlas.AI</h3>
                   <p className="text-sm text-[#AAB4D0] max-w-sm">Desbloqueie os detalhes de todas as 14 fontes localizadas e receba a análise estruturada completa.</p>
                 </div>
                 <div className="space-y-4 w-full max-w-xs">
                    <div className="flex justify-between items-end pb-2">
                       <span className="text-[10px] font-bold text-[#AAB4D0] uppercase tracking-widest">Acesso vitalício</span>
-                      <p className="text-3xl font-space font-bold">R$ 19,90</p>
+                      <p className="text-3xl font-space font-bold text-[#F5F7FB]">R$ 19,90</p>
                    </div>
                    <Button className="w-full h-14 bg-[#4DA3FF] hover:bg-[#3d8be0] text-[#0B1020] font-bold rounded-xl shadow-lg shadow-blue-500/10">
                      DESBLOQUEAR RELATÓRIO
@@ -210,11 +213,11 @@ export default function ScanResultPage() {
                   ].map((cat, i) => (
                     <div key={i} className="space-y-1">
                       <div className="flex justify-between text-[10px] font-bold">
-                        <span>{cat.label}</span>
-                        <span>{cat.p}%</span>
+                        <span className="text-[#AAB4D0]">{cat.label}</span>
+                        <span className="text-[#F5F7FB]">{cat.p}%</span>
                       </div>
                       <div className="h-1 w-full bg-[#161F38] rounded-full overflow-hidden">
-                        <div className={cn("h-full rounded-full", cat.c)} style={{ width: `${cat.p}%` }} />
+                        <div className={cn("h-full rounded-full transition-all duration-1000", cat.c)} style={{ width: `${cat.p}%` }} />
                       </div>
                     </div>
                   ))}
@@ -232,8 +235,4 @@ export default function ScanResultPage() {
       </div>
     </div>
   );
-}
-
-function cn(...inputs: any[]) {
-  return inputs.filter(Boolean).join(' ');
 }
