@@ -52,13 +52,13 @@ export default function SearchLandingPage() {
 
       <nav className="relative z-10 w-full px-6 py-8 flex items-center justify-between max-w-7xl mx-auto">
         <div className="flex items-center gap-2">
-          <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-[#4DA3FF] to-[#7C6CFF] flex items-center justify-center shadow-lg shadow-blue-500/20">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#4DA3FF] to-[#7C6CFF] flex items-center justify-center shadow-lg shadow-blue-500/20">
             <Image 
               src="/localiza.png" 
               alt="Logo" 
-              width={32} 
-              height={32} 
-              className="w-8 h-8 object-contain"
+              width={48} 
+              height={48} 
+              className="w-12 h-12 object-contain"
             />
           </div>
         </div>
@@ -127,9 +127,9 @@ export default function SearchLandingPage() {
           <Image 
             src="/localiza.png" 
             alt="Logo Footer" 
-            width={32} 
-            height={32} 
-            className="w-8 h-8 object-contain"
+            width={48} 
+            height={48} 
+            className="w-12 h-12 object-contain"
           />
         </div>
         <p className="text-xs text-[#AAB4D0]/50 font-medium">
