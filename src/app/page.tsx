@@ -77,6 +77,7 @@ export default function PresentationPage() {
 
   useEffect(() => {
     const days = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'];
+    // Definimos o dia da semana apenas no cliente para evitar erro de hidratação
     setDayOfWeekText(`(${days[new Date().getDay()]})`);
 
     const interval = setInterval(() => {
