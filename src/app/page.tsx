@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
@@ -73,12 +72,12 @@ export default function PresentationPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [showButton, setShowButton] = useState(false);
-  const [counter, setCounter] = useState(10432);
-  const [dayOfWeek, setDayOfWeek] = useState<string | null>(null);
+  const [counter, setCounter] = useState(10000);
+  const [dayOfWeekText, setDayOfWeekText] = useState('');
 
   useEffect(() => {
     const days = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'];
-    setDayOfWeek(days[new Date().getDay()]);
+    setDayOfWeekText(`(${days[new Date().getDay()]})`);
 
     const interval = setInterval(() => {
       setCounter(prev => prev + Math.floor(Math.random() * 3) + 1);
@@ -149,7 +148,7 @@ export default function PresentationPage() {
 
           <div className="flex flex-col items-center gap-2">
             <p className="text-[11px] font-bold text-[#AAB4D0] tracking-tight">
-              <span className="text-[#4DA3FF]">+{counter.toLocaleString('pt-BR')}</span> perfis analisados hoje {dayOfWeek ? `(${dayOfWeek})` : ''}
+              <span className="text-[#4DA3FF]">+{counter.toLocaleString('pt-BR')}</span> perfis analisados hoje {dayOfWeekText}
             </p>
           </div>
         </div>

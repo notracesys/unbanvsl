@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState } from 'react';
@@ -173,10 +172,6 @@ export default function ScanWizard() {
           </div>
         </div>
       </main>
-
-      <footer className="p-8 text-center text-[10px] font-bold text-[#AAB4D0]/30 uppercase tracking-[0.5em] relative z-10">
-        Localiza.AI // Secure Intelligence Protocol
-      </footer>
     </div>
   );
 }
