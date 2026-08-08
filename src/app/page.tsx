@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
@@ -72,7 +73,7 @@ export default function PresentationPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [showButton, setShowButton] = useState(false);
-  const [counter, setCounter] = useState(94538);
+  const [counter, setCounter] = useState(10432);
   const [dayOfWeek, setDayOfWeek] = useState<string | null>(null);
 
   useEffect(() => {
