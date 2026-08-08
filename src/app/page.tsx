@@ -74,13 +74,13 @@ export default function PresentationPage() {
   const [step, setStep] = useState(1);
   const [showButton, setShowButton] = useState(false);
   const [counter, setCounter] = useState(94538);
-
-  const getDayOfWeek = () => {
-    const days = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'];
-    return days[new Date().getDay()];
-  };
+  const [dayOfWeek, setDayOfWeek] = useState<string | null>(null);
 
   useEffect(() => {
+    // Determine the day of the week only on the client side to avoid hydration mismatches
+    const days = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'];
+    setDayOfWeek(days[new Date().getDay()]);
+
     const interval = setInterval(() => {
       setCounter(prev => prev + Math.floor(Math.random() * 3) + 1);
     }, 3000);
@@ -150,7 +150,7 @@ export default function PresentationPage() {
 
           <div className="flex flex-col items-center gap-2">
             <p className="text-[11px] font-bold text-[#AAB4D0] tracking-tight">
-              <span className="text-[#7C6CFF]">+{counter.toLocaleString('pt-BR')}</span> perfis analisados hoje ({getDayOfWeek()})
+              <span className="text-[#7C6CFF]">+{counter.toLocaleString('pt-BR')}</span> perfis analisados hoje {dayOfWeek ? `(${dayOfWeek})` : ''}
             </p>
             <p className="text-xs text-[#AAB4D0]/40 font-medium flex items-center gap-2">
               Verificação Privada <ChevronRight className="w-3 h-3" /> Inteligência de Dados
