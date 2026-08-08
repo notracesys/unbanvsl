@@ -89,19 +89,20 @@ export default function PresentationPage() {
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#0B1020] text-[#F5F7FB] p-6 relative overflow-hidden font-sans">
       <TechBackground />
 
-      <header className="absolute top-0 left-0 w-full p-8 flex justify-center z-10">
-        <div className="flex items-center gap-2">
+      <header className="absolute top-0 left-0 w-full p-4 flex justify-center z-10">
+        <div className="flex items-center">
           <Image 
             src="/localiza.png" 
             alt="Localiza.AI Logo" 
             width={220} 
             height={220} 
             className="w-48 md:w-64 h-auto object-contain"
+            priority
           />
         </div>
       </header>
 
-      <main className="relative z-10 w-full max-w-2xl flex flex-col items-center space-y-12">
+      <main className="relative z-10 w-full max-w-2xl flex flex-col items-center space-y-12 mt-12">
         <div className="w-full min-h-[160px] flex flex-col items-center text-center">
           <h1 className="text-2xl md:text-3xl lg:text-4xl font-space font-bold leading-tight tracking-tight text-[#F5F7FB]">
             <RevealText 
@@ -122,14 +123,14 @@ export default function PresentationPage() {
         </div>
 
         <div className={cn(
-          "transition-all duration-1000 transform flex flex-col items-center space-y-6",
+          "transition-all duration-1000 transform flex flex-col items-center space-y-6 w-full px-4",
           showButton ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8 pointer-events-none"
         )}>
           <Button 
             onClick={handleProceed}
-            className="h-16 px-12 rounded-2xl bg-[#4DA3FF] hover:bg-[#3d8be0] text-[#0B1020] font-bold text-lg uppercase tracking-widest shadow-2xl shadow-blue-500/20 group"
+            className="w-full h-16 md:w-auto md:px-12 rounded-2xl bg-[#4DA3FF] hover:bg-[#3d8be0] text-[#0B1020] font-bold text-lg uppercase tracking-widest shadow-2xl shadow-blue-500/20 group"
           >
-            Continuar para Localiza.AI
+            Prosseguir
             <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
           </Button>
 
@@ -139,9 +140,9 @@ export default function PresentationPage() {
         </div>
       </main>
 
-      <footer className="absolute bottom-0 w-full p-8 text-center">
+      <footer className="absolute bottom-0 w-full p-6 text-center">
         <p className="text-[10px] font-mono font-bold text-[#AAB4D0]/30 uppercase tracking-[0.5em]">
-          Localiza.AI Intelligence Protocol
+          Localiza.AI // Secure Intelligence Protocol
         </p>
       </footer>
     </div>
