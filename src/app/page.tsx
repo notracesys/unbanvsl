@@ -3,9 +3,10 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, ShieldAlert, Network, ChevronRight } from 'lucide-react';
+import { ArrowRight, ShieldAlert, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 
 function TechBackground() {
   return (
@@ -28,7 +29,6 @@ const RevealText = React.memo(({ text, delay = 0, onComplete }: { text: string; 
   const [isFinished, setIsFinished] = useState(false);
   const onCompleteRef = useRef(onComplete);
 
-  // Mantém o callback atualizado sem disparar o efeito
   useEffect(() => {
     onCompleteRef.current = onComplete;
   }, [onComplete]);
@@ -91,8 +91,14 @@ export default function PresentationPage() {
       <TechBackground />
 
       <header className="absolute top-0 left-0 w-full p-8 flex justify-center z-10">
-        <div className="flex items-center gap-2 opacity-50">
-          <Network className="w-5 h-5 text-[#4DA3FF]" />
+        <div className="flex items-center gap-2 opacity-80">
+          <Image 
+            src="/localiza.png" 
+            alt="Localiza.AI Logo" 
+            width={32} 
+            height={32} 
+            className="w-8 h-8 object-contain"
+          />
           <span className="text-lg font-space font-bold tracking-tighter">
             LOCALIZA<span className="text-[#4DA3FF]">.AI</span>
           </span>
