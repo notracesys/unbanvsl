@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
@@ -72,6 +73,19 @@ export default function PresentationPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [showButton, setShowButton] = useState(false);
+  const [counter, setCounter] = useState(94538);
+
+  const getDayOfWeek = () => {
+    const days = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'];
+    return days[new Date().getDay()];
+  };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCounter(prev => prev + Math.floor(Math.random() * 3) + 1);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleStep1Complete = useCallback(() => {
     setStep(2);
@@ -134,9 +148,14 @@ export default function PresentationPage() {
             <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
           </Button>
 
-          <p className="text-sm text-[#AAB4D0] font-medium flex items-center gap-2">
-            Verificação Privada <ChevronRight className="w-3 h-3" /> Inteligência de Dados
-          </p>
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-[11px] font-bold text-[#AAB4D0] tracking-tight">
+              <span className="text-[#7C6CFF]">+{counter.toLocaleString('pt-BR')}</span> perfis analisados hoje ({getDayOfWeek()})
+            </p>
+            <p className="text-xs text-[#AAB4D0]/40 font-medium flex items-center gap-2">
+              Verificação Privada <ChevronRight className="w-3 h-3" /> Inteligência de Dados
+            </p>
+          </div>
         </div>
       </main>
 
