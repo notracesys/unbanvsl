@@ -5,16 +5,11 @@ import { useSearchParams } from 'next/navigation';
 import { 
   Search, 
   MoreVertical, 
-  Image as ImageIcon, 
-  PlaySquare, 
-  ShoppingBag, 
-  Newspaper, 
   Settings,
   Grid,
   Lock,
   ChevronDown,
   AlertTriangle,
-  Loader2,
   CheckCircle2,
   ArrowRight,
   ShieldAlert
@@ -34,7 +29,6 @@ export default function GoogleScanResultPage() {
 
   useEffect(() => {
     const runScan = async () => {
-      // Simulação de progresso para tensão
       const interval = setInterval(() => {
         setProgress(prev => (prev < 90 ? prev + 1 : prev));
       }, 50);
@@ -126,16 +120,16 @@ export default function GoogleScanResultPage() {
             <Search className="w-4 h-4" /> Todas
           </div>
           <div className="flex items-center gap-1 pb-3 hover:text-white cursor-pointer whitespace-nowrap">
-            <ImageIcon className="w-4 h-4" /> Imagens
+            Texto
           </div>
           <div className="flex items-center gap-1 pb-3 hover:text-white cursor-pointer whitespace-nowrap">
-            <PlaySquare className="w-4 h-4" /> Vídeos
+            Documentos
           </div>
           <div className="flex items-center gap-1 pb-3 hover:text-white cursor-pointer whitespace-nowrap">
-            <ShoppingBag className="w-4 h-4" /> Shopping
+            Registros
           </div>
           <div className="flex items-center gap-1 pb-3 hover:text-white cursor-pointer whitespace-nowrap">
-            <Newspaper className="w-4 h-4" /> Notícias
+            Vazamentos
           </div>
           <div className="flex items-center gap-1 pb-3 hover:text-white cursor-pointer whitespace-nowrap">
             <MoreVertical className="w-4 h-4" /> Mais
@@ -160,9 +154,9 @@ export default function GoogleScanResultPage() {
             <h3 className="text-xl font-medium leading-relaxed">
               Resumo da exposição detectada para <span className="text-[#4DA3FF]">{query}</span>:
             </h3>
-            <p className="text-[#e8eaed] leading-relaxed text-[16px]">
+            <div className="text-[#e8eaed] leading-relaxed text-[16px] whitespace-pre-wrap">
               {scanData?.aiOverview}
-            </p>
+            </div>
             <div className="flex items-center gap-2 text-[#9aa0a6] text-xs pt-2">
               <CheckCircle2 className="w-3.5 h-3.5 text-green-500" /> Fontes verificadas em tempo real
               <span className="mx-2">•</span>
@@ -171,29 +165,7 @@ export default function GoogleScanResultPage() {
           </div>
         </div>
 
-        {/* Imagens Simuladas */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-medium">Imagens</h2>
-          <div className="flex gap-3 overflow-x-auto no-scrollbar">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="min-w-[160px] md:min-w-[200px] aspect-square bg-[#303134] rounded-xl overflow-hidden relative group cursor-pointer border border-[#3c4043]">
-                <img 
-                  src={`https://picsum.photos/seed/${query}-${i}/400/400`} 
-                  alt={`Result ${i}`} 
-                  className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
-                />
-                <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent">
-                  <p className="text-[10px] text-white/60 truncate">{query} - Fonte {i}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-          <Button variant="outline" className="rounded-full border-[#3c4043] text-sm h-9 px-6 bg-[#303134] hover:bg-[#3c4043] text-[#e8eaed]">
-            Ver mais imagens
-          </Button>
-        </div>
-
-        {/* Resultados Principais */}
+        {/* Resultados Principais (Apenas Texto) */}
         <div className="space-y-8 max-w-[652px]">
           {scanData?.results.map((result, index) => (
             <div key={index} className="group space-y-1 animate-in fade-in slide-in-from-bottom-2 duration-700" style={{ animationDelay: `${index * 100}ms` }}>
@@ -219,7 +191,7 @@ export default function GoogleScanResultPage() {
                 {result.isSensitive && <ShieldAlert className="w-4 h-4 inline mr-2 align-text-bottom" />}
                 {result.title}
               </h3>
-              <p className="text-sm text-[#bdc1c6] leading-relaxed line-clamp-2">
+              <p className="text-sm text-[#bdc1c6] leading-relaxed">
                 {result.snippet}
               </p>
               {result.isSensitive && (
