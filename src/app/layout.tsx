@@ -7,7 +7,7 @@ const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-space
 const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono' });
 
 export const metadata: Metadata = {
-  title: 'ATLAS.AI | Inteligência de Dados Públicos',
+  title: 'Localiza.AI | Inteligência de Dados Públicos',
   description: 'A plataforma definitiva para busca rápida, análise clara e resultados verificáveis de dados públicos.',
 };
 

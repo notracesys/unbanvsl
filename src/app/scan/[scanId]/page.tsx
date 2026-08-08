@@ -181,7 +181,7 @@ export default function ScanResultPage() {
                   <Unlock className="w-8 h-8 text-[#7C6CFF]" />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-2xl font-space font-bold text-[#F5F7FB]">Relatório Completo Atlas.AI</h3>
+                  <h3 className="text-2xl font-space font-bold text-[#F5F7FB]">Relatório Completo Localiza.AI</h3>
                   <p className="text-sm text-[#AAB4D0] max-w-sm">Desbloqueie os detalhes de todas as 14 fontes localizadas e receba a análise estruturada completa.</p>
                 </div>
                 <div className="space-y-4 w-full max-w-xs">

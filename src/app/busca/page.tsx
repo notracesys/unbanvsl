@@ -38,7 +38,7 @@ export default function SearchLandingPage() {
   return (
     <div className="min-h-screen flex flex-col bg-[#0B1020] relative text-[#F5F7FB] font-sans">
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#7C6CFF]/5 blur-[120px] rounded-full" />
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#4DA3FF]/5 blur-[120px] rounded-full" />
         <div 
           className="absolute inset-0 opacity-[0.02]" 
           style={{
@@ -54,7 +54,7 @@ export default function SearchLandingPage() {
             <Network className="w-6 h-6 text-white" />
           </div>
           <span className="text-2xl font-space font-bold tracking-tighter">
-            ATLAS<span className="text-[#4DA3FF]">.AI</span>
+            LOCALIZA<span className="text-[#4DA3FF]">.AI</span>
           </span>
         </div>
       </nav>
@@ -120,10 +120,10 @@ export default function SearchLandingPage() {
       <footer className="relative z-10 w-full border-t border-[#27314F] py-12 px-6 flex flex-col md:flex-row items-center justify-between max-w-7xl mx-auto gap-6">
         <div className="flex items-center gap-2 opacity-50">
           <Network className="w-5 h-5 text-[#4DA3FF]" />
-          <span className="text-sm font-space font-bold">ATLAS.AI</span>
+          <span className="text-sm font-space font-bold">LOCALIZA.AI</span>
         </div>
         <p className="text-xs text-[#AAB4D0]/50 font-medium">
-          © 2024 Atlas Data Intelligence. Fontes públicas oficiais.
+          © 2024 Localiza Data Intelligence. Fontes públicas oficiais.
         </p>
       </footer>
     </div>

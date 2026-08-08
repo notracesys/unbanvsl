@@ -40,11 +40,13 @@ function RevealText({ text, delay = 0, onComplete }: { text: string; delay?: num
         index++;
       } else {
         clearInterval(interval);
-        if (onComplete) onComplete();
+        if (onComplete) {
+          setTimeout(onComplete, 500);
+        }
       }
-    }, 30);
+    }, 35);
     return () => clearInterval(interval);
-  }, [text, isStarted]);
+  }, [text, isStarted, onComplete]);
 
   return (
     <span className="inline-block transition-all duration-300">
@@ -62,7 +64,6 @@ export default function PresentationPage() {
   const [showButton, setShowButton] = useState(false);
 
   const handleProceed = () => {
-    // Aqui redirecionaremos para a página de busca no próximo passo
     router.push('/busca');
   };
 
@@ -74,7 +75,7 @@ export default function PresentationPage() {
         <div className="flex items-center gap-2 opacity-50">
           <Network className="w-5 h-5 text-[#4DA3FF]" />
           <span className="text-lg font-space font-bold tracking-tighter">
-            ATLAS<span className="text-[#4DA3FF]">.AI</span>
+            LOCALIZA<span className="text-[#4DA3FF]">.AI</span>
           </span>
         </div>
       </header>
@@ -111,7 +112,7 @@ export default function PresentationPage() {
             onClick={handleProceed}
             className="h-16 px-12 rounded-2xl bg-[#4DA3FF] hover:bg-[#3d8be0] text-[#0B1020] font-bold text-lg uppercase tracking-widest shadow-2xl shadow-blue-500/20 group"
           >
-            Continuar para ATLAS.AI
+            Continuar para Localiza.AI
             <ArrowRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
           </Button>
 
@@ -123,7 +124,7 @@ export default function PresentationPage() {
 
       <footer className="absolute bottom-0 w-full p-8 text-center">
         <p className="text-[10px] font-mono font-bold text-[#AAB4D0]/30 uppercase tracking-[0.5em]">
-          Atlas Data Intelligence Protocol
+          Localiza.AI Intelligence Protocol
         </p>
       </footer>
     </div>
