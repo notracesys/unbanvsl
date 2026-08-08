@@ -52,22 +52,19 @@ export default function SearchLandingPage() {
 
       <nav className="relative z-10 w-full px-6 py-8 flex items-center justify-between max-w-7xl mx-auto">
         <div className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#4DA3FF] to-[#7C6CFF] flex items-center justify-center shadow-lg shadow-blue-500/20">
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-[#4DA3FF] to-[#7C6CFF] flex items-center justify-center shadow-lg shadow-blue-500/20">
             <Image 
               src="/localiza.png" 
               alt="Logo" 
-              width={24} 
-              height={24} 
-              className="w-6 h-6 object-contain"
+              width={32} 
+              height={32} 
+              className="w-8 h-8 object-contain"
             />
           </div>
-          <span className="text-2xl font-space font-bold tracking-tighter">
-            LOCALIZA<span className="text-[#4DA3FF]">.AI</span>
-          </span>
         </div>
       </nav>
 
-      <main className="flex-1-relative z-10 flex flex-col items-center pt-24 px-6 animate-in fade-in slide-in-from-bottom-6 duration-1000">
+      <main className="flex-1 relative z-10 flex flex-col items-center pt-24 px-6 animate-in fade-in slide-in-from-bottom-6 duration-1000">
         <section className="w-full max-w-4xl text-center space-y-8 mb-24">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#11182D] border border-[#27314F]">
             <Activity className="w-3.5 h-3.5 text-[#4DA3FF]" />
@@ -130,11 +127,10 @@ export default function SearchLandingPage() {
           <Image 
             src="/localiza.png" 
             alt="Logo Footer" 
-            width={20} 
-            height={20} 
-            className="w-5 h-5 object-contain"
+            width={32} 
+            height={32} 
+            className="w-8 h-8 object-contain"
           />
-          <span className="text-sm font-space font-bold">LOCALIZA.AI</span>
         </div>
         <p className="text-xs text-[#AAB4D0]/50 font-medium">
           © 2024 Localiza Data Intelligence. Fontes públicas oficiais.

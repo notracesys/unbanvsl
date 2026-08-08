@@ -95,13 +95,10 @@ export default function PresentationPage() {
           <Image 
             src="/localiza.png" 
             alt="Localiza.AI Logo" 
-            width={32} 
-            height={32} 
-            className="w-8 h-8 object-contain"
+            width={40} 
+            height={40} 
+            className="w-10 h-10 object-contain"
           />
-          <span className="text-lg font-space font-bold tracking-tighter">
-            LOCALIZA<span className="text-[#4DA3FF]">.AI</span>
-          </span>
         </div>
       </header>
 

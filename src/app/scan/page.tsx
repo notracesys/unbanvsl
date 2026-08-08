@@ -55,16 +55,15 @@ export default function ScanWizard() {
 
       <header className="px-6 py-8 border-b border-[#27314F] flex items-center justify-between relative z-10">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-[#4DA3FF] flex items-center justify-center">
+          <div className="w-10 h-10 rounded-lg bg-[#4DA3FF] flex items-center justify-center">
             <Image 
               src="/localiza.png" 
               alt="Logo Header" 
-              width={20} 
-              height={20} 
-              className="w-5 h-5 object-contain brightness-0 invert"
+              width={28} 
+              height={28} 
+              className="w-7 h-7 object-contain brightness-0 invert"
             />
           </div>
-          <span className="font-space font-bold tracking-tighter">Localiza<span className="text-[#4DA3FF]">.AI</span></span>
         </div>
         <div className="flex items-center gap-4">
           <div className="flex gap-1">
