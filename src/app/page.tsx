@@ -1,9 +1,8 @@
-
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, ShieldAlert, ChevronRight } from 'lucide-react';
+import { ArrowRight, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
@@ -95,9 +94,9 @@ export default function PresentationPage() {
           <Image 
             src="/localiza.png" 
             alt="Localiza.AI Logo" 
-            width={180} 
-            height={180} 
-            className="w-32 md:w-44 h-auto object-contain"
+            width={220} 
+            height={220} 
+            className="w-48 md:w-64 h-auto object-contain"
           />
         </div>
       </header>
@@ -126,10 +125,6 @@ export default function PresentationPage() {
           "transition-all duration-1000 transform flex flex-col items-center space-y-6",
           showButton ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8 pointer-events-none"
         )}>
-          <div className="w-16 h-16 rounded-full bg-[#4DA3FF]/10 flex items-center justify-center border border-[#4DA3FF]/20 animate-pulse mb-4">
-            <ShieldAlert className="w-8 h-8 text-[#4DA3FF]" />
-          </div>
-
           <Button 
             onClick={handleProceed}
             className="h-16 px-12 rounded-2xl bg-[#4DA3FF] hover:bg-[#3d8be0] text-[#0B1020] font-bold text-lg uppercase tracking-widest shadow-2xl shadow-blue-500/20 group"
