@@ -5,18 +5,10 @@ import { Button } from '@/components/ui/button';
 import { ShieldAlert, Volume2, Lock, AlertTriangle } from 'lucide-react';
 
 export default function MobileSalesPage() {
-  const [viewers, setViewers] = useState(1432);
   const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
     setHasMounted(true);
-  }, []);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setViewers(prev => prev + Math.floor(Math.random() * 5) - 2);
-    }, 3000);
-    return () => clearInterval(interval);
   }, []);
 
   if (!hasMounted) return null;
@@ -41,7 +33,7 @@ export default function MobileSalesPage() {
         <section className="w-full relative group max-w-[320px]">
           <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-20 bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-md shadow-xl flex items-center gap-2 whitespace-nowrap">
              <div className="w-2 h-2 bg-red-600 rounded-full animate-pulse" />
-             <span className="text-[10px] font-bold text-zinc-300 uppercase">{viewers} JOGADORES ESTÃO SALVANDO SUAS CONTAS</span>
+             <span className="text-[10px] font-bold text-zinc-300 uppercase">+200 RECUPERAÇÕES HOJE!</span>
           </div>
 
           <div className="w-full aspect-[9/16] bg-zinc-900 rounded-2xl border-2 border-zinc-800 shadow-[0_0_40px_rgba(220,38,38,0.3)] relative overflow-hidden">
