@@ -41,7 +41,8 @@ export default function MobileSalesPage() {
     }).catch(() => {}); 
   };
 
-  const handlePlayVideo = () => {
+  const handlePlayVideo = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
     if (playerRef.current) {
       playerRef.current.play();
       setIsPlaying(true);
@@ -89,8 +90,8 @@ export default function MobileSalesPage() {
       </header>
 
       <section className="w-full relative group max-w-[320px]">
-        {/* Contador de urgência */}
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-20 bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-md shadow-xl flex items-center gap-2 whitespace-nowrap pointer-events-none">
+        {/* Contador de urgência - Z-INDEX AUMENTADO PARA 110 */}
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-[110] bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-md shadow-xl flex items-center gap-2 whitespace-nowrap pointer-events-none">
           <div className="w-2 h-2 bg-red-600 rounded-full animate-ping" />
           <span className="text-white text-[10px] font-bold uppercase tracking-widest">
             {recoveryCount} JOGADORES RECUPERANDO AGORA
@@ -98,7 +99,7 @@ export default function MobileSalesPage() {
         </div>
 
         <div 
-          className="aspect-[9/16] w-full bg-zinc-900 rounded-3xl overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.8)] border border-zinc-800 relative"
+          className="aspect-[9/16] w-full bg-zinc-900 rounded-3xl overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.8)] border border-zinc-800 relative cursor-pointer"
           onClick={togglePlayPause}
         >
           {/* Overlay de Pausa / Escassez Extrema */}
@@ -108,7 +109,7 @@ export default function MobileSalesPage() {
                 <div className="flex justify-center">
                   <div 
                     onClick={handlePlayVideo}
-                    className="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(220,38,38,0.8)] animate-pulse border-4 border-white/20"
+                    className="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(220,38,38,0.8)] animate-pulse border-4 border-white/20 cursor-pointer"
                   >
                     <Play className="w-10 h-10 text-white fill-current ml-1" />
                   </div>
@@ -157,7 +158,7 @@ export default function MobileSalesPage() {
               viewer_user_id: visitorId.current,
             }}
             streamType="on-demand"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover pointer-events-none"
             onTimeUpdate={(e: any) => {
               const currentTime = e.target.currentTime;
               const duration = e.target.duration;
@@ -230,13 +231,7 @@ export default function MobileSalesPage() {
         .text-glow-red { text-shadow: 0 0 15px rgba(220, 38, 38, 0.7); }
         
         /* OCULTA ABSOLUTAMENTE TUDO DO PAINEL DE CONTROLE NATIVO */
-        mux-player::part(control-bar) {
-          display: none !important;
-          opacity: 0 !important;
-          pointer-events: none !important;
-        }
-
-        /* REMOVE QUALQUER ELEMENTO DE INTERAÇÃO NATIVO */
+        mux-player::part(control-bar),
         mux-player::part(play-button),
         mux-player::part(mute-button),
         mux-player::part(volume-range),
@@ -251,10 +246,11 @@ export default function MobileSalesPage() {
         mux-player::part(bottom-chrome) {
           display: none !important;
           opacity: 0 !important;
+          visibility: hidden !important;
+          pointer-events: none !important;
         }
 
-        /* MANTÉM APENAS A BARRA DE PROGRESSO VISUAL NA BASE SE NECESSÁRIO, 
-           MAS AQUI VAMOS OCULTAR TUDO PARA GARANTIR LIMPEZA TOTAL */
+        /* MANTÉM APENAS A BARRA DE PROGRESSO VISUAL NA BASE */
         mux-player::part(time-range) {
           display: block !important;
           position: absolute !important;
@@ -265,6 +261,7 @@ export default function MobileSalesPage() {
           pointer-events: none !important;
           --media-range-thumb-display: none !important;
           --media-time-range-thumb-display: none !important;
+          z-index: 50 !important;
         }
 
         mux-player {
