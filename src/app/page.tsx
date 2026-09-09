@@ -78,9 +78,9 @@ export default function MobileSalesPage() {
 
   return (
     <main className="min-h-screen bg-[#050505] flex flex-col items-center px-4 pt-4 pb-20 select-none overflow-x-hidden">
-      <header className="w-full max-w-[500px] text-center mb-6 space-y-3">
-        <h1 className="text-white text-2xl font-black italic uppercase tracking-tighter leading-tight">
-          ESSE MACETE IRÁ <span className="text-red-600 text-[2.2rem] block animate-pulse text-glow-red">SAIR DO AR A QUALQUER MOMENTO.</span>
+      <header className="w-full max-w-[480px] text-center mb-6 space-y-2">
+        <h1 className="text-white text-[1.4rem] font-black italic uppercase tracking-tighter leading-[1.1]">
+          ESSE MACETE IRÁ <span className="text-red-600 text-[1.6rem] animate-pulse text-glow-red">SAIR DO AR A QUALQUER MOMENTO.</span>
         </h1>
         <p className="text-zinc-300 text-[13px] font-medium leading-tight px-2">
           Já solicitaram a queda deste site. Aproveite enquanto há tempo para recuperar sua conta.
@@ -88,7 +88,7 @@ export default function MobileSalesPage() {
       </header>
 
       <section className="w-full relative group max-w-[320px]">
-        {/* Contador de urgência - Z-INDEX AUMENTADO PARA 110 */}
+        {/* Contador de urgência */}
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-[110] bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-md shadow-xl flex items-center gap-2 whitespace-nowrap pointer-events-none">
           <div className="w-2 h-2 bg-red-600 rounded-full animate-ping" />
           <span className="text-white text-[10px] font-bold uppercase tracking-widest">
@@ -123,7 +123,7 @@ export default function MobileSalesPage() {
                     <p className="text-zinc-200 text-sm font-bold leading-tight">
                       ESSE MACETE VAI SUMIR... <br />
                       <span className="text-zinc-400 text-[11px] font-normal mt-2 block">
-                        Se você parar agora, outra pessoa pegará sua vaga no sistema de desbanimento. Continue assistindo.
+                        Se você parar agora, nunca mais terá acesso a este segredo. Continue assistindo.
                       </span>
                     </p>
                   </div>
