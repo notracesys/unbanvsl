@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Volume2, Lock, Play } from 'lucide-react';
+import { Volume2, Lock, Play, AlertCircle } from 'lucide-react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { initializeFirebase } from '@/firebase';
 import MuxPlayer from '@mux/mux-player-react';
@@ -76,7 +76,7 @@ export default function MobileSalesPage() {
             ASSISTA AGORA ANTES QUE <br />
             ESSE VÍDEO SEJA <span className="text-red-600 text-glow-red">RETIRADO DO AR.</span>
           </h1>
-          <p className="text-zinc-300 text-[13px] font-medium leading-tight px-2">
+          <p className="text-zinc-300 text-[13px] font-medium leading-tight px-2 text-balance">
             A Garena já solicitou a queda deste site. Recupere sua conta enquanto há tempo.
           </p>
         </header>
@@ -102,7 +102,7 @@ export default function MobileSalesPage() {
                 <div className="px-6 py-4 bg-red-600/90 backdrop-blur-md rounded-2xl border border-white/20 flex flex-col items-center gap-2 shadow-2xl mx-4">
                   <div className="flex items-center gap-3">
                     <Volume2 className="w-8 h-8 text-white animate-pulse" />
-                    <span className="text-lg font-black uppercase italic tracking-tighter text-white">LIGUE O SOM!</span>
+                    <span className="text-lg font-black uppercase italic tracking-tighter text-white text-center">LIGUE O SOM!</span>
                   </div>
                   <p className="text-[10px] font-bold text-white/90 uppercase text-center leading-tight">
                     INSTRUÇÕES DE DESBANIMENTO <br /> EXPOSTAS NESTE VÍDEO
@@ -120,13 +120,20 @@ export default function MobileSalesPage() {
                 viewer_user_id: visitorId.current,
               }}
               streamType="on-demand"
-              className="w-full h-full object-cover vsl-player pointer-events-none"
+              className="w-full h-full object-cover vsl-player"
               onTimeUpdate={handleTimeUpdate}
               onPlay={() => setIsPlaying(true)}
               placeholder="https://picsum.photos/seed/vsl-ff-poster/720/1280"
               primaryColor="#ef4444"
-              layout="video"
+              layout="vod"
             />
+          </div>
+
+          <div className="mt-4 text-center animate-pulse-slow">
+             <p className="text-red-500 text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2">
+                <Volume2 className="w-4 h-4 fill-current" />
+                Toque para ativar o áudio
+             </p>
           </div>
         </section>
 
@@ -162,17 +169,33 @@ export default function MobileSalesPage() {
         .button-pulse { animation: pulse-cta 2s infinite; }
         .text-glow-red { text-shadow: 0 0 10px rgba(220, 38, 38, 0.5); }
         
-        /* Força a ocultação ABSOLUTA de qualquer elemento de interface do Mux Player */
-        mux-player::part(control-bar),
-        mux-player::part(media-controller),
-        mux-player::part(top-chrome),
-        mux-player::part(center-controls),
+        /* Estilo da Barra de Progresso (VSL Style) */
+        mux-player::part(control-bar) {
+          display: flex !important;
+          background: transparent !important;
+          padding: 0 15px !important;
+          position: absolute !important;
+          bottom: 10px !important;
+          left: 0 !important;
+          right: 0 !important;
+          z-index: 5 !important;
+          pointer-events: none !important;
+        }
+
+        mux-player::part(time-range) {
+          display: block !important;
+          pointer-events: none !important; /* BLOQUEIA O ADIANTAMENTO */
+          flex: 1 !important;
+          opacity: 1 !important;
+          height: 6px !important;
+        }
+
+        /* Oculta ABSOLUTAMENTE tudo menos a barra de tempo */
         mux-player::part(play-button),
         mux-player::part(seek-backward-button),
         mux-player::part(seek-forward-button),
         mux-player::part(mute-button),
         mux-player::part(volume-range),
-        mux-player::part(time-range),
         mux-player::part(time-display),
         mux-player::part(playback-rate-button),
         mux-player::part(fullscreen-button),
@@ -180,17 +203,12 @@ export default function MobileSalesPage() {
         mux-player::part(airplay-button),
         mux-player::part(pip-button),
         mux-player::part(captions-button),
-        .vsl-player::part(control-bar),
-        .vsl-player::part(time-range),
-        .vsl-player::part(media-controller) {
+        mux-player::part(top-chrome),
+        mux-player::part(center-controls),
+        mux-player::part(media-controller) {
           display: none !important;
           visibility: hidden !important;
           opacity: 0 !important;
-          height: 0 !important;
-          width: 0 !important;
-          margin: 0 !important;
-          padding: 0 !important;
-          pointer-events: none !important;
         }
       `}</style>
     </main>
