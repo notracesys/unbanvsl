@@ -14,6 +14,7 @@ export default function MobileSalesPage() {
   const [isEnded, setIsEnded] = useState(false);
   const [showCTA, setShowCTA] = useState(false);
   const playerRef = useRef<any>(null);
+  const ctaRef = useRef<HTMLDivElement>(null);
   const visitorId = useRef<string>('');
   const trackedMilestones = useRef<Set<number>>(new Set());
   const { firestore } = initializeFirebase();
@@ -27,6 +28,15 @@ export default function MobileSalesPage() {
     }, 15000);
     return () => clearInterval(interval);
   }, []);
+
+  // Efeito para rolar até o botão quando ele aparecer
+  useEffect(() => {
+    if (showCTA && ctaRef.current) {
+      setTimeout(() => {
+        ctaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    }
+  }, [showCTA]);
 
   const trackMetric = (milestone: number, currentTime: number = 0, duration: number = 0) => {
     if (!firestore) return;
@@ -198,7 +208,10 @@ export default function MobileSalesPage() {
 
       {/* Botão de Chamada para Ação - Aparece apenas após 02:08 */}
       {showCTA && (
-        <section className="w-full max-w-[360px] mt-8 flex flex-col items-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
+        <section 
+          ref={ctaRef}
+          className="w-full max-w-[360px] mt-8 flex flex-col items-center animate-in fade-in slide-in-from-bottom-4 duration-1000"
+        >
           <Button 
             onClick={() => window.open('https://checkout.exemplo.com', '_blank')}
             className="w-full h-16 text-lg font-black uppercase italic tracking-tighter bg-[#22c55e] hover:bg-[#16a34a] text-white rounded-2xl shadow-[0_8px_0_rgb(21,128,61)] active:translate-y-1 active:shadow-[0_4px_0_rgb(21,128,61)] transition-all duration-75 flex flex-col leading-none button-pulse"
