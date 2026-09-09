@@ -1,13 +1,21 @@
+
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Volume2, Lock } from 'lucide-react';
+import { getFirestore, collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { initializeFirebase } from '@/firebase';
 
 export default function MobileSalesPage() {
   const [hasMounted, setHasMounted] = useState(false);
   const [recoveryCount, setRecoveryCount] = useState(247);
   const [isPlaying, setIsPlaying] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const visitorId = useRef(`vis_${Math.random().toString(36).substr(2, 9)}`);
+  
+  // Firebase metrics
+  const { firestore } = initializeFirebase();
 
   useEffect(() => {
     setHasMounted(true);
@@ -20,13 +28,48 @@ export default function MobileSalesPage() {
     return () => clearInterval(interval);
   }, []);
 
+  const trackMetric = (milestone: number) => {
+    if (!firestore || !videoRef.current) return;
+    
+    addDoc(collection(firestore, 'metrics'), {
+      visitorId: visitorId.current,
+      watchTime: videoRef.current.currentTime,
+      totalDuration: videoRef.current.duration || 0,
+      percentage: milestone,
+      device: navigator.userAgent.includes('Mobi') ? 'mobile' : 'desktop',
+      createdAt: serverTimestamp(),
+    }).catch(err => console.error("Error tracking metric:", err));
+  };
+
   const handlePlayVideo = () => {
-    const video = document.getElementById('vsl-video') as HTMLVideoElement;
-    if (video) {
-      video.play();
+    if (videoRef.current) {
+      videoRef.current.play();
       setIsPlaying(true);
+      trackMetric(0); // Play event
     }
   };
+
+  // Track milestones
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const milestones = [25, 50, 75, 90, 100];
+    const tracked = new Set();
+
+    const handleTimeUpdate = () => {
+      const progress = (video.currentTime / video.duration) * 100;
+      milestones.forEach(m => {
+        if (progress >= m && !tracked.has(m)) {
+          tracked.add(m);
+          trackMetric(m);
+        }
+      });
+    };
+
+    video.addEventListener('timeupdate', handleTimeUpdate);
+    return () => video.removeEventListener('timeupdate', handleTimeUpdate);
+  }, [isPlaying]);
 
   if (!hasMounted) return null;
 
@@ -34,19 +77,16 @@ export default function MobileSalesPage() {
     <main className="min-h-screen bg-[#050505] text-white font-sans selection:bg-red-600 overflow-x-hidden">
       <div className="w-full max-w-[450px] mx-auto px-5 py-8 flex flex-col items-center">
         
-        {/* Hook Agressivo */}
         <header className="text-center space-y-4 mb-8">
           <h1 className="text-[26px] leading-[1.1] font-black italic uppercase tracking-tighter">
             ASSISTA AGORA ANTES QUE <br />
             ESSE VÍDEO SEJA <span className="text-red-600 text-glow-red">RETIRADO DO AR.</span>
           </h1>
-
           <p className="text-zinc-300 text-[13px] font-medium leading-tight px-2">
             A Garena já solicitou a queda deste site. Recupere sua conta enquanto há tempo.
           </p>
         </header>
 
-        {/* VSL - Formato Vertical */}
         <section className="w-full relative group max-w-[320px]">
           <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-20 bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-md shadow-xl flex items-center gap-2 whitespace-nowrap">
              <div className="w-2 h-2 bg-red-600 rounded-full animate-pulse" />
@@ -54,7 +94,6 @@ export default function MobileSalesPage() {
           </div>
 
           <div className="w-full aspect-[9/16] bg-zinc-900 rounded-2xl border-2 border-zinc-800 shadow-[0_0_40px_rgba(220,38,38,0.3)] relative overflow-hidden">
-            
             {!isPlaying && (
               <div 
                 className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/80 transition-all active:bg-black/60 cursor-pointer"
@@ -75,33 +114,20 @@ export default function MobileSalesPage() {
                     INSTRUÇÕES DE DESBANIMENTO <br /> EXPOSTAS NESTE VÍDEO
                   </p>
                 </div>
-                
-                <div className="mt-8 flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/10">
-                  <p className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400">
-                    Toque para iniciar agora
-                  </p>
-                </div>
               </div>
             )}
             
             <video 
-              id="vsl-video"
+              ref={videoRef}
               className="w-full h-full object-cover"
               playsInline
               poster="https://picsum.photos/seed/vsl-ff-poster/720/1280"
             >
               <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4" />
-              Seu navegador não suporta vídeos.
             </video>
-          </div>
-          
-          {/* Fake progress bar */}
-          <div className="w-full h-1.5 bg-zinc-800 mt-2 rounded-full overflow-hidden">
-            <div className="w-[45%] h-full bg-red-600 shadow-[0_0_10px_rgba(220,38,38,0.5)]" />
           </div>
         </section>
 
-        {/* CTA */}
         <section className="w-full mt-10 flex flex-col items-center space-y-6">
           <Button 
             className="w-full py-10 text-xl font-black uppercase italic tracking-tighter bg-[#22c55e] hover:bg-[#16a34a] text-white rounded-2xl shadow-[0_8px_0_rgb(21,128,61)] active:translate-y-1 active:shadow-[0_4px_0_rgb(21,128,61)] transition-all duration-75 flex flex-col leading-none button-pulse"
@@ -125,28 +151,14 @@ export default function MobileSalesPage() {
           <p>ESTE SITE NÃO POSSUI VÍNCULO COM A GARENA. USE POR SUA CONTA E RISCO.</p>
           <p>UNBAN ELITE SYSTEM - © 2024</p>
         </footer>
-
       </div>
 
       <style jsx global>{`
-        @keyframes bounce-slow {
-          0%, 100% { transform: translateY(0); }
-          50% { transform: translateY(-8px); }
-        }
-        .animate-bounce-slow {
-          animation: bounce-slow 2s ease-in-out infinite;
-        }
-        @keyframes pulse-cta {
-          0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6); }
-          70% { box-shadow: 0 0 0 15px rgba(34, 197, 94, 0); }
-          100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
-        }
-        .button-pulse {
-          animation: pulse-cta 2s infinite;
-        }
-        .text-glow-red {
-          text-shadow: 0 0 10px rgba(220, 38, 38, 0.5);
-        }
+        @keyframes bounce-slow { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        .animate-bounce-slow { animation: bounce-slow 2s ease-in-out infinite; }
+        @keyframes pulse-cta { 0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6); } 70% { box-shadow: 0 0 0 15px rgba(34, 197, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
+        .button-pulse { animation: pulse-cta 2s infinite; }
+        .text-glow-red { text-shadow: 0 0 10px rgba(220, 38, 38, 0.5); }
       `}</style>
     </main>
   );

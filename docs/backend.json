@@ -1,47 +1,30 @@
+
 {
   "entities": {
-    "Scan": {
-      "title": "Scan",
-      "description": "Uma sessão de análise de inteligência de dados Atlas.",
+    "VSLMetric": {
+      "title": "VSL Metric",
+      "description": "Métricas de visualização da VSL para análise de retenção.",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
-        "query": { "type": "string", "description": "O dado consultado pelo usuário" },
-        "type": { "type": "string", "enum": ["email", "phone", "cpf", "cnpj", "name", "username", "other"] },
-        "status": { "type": "string", "enum": ["processing", "completed", "failed"] },
-        "exposureScore": { "type": "number", "minimum": 0, "maximum": 100 },
-        "findingsCount": { "type": "number" },
-        "isPaid": { "type": "boolean" },
+        "visitorId": { "type": "string" },
+        "watchTime": { "type": "number", "description": "Segundos assistidos" },
+        "totalDuration": { "type": "number", "description": "Duração total do vídeo" },
+        "percentage": { "type": "number", "description": "Porcentagem concluída" },
+        "lastMilestone": { "type": "number", "enum": [0, 25, 50, 75, 90, 100] },
+        "device": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["query", "type", "status", "createdAt"]
-    },
-    "Finding": {
-      "title": "Finding",
-      "description": "Uma ocorrência de dado localizada em fonte pública.",
-      "type": "object",
-      "properties": {
-        "scanId": { "type": "string" },
-        "type": { "type": "string", "description": "Categoria do dado (Ex: Profissional, Jurídico)" },
-        "source": { "type": "string" },
-        "relevance": { "type": "string", "enum": ["low", "moderate", "high"] },
-        "snippet": { "type": "string" },
-        "verifiedAt": { "type": "string", "format": "date-time" }
-      },
-      "required": ["scanId", "type", "source", "relevance"]
+      "required": ["visitorId", "watchTime", "createdAt"]
     }
   },
   "auth": {
     "providers": ["google.com", "anonymous"]
   },
   "firestore": {
-    "/scans/{scanId}": {
-      "schema": "Scan",
-      "description": "Coleção de análises Atlas realizadas."
-    },
-    "/scans/{scanId}/findings/{findingId}": {
-      "schema": "Finding",
-      "description": "Resultados detalhados de cada análise."
+    "/metrics/{metricId}": {
+      "schema": "VSLMetric",
+      "description": "Registros de eventos de visualização da VSL."
     }
   }
 }
