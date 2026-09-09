@@ -12,12 +12,13 @@ export default function MobileSalesPage() {
   const [recoveryCount, setRecoveryCount] = useState(247);
   const [isPlaying, setIsPlaying] = useState(false);
   const playerRef = useRef<any>(null);
-  const visitorId = useRef<string>(Math.random().toString(36).substring(7));
+  const visitorId = useRef<string>('');
   const trackedMilestones = useRef<Set<number>>(new Set());
   const { firestore } = initializeFirebase();
 
   useEffect(() => {
     setHasMounted(true);
+    visitorId.current = Math.random().toString(36).substring(7);
     const interval = setInterval(() => {
       setRecoveryCount(prev => prev + (Math.random() > 0.7 ? 1 : 0));
     }, 15000);
@@ -119,7 +120,7 @@ export default function MobileSalesPage() {
         <div className="mt-6 flex flex-col items-center gap-2">
           <div className="flex items-center gap-2 text-white/90 animate-pulse">
             <Volume2 className="w-5 h-5 text-red-600" />
-            <span className="text-[12px] font-black uppercase tracking-tighter text-center">Aumente o som para receber as instruções</span>
+            <span className="text-[12px] font-black uppercase tracking-tighter text-center uppercase">Aumente o som para receber as instruções</span>
           </div>
           <div className="w-full max-w-[180px] h-1 bg-zinc-800 rounded-full overflow-hidden relative opacity-30">
             <div className="absolute inset-0 bg-red-600/50 animate-pulse" />
@@ -155,9 +156,7 @@ export default function MobileSalesPage() {
       <style dangerouslySetInnerHTML={{ __html: `
         .text-glow-red { text-shadow: 0 0 15px rgba(220, 38, 38, 0.7); }
         
-        /* BLINDAGEM TOTAL DO PLAYER - REMOVE TUDO EXCETO BARRA DE PROGRESSO */
-        
-        mux-player::part(play-button),
+        /* OCULTA CONTROLES DESNECESSÁRIOS */
         mux-player::part(mute-button),
         mux-player::part(volume-range),
         mux-player::part(fullscreen-button),
@@ -168,12 +167,17 @@ export default function MobileSalesPage() {
         mux-player::part(settings-menu-button),
         mux-player::part(cast-button),
         mux-player::part(pip-button),
-        mux-player::part(top-chrome),
-        mux-player::part(center-controls) {
+        mux-player::part(top-chrome) {
           display: none !important;
         }
 
-        /* Configura a barra de controle para mostrar APENAS o progresso de forma passiva */
+        /* PERMITE PAUSAR E ASSISTIR NOVAMENTE */
+        mux-player::part(play-button),
+        mux-player::part(replay-button) {
+          display: flex !important;
+        }
+
+        /* CONFIGURA A BARRA DE CONTROLE */
         mux-player::part(control-bar) {
           display: flex !important;
           background: transparent !important;
@@ -182,10 +186,10 @@ export default function MobileSalesPage() {
           bottom: 0 !important;
           left: 0 !important;
           right: 0 !important;
-          pointer-events: none !important; /* BLOQUEIA QUALQUER CLIQUE NA BARRA */
+          pointer-events: auto !important; /* Habilita clique para pausar/replay */
         }
 
-        /* A barra de tempo fica visível para o lead ver o avanço, mas sem interação */
+        /* TRAVA A BARRA DE PROGRESSO (IMPEDE ADIANTAR) */
         mux-player::part(time-range) {
           display: block !important;
           flex: 1 !important;
@@ -197,7 +201,7 @@ export default function MobileSalesPage() {
         mux-player {
           --media-range-track-background: rgba(255, 255, 255, 0.1);
           --media-range-bar-color: #dc2626;
-          --controls: none; /* Reforço Mux */
+          --controls: none; 
         }
       `}} />
     </main>
