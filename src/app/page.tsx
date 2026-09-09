@@ -120,11 +120,13 @@ export default function MobileSalesPage() {
                 viewer_user_id: visitorId.current,
               }}
               streamType="on-demand"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover vsl-player"
               onTimeUpdate={handleTimeUpdate}
               onPlay={() => setIsPlaying(true)}
               placeholder="https://picsum.photos/seed/vsl-ff-poster/720/1280"
               primaryColor="#ef4444"
+              noFullscreen
+              noPlaybackRate
             />
           </div>
         </section>
@@ -160,6 +162,15 @@ export default function MobileSalesPage() {
         @keyframes pulse-cta { 0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6); } 70% { box-shadow: 0 0 0 15px rgba(34, 197, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
         .button-pulse { animation: pulse-cta 2s infinite; }
         .text-glow-red { text-shadow: 0 0 10px rgba(220, 38, 38, 0.5); }
+        
+        /* Oculta barra de progresso e botões de busca para evitar pular vídeo */
+        .vsl-player::part(media-range),
+        .vsl-player::part(seek-backward-button),
+        .vsl-player::part(seek-forward-button),
+        .vsl-player::part(playback-rate-button),
+        .vsl-player::part(fullscreen-button) {
+          display: none !important;
+        }
       `}</style>
     </main>
   );
