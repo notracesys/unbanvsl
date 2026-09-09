@@ -120,7 +120,7 @@ export default function MobileSalesPage() {
                 viewer_user_id: visitorId.current,
               }}
               streamType="on-demand"
-              className="w-full h-full object-cover vsl-player"
+              className="w-full h-full object-cover vsl-player pointer-events-none"
               onTimeUpdate={handleTimeUpdate}
               onPlay={() => setIsPlaying(true)}
               placeholder="https://picsum.photos/seed/vsl-ff-poster/720/1280"
@@ -162,26 +162,34 @@ export default function MobileSalesPage() {
         .button-pulse { animation: pulse-cta 2s infinite; }
         .text-glow-red { text-shadow: 0 0 10px rgba(220, 38, 38, 0.5); }
         
-        /* Força a ocultação de qualquer elemento de controle que o Mux Player possa injetar */
+        /* Força a ocultação ABSOLUTA de qualquer elemento de interface do Mux Player */
+        mux-player::part(control-bar),
+        mux-player::part(media-controller),
+        mux-player::part(top-chrome),
+        mux-player::part(center-controls),
+        mux-player::part(play-button),
+        mux-player::part(seek-backward-button),
+        mux-player::part(seek-forward-button),
+        mux-player::part(mute-button),
+        mux-player::part(volume-range),
+        mux-player::part(time-range),
+        mux-player::part(time-display),
+        mux-player::part(playback-rate-button),
+        mux-player::part(fullscreen-button),
+        mux-player::part(cast-button),
+        mux-player::part(airplay-button),
+        mux-player::part(pip-button),
+        mux-player::part(captions-button),
         .vsl-player::part(control-bar),
-        .vsl-player::part(media-controller),
-        .vsl-player::part(top-chrome),
-        .vsl-player::part(center-controls),
-        .vsl-player::part(play-button),
-        .vsl-player::part(seek-backward-button),
-        .vsl-player::part(seek-forward-button),
-        .vsl-player::part(mute-button),
-        .vsl-player::part(volume-range),
         .vsl-player::part(time-range),
-        .vsl-player::part(playback-rate-button),
-        .vsl-player::part(fullscreen-button),
-        .vsl-player::part(cast-button),
-        .vsl-player::part(airplay-button),
-        .vsl-player::part(pip-button),
-        .vsl-player::part(captions-button) {
+        .vsl-player::part(media-controller) {
           display: none !important;
           visibility: hidden !important;
           opacity: 0 !important;
+          height: 0 !important;
+          width: 0 !important;
+          margin: 0 !important;
+          padding: 0 !important;
           pointer-events: none !important;
         }
       `}</style>
