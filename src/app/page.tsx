@@ -43,7 +43,11 @@ export default function MobileSalesPage() {
     if (playerRef.current) {
       playerRef.current.play();
       setIsPlaying(true);
-      trackMetric(0); 
+      // Track play event if not already tracked
+      if (!trackedMilestones.current.has(0)) {
+        trackedMilestones.current.add(0);
+        trackMetric(0);
+      }
     }
   };
 
@@ -77,22 +81,25 @@ export default function MobileSalesPage() {
       </header>
 
       <section className="w-full relative group max-w-[320px]">
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-20 bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-md shadow-xl flex items-center gap-2 whitespace-nowrap">
+        {/* Contador de urgência */}
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-20 bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-md shadow-xl flex items-center gap-2 whitespace-nowrap pointer-events-none">
            <div className="w-2 h-2 bg-red-600 rounded-full animate-pulse" />
            <span className="text-[10px] font-bold text-zinc-300 uppercase">+{recoveryCount} RECUPERAÇÕES HOJE!</span>
         </div>
 
+        {/* Player Container */}
         <div 
           className="w-full aspect-[9/16] bg-zinc-900 rounded-2xl border-2 border-zinc-800 shadow-[0_0_40px_rgba(220,38,38,0.3)] relative overflow-hidden"
           onContextMenu={(e) => e.preventDefault()}
         >
+          {/* Overlay de Play Central (aparece quando pausado) */}
           {!isPlaying && (
             <div 
               className="absolute inset-0 z-10 flex items-center justify-center cursor-pointer bg-black/40 backdrop-blur-[2px]"
               onClick={handlePlayVideo}
             >
               <div className="flex flex-col items-center gap-4">
-                <div className="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(220,38,38,0.6)] animate-bounce group-active:scale-95 transition-transform">
+                <div className="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(220,38,38,0.6)] animate-bounce active:scale-95 transition-transform">
                   <Play className="w-10 h-10 text-white fill-current ml-1" />
                 </div>
                 <div className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/20">
@@ -111,17 +118,20 @@ export default function MobileSalesPage() {
               viewer_user_id: visitorId.current,
             }}
             streamType="on-demand"
-            className="w-full h-full object-cover vsl-player"
+            className="w-full h-full object-cover pointer-events-auto"
             onTimeUpdate={handleTimeUpdate}
             onPlay={() => setIsPlaying(true)}
+            onPause={() => setIsPlaying(false)}
+            onEnded={() => setIsPlaying(false)}
             placeholder="https://picsum.photos/seed/vsl-ff-poster/720/1280"
           />
         </div>
 
+        {/* Chamada de Áudio */}
         <div className="mt-6 flex flex-col items-center gap-2">
           <div className="flex items-center gap-2 text-white/90 animate-pulse">
             <Volume2 className="w-5 h-5 text-red-600" />
-            <span className="text-[12px] font-black uppercase tracking-tighter text-center uppercase">Aumente o som para receber as instruções</span>
+            <span className="text-[12px] font-black uppercase tracking-tighter text-center">Aumente o som para receber as instruções</span>
           </div>
           <div className="w-full max-w-[180px] h-1 bg-zinc-800 rounded-full overflow-hidden relative opacity-30">
             <div className="absolute inset-0 bg-red-600/50 animate-pulse" />
@@ -129,6 +139,7 @@ export default function MobileSalesPage() {
         </div>
       </section>
 
+      {/* Botão de Chamada para Ação */}
       <section className="w-full max-w-[360px] mt-8 flex flex-col items-center">
         <Button 
           onClick={() => window.open('https://checkout.exemplo.com', '_blank')}
@@ -138,6 +149,7 @@ export default function MobileSalesPage() {
           <span className="text-[10px] mt-1 not-italic tracking-normal">Acesso vitalício ao sistema bypass</span>
         </Button>
 
+        {/* Logos e Segurança */}
         <div className="flex flex-col items-center gap-4 py-8 w-full">
           <div className="flex items-center gap-4 grayscale opacity-40">
             <img src="https://upload.wikimedia.org/wikipedia/commons/0/05/Garena_logo.svg" alt="Garena" className="h-4" />
@@ -154,10 +166,11 @@ export default function MobileSalesPage() {
         Uso exclusivo para recuperação de contas legítimas.
       </footer>
 
+      {/* Estilos para blindar o player de forma inteligente */}
       <style dangerouslySetInnerHTML={{ __html: `
         .text-glow-red { text-shadow: 0 0 15px rgba(220, 38, 38, 0.7); }
         
-        /* OCULTA CONTROLES DESNECESSÁRIOS */
+        /* OCULTA CONTROLES DE INTERRUPÇÃO */
         mux-player::part(mute-button),
         mux-player::part(volume-range),
         mux-player::part(fullscreen-button),
@@ -176,9 +189,10 @@ export default function MobileSalesPage() {
         mux-player::part(play-button),
         mux-player::part(replay-button) {
           display: flex !important;
+          pointer-events: auto !important;
         }
 
-        /* CONFIGURA A BARRA DE CONTROLE */
+        /* CONFIGURA A BARRA DE CONTROLE PARA RECEBER TOQUE */
         mux-player::part(control-bar) {
           display: flex !important;
           background: transparent !important;
@@ -187,10 +201,10 @@ export default function MobileSalesPage() {
           bottom: 0 !important;
           left: 0 !important;
           right: 0 !important;
-          pointer-events: auto !important; /* Habilita clique para pausar/replay */
+          pointer-events: auto !important;
         }
 
-        /* TRAVA A BARRA DE PROGRESSO (IMPEDE ADIANTAR) */
+        /* TRAVA APENAS A BARRA DE PROGRESSO (IMPEDE ADIANTAR) */
         mux-player::part(time-range) {
           display: block !important;
           flex: 1 !important;
@@ -202,7 +216,6 @@ export default function MobileSalesPage() {
         mux-player {
           --media-range-track-background: rgba(255, 255, 255, 0.1);
           --media-range-bar-color: #dc2626;
-          --controls: none; 
         }
       `}} />
     </main>
