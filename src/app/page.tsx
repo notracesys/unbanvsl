@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { ShieldAlert, Timer, Lock, ChevronRight, Volume2 } from 'lucide-react';
+import { ShieldAlert, Timer, Lock, Volume2 } from 'lucide-react';
 
 export default function MobileSalesPage() {
   const [timeLeft, setTimeLeft] = useState(415); // 6m 55s
@@ -95,10 +95,6 @@ export default function MobileSalesPage() {
         <section className="w-full mt-10 flex flex-col items-center space-y-6">
           
           <div className="text-center">
-            <div className="flex items-center justify-center gap-2 text-yellow-500 font-black text-xl italic">
-              <Timer className="w-5 h-5" />
-              LICENÇA EXPIRA EM: {formatTime(timeLeft)}
-            </div>
             <p className="text-red-500 text-[11px] font-bold mt-1 animate-pulse uppercase">
               ⚠️ ÚLTIMAS 4 VAGAS DISPONÍVEIS NO SERVIDOR
             </p>
