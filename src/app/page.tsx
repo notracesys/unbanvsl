@@ -51,7 +51,7 @@ export default function MobileSalesPage() {
 
           <h1 className="text-[26px] leading-[1.1] font-black italic uppercase tracking-tighter">
             ASSISTA AGORA ANTES QUE <br />
-            ESSE VÍDEO SEJA <span className="text-red-600 underline decoration-[6px]">RETIRADO DO AR.</span>
+            ESSE VÍDEO SEJA <span className="text-red-600">RETIRADO DO AR.</span>
           </h1>
 
           <p className="text-zinc-300 text-[13px] font-medium leading-tight px-2">
