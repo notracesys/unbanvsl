@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -85,7 +84,7 @@ export default function MobileSalesPage() {
           <span className="text-red-600 text-[2.8rem] block animate-pulse text-glow-red">RETIRADO DO AR.</span>
         </h1>
         <p className="text-zinc-300 text-[13px] font-medium leading-tight px-2">
-          A Garena já solicitou a queda deste site. Recupere sua conta em 5 minutos ou perca suas skins e passes para sempre.
+          Já solicitaram a queda imediata deste site. Aproveite enquanto há tempo para recuperar sua conta.
         </p>
       </header>
 
