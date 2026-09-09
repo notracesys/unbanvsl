@@ -5,16 +5,12 @@ import { Button } from '@/components/ui/button';
 import { ShieldAlert, Volume2, Lock, AlertTriangle } from 'lucide-react';
 
 export default function MobileSalesPage() {
-  const [timeLeft, setTimeLeft] = useState(415); // 6m 55s
   const [viewers, setViewers] = useState(1432);
   const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
     setHasMounted(true);
-    if (timeLeft <= 0) return;
-    const timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
-    return () => clearInterval(timer);
-  }, [timeLeft]);
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -23,23 +19,10 @@ export default function MobileSalesPage() {
     return () => clearInterval(interval);
   }, []);
 
-  const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
   if (!hasMounted) return null;
 
   return (
     <main className="min-h-screen bg-[#050505] text-white font-sans selection:bg-red-600 overflow-x-hidden">
-      {/* Barra de Urgência de Topo - Sticky */}
-      <div className="sticky top-0 z-50 bg-red-600 py-2 px-4 text-center text-[10px] font-black uppercase tracking-[0.1em] flex items-center justify-center gap-2 border-b border-red-500 shadow-2xl">
-        <ShieldAlert className="w-3 h-3 animate-pulse" />
-        ACESSO VULNERÁVEL: {formatTime(timeLeft)}
-        <ShieldAlert className="w-3 h-3 animate-pulse" />
-      </div>
-
       <div className="w-full max-w-[450px] mx-auto px-5 py-8 flex flex-col items-center">
         
         {/* Hook Agressivo com Foco em Escassez Extrema */}
