@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Volume2, Lock, Play } from 'lucide-react';
+import { Volume2, Lock, Play, AlertTriangle, RefreshCcw } from 'lucide-react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { initializeFirebase } from '@/firebase';
 import MuxPlayer from '@mux/mux-player-react';
@@ -12,6 +12,7 @@ export default function MobileSalesPage() {
   const [hasMounted, setHasMounted] = useState(false);
   const [recoveryCount, setRecoveryCount] = useState(247);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isEnded, setIsEnded] = useState(false);
   const playerRef = useRef<any>(null);
   const visitorId = useRef<string>('');
   const trackedMilestones = useRef<Set<number>>(new Set());
@@ -43,7 +44,7 @@ export default function MobileSalesPage() {
     if (playerRef.current) {
       playerRef.current.play();
       setIsPlaying(true);
-      // Track play event if not already tracked
+      setIsEnded(false);
       if (!trackedMilestones.current.has(0)) {
         trackedMilestones.current.add(0);
         trackMetric(0);
@@ -92,19 +93,52 @@ export default function MobileSalesPage() {
           className="w-full aspect-[9/16] bg-zinc-900 rounded-2xl border-2 border-zinc-800 shadow-[0_0_40px_rgba(220,38,38,0.3)] relative overflow-hidden"
           onContextMenu={(e) => e.preventDefault()}
         >
-          {/* Overlay de Play Central (aparece quando pausado) */}
-          {!isPlaying && (
+          {/* Overlay de Pausa / Escassez Extrema */}
+          {!isPlaying && !isEnded && (
             <div 
-              className="absolute inset-0 z-10 flex items-center justify-center cursor-pointer bg-black/40 backdrop-blur-[2px]"
+              className="absolute inset-0 z-[100] flex items-center justify-center cursor-pointer bg-black/80 backdrop-blur-md transition-all duration-300"
+              onClick={handlePlayVideo}
+            >
+              <div className="flex flex-col items-center gap-6 px-6 text-center">
+                <div className="w-24 h-24 bg-red-600 rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(220,38,38,0.8)] animate-pulse border-4 border-white/20">
+                  <Play className="w-12 h-12 text-white fill-current ml-1" />
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="flex items-center justify-center gap-2 text-red-500 font-black animate-bounce">
+                    <AlertTriangle className="w-6 h-6" />
+                    <span className="text-xl uppercase tracking-tighter italic">NÃO PARE AGORA!</span>
+                  </div>
+                  
+                  <div className="bg-white/5 border border-white/10 p-4 rounded-xl backdrop-blur-sm">
+                    <p className="text-white text-sm font-bold leading-tight uppercase">
+                      O SISTEMA BYPASS ESTÁ SENDO <br />
+                      <span className="text-red-500 text-lg">DESCONECTADO...</span>
+                    </p>
+                    <p className="text-zinc-400 text-[10px] mt-2 font-medium">
+                      Se você fechar ou parar o vídeo, sua conta será marcada como "IRRECUPERÁVEL" nos servidores da Garena.
+                    </p>
+                  </div>
+                  
+                  <p className="text-zinc-200 text-xs font-black uppercase tracking-widest animate-pulse">
+                    CLIQUE PARA VOLTAR A ASSISTIR IMEDIATAMENTE
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Overlay de Replay ao Final */}
+          {isEnded && (
+            <div 
+              className="absolute inset-0 z-[100] flex items-center justify-center cursor-pointer bg-black/90 backdrop-blur-lg"
               onClick={handlePlayVideo}
             >
               <div className="flex flex-col items-center gap-4">
-                <div className="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(220,38,38,0.6)] animate-bounce active:scale-95 transition-transform">
-                  <Play className="w-10 h-10 text-white fill-current ml-1" />
+                <div className="w-20 h-20 bg-zinc-100 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+                  <RefreshCcw className="w-10 h-10 text-black" />
                 </div>
-                <div className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/20">
-                  <span className="text-white text-[10px] font-black uppercase tracking-widest">CLIQUE PARA ASSISTIR</span>
-                </div>
+                <span className="text-white text-xs font-black uppercase tracking-widest">ASSISTIR NOVAMENTE</span>
               </div>
             </div>
           )}
@@ -120,9 +154,9 @@ export default function MobileSalesPage() {
             streamType="on-demand"
             className="w-full h-full object-cover pointer-events-auto"
             onTimeUpdate={handleTimeUpdate}
-            onPlay={() => setIsPlaying(true)}
+            onPlay={() => { setIsPlaying(true); setIsEnded(false); }}
             onPause={() => setIsPlaying(false)}
-            onEnded={() => setIsPlaying(false)}
+            onEnded={() => { setIsPlaying(false); setIsEnded(true); }}
             placeholder="https://picsum.photos/seed/vsl-ff-poster/720/1280"
           />
         </div>
@@ -131,7 +165,7 @@ export default function MobileSalesPage() {
         <div className="mt-6 flex flex-col items-center gap-2">
           <div className="flex items-center gap-2 text-white/90 animate-pulse">
             <Volume2 className="w-5 h-5 text-red-600" />
-            <span className="text-[12px] font-black uppercase tracking-tighter text-center">Aumente o som para receber as instruções</span>
+            <span className="text-[12px] font-black uppercase tracking-tighter text-center">LIGUE O SOM PARA RECEBER AS INSTRUÇÕES</span>
           </div>
           <div className="w-full max-w-[180px] h-1 bg-zinc-800 rounded-full overflow-hidden relative opacity-30">
             <div className="absolute inset-0 bg-red-600/50 animate-pulse" />
@@ -170,9 +204,7 @@ export default function MobileSalesPage() {
       <style dangerouslySetInnerHTML={{ __html: `
         .text-glow-red { text-shadow: 0 0 15px rgba(220, 38, 38, 0.7); }
         
-        /* OCULTA CONTROLES DE INTERRUPÇÃO */
-        mux-player::part(mute-button),
-        mux-player::part(volume-range),
+        /* OCULTA TODOS OS CONTROLES QUE PERMITEM ADIANTAR OU SAIR DO VÍDEO */
         mux-player::part(fullscreen-button),
         mux-player::part(seek-backward-button),
         mux-player::part(seek-forward-button),
@@ -181,18 +213,20 @@ export default function MobileSalesPage() {
         mux-player::part(settings-menu-button),
         mux-player::part(cast-button),
         mux-player::part(pip-button),
-        mux-player::part(top-chrome) {
+        mux-player::part(top-chrome),
+        mux-player::part(mute-button),
+        mux-player::part(volume-range) {
           display: none !important;
         }
 
-        /* PERMITE PAUSAR E ASSISTIR NOVAMENTE */
+        /* PERMITE PAUSAR E ASSISTIR NOVAMENTE PELOS CONTROLES NATIVOS TAMBÉM */
         mux-player::part(play-button),
         mux-player::part(replay-button) {
           display: flex !important;
           pointer-events: auto !important;
         }
 
-        /* CONFIGURA A BARRA DE CONTROLE PARA RECEBER TOQUE */
+        /* CONFIGURA A BARRA DE CONTROLE PARA SER VISÍVEL MAS NÃO INTERATIVA */
         mux-player::part(control-bar) {
           display: flex !important;
           background: transparent !important;
@@ -208,14 +242,15 @@ export default function MobileSalesPage() {
         mux-player::part(time-range) {
           display: block !important;
           flex: 1 !important;
-          height: 4px !important;
+          height: 6px !important;
           pointer-events: none !important; /* BLOQUEIA O ARRASTE/PULO */
-          opacity: 0.8 !important;
+          opacity: 0.9 !important;
         }
 
         mux-player {
-          --media-range-track-background: rgba(255, 255, 255, 0.1);
+          --media-range-track-background: rgba(255, 255, 255, 0.15);
           --media-range-bar-color: #dc2626;
+          --media-button-icon-width: 24px;
         }
       `}} />
     </main>
