@@ -12,6 +12,7 @@ export default function MobileSalesPage() {
   const [recoveryCount, setRecoveryCount] = useState(2483);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isEnded, setIsEnded] = useState(false);
+  const [showCTA, setShowCTA] = useState(false);
   const playerRef = useRef<any>(null);
   const visitorId = useRef<string>('');
   const trackedMilestones = useRef<Set<number>>(new Set());
@@ -162,6 +163,11 @@ export default function MobileSalesPage() {
               const duration = e.target.duration;
               const progress = (currentTime / duration) * 100;
               
+              // Mostrar CTA aos 2 minutos e 8 segundos (128 segundos)
+              if (currentTime >= 128 && !showCTA) {
+                setShowCTA(true);
+              }
+
               [25, 50, 75, 90, 100].forEach(m => {
                 if (progress >= m && !trackedMilestones.current.has(m)) {
                   trackedMilestones.current.add(m);
@@ -190,34 +196,36 @@ export default function MobileSalesPage() {
         </div>
       </section>
 
-      {/* Botão de Chamada para Ação */}
-      <section className="w-full max-w-[360px] mt-8 flex flex-col items-center">
-        <Button 
-          onClick={() => window.open('https://checkout.exemplo.com', '_blank')}
-          className="w-full h-16 text-lg font-black uppercase italic tracking-tighter bg-[#22c55e] hover:bg-[#16a34a] text-white rounded-2xl shadow-[0_8px_0_rgb(21,128,61)] active:translate-y-1 active:shadow-[0_4px_0_rgb(21,128,61)] transition-all duration-75 flex flex-col leading-none button-pulse"
-        >
-          QUERO DESBANIR AGORA!
-          <span className="text-[10px] mt-1 not-italic tracking-normal">Acesso vitalício ao sistema bypass</span>
-        </Button>
-        
-        <div className="mt-4 flex items-center gap-2 text-zinc-500">
-          <Lock className="w-3 h-3" />
-          <span className="text-[10px] font-bold uppercase tracking-tight">Pagamento 100% seguro via criptografia</span>
-        </div>
+      {/* Botão de Chamada para Ação - Aparece apenas após 02:08 */}
+      {showCTA && (
+        <section className="w-full max-w-[360px] mt-8 flex flex-col items-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
+          <Button 
+            onClick={() => window.open('https://checkout.exemplo.com', '_blank')}
+            className="w-full h-16 text-lg font-black uppercase italic tracking-tighter bg-[#22c55e] hover:bg-[#16a34a] text-white rounded-2xl shadow-[0_8px_0_rgb(21,128,61)] active:translate-y-1 active:shadow-[0_4px_0_rgb(21,128,61)] transition-all duration-75 flex flex-col leading-none button-pulse"
+          >
+            QUERO DESBANIR AGORA!
+            <span className="text-[10px] mt-1 not-italic tracking-normal">Acesso vitalício ao sistema bypass</span>
+          </Button>
+          
+          <div className="mt-4 flex items-center gap-2 text-zinc-500">
+            <Lock className="w-3 h-3" />
+            <span className="text-[10px] font-bold uppercase tracking-tight">Pagamento 100% seguro via criptografia</span>
+          </div>
 
-        {/* Prova social minimalista */}
-        <div className="mt-6 w-full space-y-3">
-          <div className="bg-zinc-900/50 border border-zinc-800 p-3 rounded-xl flex gap-3">
-            <div className="w-10 h-10 rounded-full bg-zinc-800 flex-shrink-0 flex items-center justify-center text-zinc-500 font-bold">
-              JS
-            </div>
-            <div className="flex flex-col">
-              <span className="text-white text-[11px] font-black italic">JOÃO S.</span>
-              <p className="text-zinc-400 text-[10px] leading-tight mt-1">Funcionou na hora! Já recuperei minha conta com a Calça Angelical que tava banida faz 1 ano.</p>
+          {/* Prova social minimalista */}
+          <div className="mt-6 w-full space-y-3">
+            <div className="bg-zinc-900/50 border border-zinc-800 p-3 rounded-xl flex gap-3">
+              <div className="w-10 h-10 rounded-full bg-zinc-800 flex-shrink-0 flex items-center justify-center text-zinc-500 font-bold">
+                JS
+              </div>
+              <div className="flex flex-col">
+                <span className="text-white text-[11px] font-black italic">JOÃO S.</span>
+                <p className="text-zinc-400 text-[10px] leading-tight mt-1">Funcionou na hora! Já recuperei minha conta com a Calça Angelical que tava banida faz 1 ano.</p>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       <footer className="mt-4 text-[8px] text-zinc-600 text-center uppercase font-bold tracking-widest max-w-[280px]">
         Este site não possui vínculo com a Garena Free Fire. <br />
