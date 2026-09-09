@@ -32,7 +32,7 @@ export default function MobileSalesPage() {
         <header className="text-center space-y-4 mb-8">
           <h1 className="text-[26px] leading-[1.1] font-black italic uppercase tracking-tighter">
             ASSISTA AGORA ANTES QUE <br />
-            ESSE VÍDEO SEJA <span className="text-red-600">RETIRADO DO AR.</span>
+            ESSE VÍDEO SEJA <span className="text-red-600 text-glow-red">RETIRADO DO AR.</span>
           </h1>
 
           <p className="text-zinc-300 text-[13px] font-medium leading-tight px-2">
@@ -48,16 +48,28 @@ export default function MobileSalesPage() {
           </div>
 
           <div className="w-full aspect-[9/16] bg-zinc-900 rounded-2xl border-2 border-zinc-800 shadow-[0_0_40px_rgba(220,38,38,0.3)] relative overflow-hidden">
-            {/* Fake Play Button */}
-            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/60 transition-all active:bg-black/40">
-              <div className="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(220,38,38,0.8)] animate-bounce-slow">
-                <div className="w-0 h-0 border-t-[12px] border-t-transparent border-l-[22px] border-l-white border-b-[12px] border-b-transparent ml-2" />
+            {/* Fake Play Button & Volume Warning */}
+            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/70 transition-all active:bg-black/40">
+              
+              <div className="flex flex-col items-center animate-bounce-slow">
+                <div className="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(220,38,38,0.8)] mb-6">
+                  <div className="w-0 h-0 border-t-[12px] border-t-transparent border-l-[22px] border-l-white border-b-[12px] border-b-transparent ml-2" />
+                </div>
+              </div>
+
+              <div className="px-6 py-4 bg-red-600/90 backdrop-blur-md rounded-2xl border border-white/20 flex flex-col items-center gap-2 shadow-2xl">
+                <div className="flex items-center gap-3">
+                  <Volume2 className="w-8 h-8 text-white animate-pulse" />
+                  <span className="text-lg font-black uppercase italic tracking-tighter text-white">LIGUE O SOM!</span>
+                </div>
+                <p className="text-[10px] font-bold text-white/90 uppercase text-center leading-tight">
+                  INSTRUÇÕES DE DESBANIMENTO <br /> EXPOSTAS NESTE VÍDEO
+                </p>
               </div>
               
-              <div className="mt-6 flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
-                <Volume2 className="w-4 h-4 text-white animate-pulse" />
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white">
-                  Toque para iniciar o desbanimento
+              <div className="mt-8 flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/10">
+                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-zinc-400">
+                  Toque para iniciar agora
                 </p>
               </div>
             </div>
@@ -65,14 +77,14 @@ export default function MobileSalesPage() {
             <img 
               src="https://picsum.photos/seed/vsl-ff-extreme/720/1280" 
               alt="FF VSL Vertical"
-              className="w-full h-full object-cover opacity-50 blur-[1px]"
+              className="w-full h-full object-cover opacity-40 blur-[2px]"
               data-ai-hint="action shooter intense"
             />
           </div>
           
           {/* Fake progress bar */}
           <div className="w-full h-1.5 bg-zinc-800 mt-2 rounded-full overflow-hidden">
-            <div className="w-[65%] h-full bg-red-600" />
+            <div className="w-[65%] h-full bg-red-600 shadow-[0_0_10px_rgba(220,38,38,0.5)]" />
           </div>
         </section>
 
@@ -127,6 +139,9 @@ export default function MobileSalesPage() {
         }
         .button-pulse {
           animation: pulse-cta 2s infinite;
+        }
+        .text-glow-red {
+          text-shadow: 0 0 10px rgba(220, 38, 38, 0.5);
         }
       `}</style>
     </main>
