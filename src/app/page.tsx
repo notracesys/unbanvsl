@@ -91,12 +91,6 @@ export default function MobileSalesPage() {
         {/* CTA e Escassez Agressiva */}
         <section className="w-full mt-10 flex flex-col items-center space-y-6">
           
-          <div className="text-center">
-            <p className="text-red-500 text-[11px] font-bold mt-1 animate-pulse uppercase tracking-widest">
-              ⚠️ ÚLTIMAS 4 VAGAS NO SERVIDOR DE INJEÇÃO
-            </p>
-          </div>
-
           <Button 
             className="w-full py-10 text-xl font-black uppercase italic tracking-tighter bg-[#22c55e] hover:bg-[#16a34a] text-white rounded-2xl shadow-[0_8px_0_rgb(21,128,61)] active:translate-y-1 active:shadow-[0_4px_0_rgb(21,128,61)] transition-all duration-75 flex flex-col leading-none button-pulse"
           >
