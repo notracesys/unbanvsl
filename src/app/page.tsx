@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Volume2, Lock, Play, AlertCircle } from 'lucide-react';
+import { Volume2, Lock, Play } from 'lucide-react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { initializeFirebase } from '@/firebase';
 import MuxPlayer from '@mux/mux-player-react';
@@ -87,7 +87,10 @@ export default function MobileSalesPage() {
              <span className="text-[10px] font-bold text-zinc-300 uppercase">+{recoveryCount} RECUPERAÇÕES HOJE!</span>
           </div>
 
-          <div className="w-full aspect-[9/16] bg-zinc-900 rounded-2xl border-2 border-zinc-800 shadow-[0_0_40px_rgba(220,38,38,0.3)] relative overflow-hidden">
+          <div 
+            className="w-full aspect-[9/16] bg-zinc-900 rounded-2xl border-2 border-zinc-800 shadow-[0_0_40px_rgba(220,38,38,0.3)] relative overflow-hidden"
+            onContextMenu={(e) => e.preventDefault()}
+          >
             {!isPlaying && (
               <div 
                 className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/80 transition-all active:bg-black/60 cursor-pointer"
@@ -129,10 +132,10 @@ export default function MobileSalesPage() {
             />
           </div>
 
-          <div className="mt-4 text-center animate-pulse-slow">
-             <p className="text-red-500 text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2">
+          <div className="mt-4 text-center">
+             <p className="text-red-500 text-[12px] font-black uppercase tracking-widest flex items-center justify-center gap-2 animate-pulse">
                 <Volume2 className="w-4 h-4 fill-current" />
-                Toque para ativar o áudio
+                Aumente o volume, o vídeo tem som!
              </p>
           </div>
         </section>
@@ -169,46 +172,54 @@ export default function MobileSalesPage() {
         .button-pulse { animation: pulse-cta 2s infinite; }
         .text-glow-red { text-shadow: 0 0 10px rgba(220, 38, 38, 0.5); }
         
-        /* Estilo da Barra de Progresso (VSL Style) */
-        mux-player::part(control-bar) {
-          display: flex !important;
-          background: transparent !important;
-          padding: 0 15px !important;
-          position: absolute !important;
-          bottom: 10px !important;
-          left: 0 !important;
-          right: 0 !important;
-          z-index: 5 !important;
+        /* 100% BLINDAGEM DO PLAYER - APENAS BARRA DE PROGRESSO VISUAL */
+        
+        /* Oculta o menu de 3 pontos, volume, tela cheia e botões de busca */
+        mux-player::part(play-button),
+        mux-player::part(mute-button),
+        mux-player::part(volume-range),
+        mux-player::part(fullscreen-button),
+        mux-player::part(seek-backward-button),
+        mux-player::part(seek-forward-button),
+        mux-player::part(captions-button),
+        mux-player::part(airplay-button),
+        mux-player::part(cast-button),
+        mux-player::part(pip-button),
+        mux-player::part(playback-rate-button),
+        mux-player::part(time-display),
+        mux-player::part(top-chrome),
+        mux-player::part(center-controls) {
+          display: none !important;
+          visibility: hidden !important;
           pointer-events: none !important;
         }
 
-        mux-player::part(time-range) {
-          display: block !important;
-          pointer-events: none !important; /* BLOQUEIA O ADIANTAMENTO */
-          flex: 1 !important;
-          opacity: 1 !important;
-          height: 6px !important;
+        /* Oculta qualquer menu de configurações ou overflow */
+        mux-player::part(settings-menu),
+        mux-player::part(settings-menu-button) {
+          display: none !important;
         }
 
-        /* Oculta ABSOLUTAMENTE tudo menos a barra de tempo */
-        mux-player::part(play-button),
-        mux-player::part(seek-backward-button),
-        mux-player::part(seek-forward-button),
-        mux-player::part(mute-button),
-        mux-player::part(volume-range),
-        mux-player::part(time-display),
-        mux-player::part(playback-rate-button),
-        mux-player::part(fullscreen-button),
-        mux-player::part(cast-button),
-        mux-player::part(airplay-button),
-        mux-player::part(pip-button),
-        mux-player::part(captions-button),
-        mux-player::part(top-chrome),
-        mux-player::part(center-controls),
-        mux-player::part(media-controller) {
-          display: none !important;
-          visibility: hidden !important;
-          opacity: 0 !important;
+        /* Configura a barra de controle para ser apenas um container da barra de tempo */
+        mux-player::part(control-bar) {
+          display: flex !important;
+          background: transparent !important;
+          padding: 0 12px !important;
+          position: absolute !important;
+          bottom: 12px !important;
+          left: 0 !important;
+          right: 0 !important;
+          z-index: 10 !important;
+          pointer-events: none !important; /* IMPEDE QUALQUER CLIQUE NA BARRA INTEIRA */
+        }
+
+        /* A barra de tempo fica visível mas NÃO INTERATIVA */
+        mux-player::part(time-range) {
+          display: block !important;
+          flex: 1 !important;
+          height: 6px !important;
+          pointer-events: none !important; /* BLOQUEIA O ARRASTE/CLIQUE */
+          opacity: 1 !important;
         }
       `}</style>
     </main>
