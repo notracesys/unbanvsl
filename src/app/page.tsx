@@ -6,9 +6,20 @@ import { ShieldAlert, Volume2, Lock, AlertTriangle } from 'lucide-react';
 
 export default function MobileSalesPage() {
   const [hasMounted, setHasMounted] = useState(false);
+  const [recoveryCount, setRecoveryCount] = useState(247);
 
   useEffect(() => {
     setHasMounted(true);
+    
+    // Inicia com um número aleatório entre 230 e 280
+    setRecoveryCount(Math.floor(Math.random() * (280 - 230 + 1)) + 230);
+
+    // Incrementa o número aleatoriamente para parecer "ao vivo"
+    const interval = setInterval(() => {
+      setRecoveryCount(prev => prev + Math.floor(Math.random() * 3) + 1);
+    }, 4500);
+
+    return () => clearInterval(interval);
   }, []);
 
   if (!hasMounted) return null;
@@ -33,7 +44,7 @@ export default function MobileSalesPage() {
         <section className="w-full relative group max-w-[320px]">
           <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-20 bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-md shadow-xl flex items-center gap-2 whitespace-nowrap">
              <div className="w-2 h-2 bg-red-600 rounded-full animate-pulse" />
-             <span className="text-[10px] font-bold text-zinc-300 uppercase">+200 RECUPERAÇÕES HOJE!</span>
+             <span className="text-[10px] font-bold text-zinc-300 uppercase">+{recoveryCount} RECUPERAÇÕES HOJE!</span>
           </div>
 
           <div className="w-full aspect-[9/16] bg-zinc-900 rounded-2xl border-2 border-zinc-800 shadow-[0_0_40px_rgba(220,38,38,0.3)] relative overflow-hidden">
