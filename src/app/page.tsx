@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -118,18 +117,12 @@ export default function MobileSalesPage() {
           {!isPlaying && !isEnded && (
             <div className="absolute inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md transition-all duration-300">
               <div className="flex flex-col items-center gap-6 px-6 text-center">
-                <div className="flex gap-4">
+                <div className="flex justify-center">
                   <div 
                     onClick={handlePlayVideo}
                     className="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(220,38,38,0.8)] animate-pulse border-4 border-white/20"
                   >
                     <Play className="w-10 h-10 text-white fill-current ml-1" />
-                  </div>
-                  <div 
-                    onClick={handleRestartVideo}
-                    className="w-20 h-20 bg-zinc-800 rounded-full flex items-center justify-center shadow-lg border-4 border-white/10"
-                  >
-                    <RefreshCcw className="w-10 h-10 text-white" />
                   </div>
                 </div>
                 
