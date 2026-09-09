@@ -44,11 +44,6 @@ export default function MobileSalesPage() {
         
         {/* Hook Agressivo com Foco em Escassez Extrema */}
         <header className="text-center space-y-4 mb-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-600/20 border border-red-600/40 rounded-full mb-2">
-            <AlertTriangle className="w-3 h-3 text-red-500" />
-            <span className="text-[9px] font-black text-red-500 uppercase tracking-widest">Tentativa de bloqueio detectada</span>
-          </div>
-
           <h1 className="text-[26px] leading-[1.1] font-black italic uppercase tracking-tighter">
             ASSISTA AGORA ANTES QUE <br />
             ESSE VÍDEO SEJA <span className="text-red-600">RETIRADO DO AR.</span>
