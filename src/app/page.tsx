@@ -19,7 +19,9 @@ export default function MobileSalesPage() {
 
   useEffect(() => {
     setHasMounted(true);
+    // Gera o ID do visitante no cliente para evitar erros de hidratação
     visitorId.current = Math.random().toString(36).substring(7);
+    
     const interval = setInterval(() => {
       setRecoveryCount(prev => prev + (Math.random() > 0.7 ? 1 : 0));
     }, 15000);
@@ -230,11 +232,12 @@ export default function MobileSalesPage() {
         mux-player::part(control-bar) {
           background: transparent !important;
           pointer-events: none !important;
+          padding: 0 !important;
         }
 
-        /* OCULTA BOTÕES ESPECÍFICOS */
-        mux-player::part(play-button),
+        /* OCULTA CADA ÍCONE INDIVIDUALMENTE COM FORÇA TOTAL */
         mux-player::part(mute-button),
+        mux-player::part(play-button),
         mux-player::part(volume-range),
         mux-player::part(fullscreen-button),
         mux-player::part(settings-menu-button),
@@ -246,15 +249,22 @@ export default function MobileSalesPage() {
         mux-player::part(seek-backward-button),
         mux-player::part(seek-forward-button),
         mux-player::part(top-chrome),
+        mux-player::part(bottom-chrome),
         mux-player::part(replay-button) {
           display: none !important;
+          visibility: hidden !important;
+          opacity: 0 !important;
+          width: 0 !important;
+          height: 0 !important;
+          margin: 0 !important;
+          padding: 0 !important;
         }
 
         /* MOSTRA APENAS A BARRA DE PROGRESSO VISUAL NA BASE */
         mux-player::part(time-range) {
           display: block !important;
           flex: 1 !important;
-          height: 6px !important;
+          height: 4px !important;
           pointer-events: none !important;
           position: absolute !important;
           bottom: 0 !important;
@@ -263,6 +273,14 @@ export default function MobileSalesPage() {
           opacity: 0.9 !important;
           margin: 0 !important;
           padding: 0 !important;
+          --media-range-thumb-display: none !important;
+          --media-time-range-thumb-display: none !important;
+        }
+
+        /* REMOVE A BOLINHA BRANCA (THUMB) DA BARRA DE PROGRESSO */
+        mux-player::part(time-range)::part(thumb) {
+          display: none !important;
+          opacity: 0 !important;
         }
 
         mux-player {
