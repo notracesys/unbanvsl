@@ -112,11 +112,11 @@ export default function MobileSalesPage() {
                   
                   <div className="bg-white/5 border border-white/10 p-4 rounded-xl backdrop-blur-sm">
                     <p className="text-white text-sm font-bold leading-tight uppercase">
-                      O SISTEMA BYPASS ESTÁ SENDO <br />
-                      <span className="text-red-500 text-lg">DESCONECTADO...</span>
+                      ESSE MACETE VAI SUMIR E <br />
+                      <span className="text-red-500 text-lg">NUNCA MAIS VOLTARÁ!</span>
                     </p>
                     <p className="text-zinc-400 text-[10px] mt-2 font-medium">
-                      Se você fechar ou parar o vídeo, sua conta será marcada como "IRRECUPERÁVEL" nos servidores da Garena.
+                      Se você fechar ou parar o vídeo agora, perderá a única chance de ver como ele funciona.
                     </p>
                   </div>
                   
