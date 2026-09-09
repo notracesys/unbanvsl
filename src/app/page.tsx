@@ -52,6 +52,26 @@ export default function MobileSalesPage() {
     }
   };
 
+  const handleRestartVideo = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (playerRef.current) {
+      playerRef.current.currentTime = 0;
+      playerRef.current.play();
+      setIsPlaying(true);
+      setIsEnded(false);
+    }
+  };
+
+  const togglePlayPause = () => {
+    if (!playerRef.current) return;
+    if (isPlaying) {
+      playerRef.current.pause();
+      setIsPlaying(false);
+    } else {
+      handlePlayVideo();
+    }
+  };
+
   const handleTimeUpdate = (e: any) => {
     const video = e.target;
     if (!video.duration) return;
@@ -90,18 +110,27 @@ export default function MobileSalesPage() {
 
         {/* Player Container */}
         <div 
-          className="w-full aspect-[9/16] bg-zinc-900 rounded-2xl border-2 border-zinc-800 shadow-[0_0_40px_rgba(220,38,38,0.3)] relative overflow-hidden"
+          className="w-full aspect-[9/16] bg-zinc-900 rounded-2xl border-2 border-zinc-800 shadow-[0_0_40px_rgba(220,38,38,0.3)] relative overflow-hidden cursor-pointer"
           onContextMenu={(e) => e.preventDefault()}
+          onClick={togglePlayPause}
         >
           {/* Overlay de Pausa / Escassez Extrema */}
           {!isPlaying && !isEnded && (
-            <div 
-              className="absolute inset-0 z-[100] flex items-center justify-center cursor-pointer bg-black/80 backdrop-blur-md transition-all duration-300"
-              onClick={handlePlayVideo}
-            >
+            <div className="absolute inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md transition-all duration-300">
               <div className="flex flex-col items-center gap-6 px-6 text-center">
-                <div className="w-24 h-24 bg-red-600 rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(220,38,38,0.8)] animate-pulse border-4 border-white/20">
-                  <Play className="w-12 h-12 text-white fill-current ml-1" />
+                <div className="flex gap-4">
+                  <div 
+                    onClick={handlePlayVideo}
+                    className="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(220,38,38,0.8)] animate-pulse border-4 border-white/20"
+                  >
+                    <Play className="w-10 h-10 text-white fill-current ml-1" />
+                  </div>
+                  <div 
+                    onClick={handleRestartVideo}
+                    className="w-20 h-20 bg-zinc-800 rounded-full flex items-center justify-center shadow-lg border-4 border-white/10"
+                  >
+                    <RefreshCcw className="w-10 h-10 text-white" />
+                  </div>
                 </div>
                 
                 <div className="space-y-4">
@@ -132,7 +161,7 @@ export default function MobileSalesPage() {
           {isEnded && (
             <div 
               className="absolute inset-0 z-[100] flex items-center justify-center cursor-pointer bg-black/90 backdrop-blur-lg"
-              onClick={handlePlayVideo}
+              onClick={handleRestartVideo}
             >
               <div className="flex flex-col items-center gap-4">
                 <div className="w-20 h-20 bg-zinc-100 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.2)]">
@@ -152,7 +181,7 @@ export default function MobileSalesPage() {
               viewer_user_id: visitorId.current,
             }}
             streamType="on-demand"
-            className="w-full h-full object-cover pointer-events-auto"
+            className="w-full h-full object-cover"
             onTimeUpdate={handleTimeUpdate}
             onPlay={() => { setIsPlaying(true); setIsEnded(false); }}
             onPause={() => setIsPlaying(false)}
@@ -200,57 +229,52 @@ export default function MobileSalesPage() {
         Uso exclusivo para recuperação de contas legítimas.
       </footer>
 
-      {/* Estilos para blindar o player de forma inteligente */}
+      {/* Estilos para blindar o player de forma agressiva */}
       <style dangerouslySetInnerHTML={{ __html: `
         .text-glow-red { text-shadow: 0 0 15px rgba(220, 38, 38, 0.7); }
         
-        /* OCULTA TODOS OS CONTROLES QUE PERMITEM ADIANTAR OU SAIR DO VÍDEO */
+        /* OCULTA ABSOLUTAMENTE TUDO DO PAINEL DE CONTROLE NATIVO */
+        mux-player::part(control-bar) {
+          background: transparent !important;
+          pointer-events: none !important;
+        }
+
+        /* OCULTA BOTÕES ESPECÍFICOS */
+        mux-player::part(play-button),
+        mux-player::part(mute-button),
+        mux-player::part(volume-range),
         mux-player::part(fullscreen-button),
+        mux-player::part(settings-menu-button),
+        mux-player::part(playback-rate-button),
+        mux-player::part(pip-button),
+        mux-player::part(airplay-button),
+        mux-player::part(cast-button),
+        mux-player::part(captions-button),
         mux-player::part(seek-backward-button),
         mux-player::part(seek-forward-button),
-        mux-player::part(captions-button),
-        mux-player::part(airplay-button),
-        mux-player::part(settings-menu-button),
-        mux-player::part(cast-button),
-        mux-player::part(pip-button),
         mux-player::part(top-chrome),
-        mux-player::part(mute-button),
-        mux-player::part(volume-range) {
+        mux-player::part(replay-button) {
           display: none !important;
         }
 
-        /* PERMITE PAUSAR E ASSISTIR NOVAMENTE PELOS CONTROLES NATIVOS TAMBÉM */
-        mux-player::part(play-button),
-        mux-player::part(replay-button) {
-          display: flex !important;
-          pointer-events: auto !important;
-        }
-
-        /* CONFIGURA A BARRA DE CONTROLE PARA SER VISÍVEL MAS NÃO INTERATIVA */
-        mux-player::part(control-bar) {
-          display: flex !important;
-          background: transparent !important;
-          padding: 0 12px 12px 12px !important;
-          position: absolute !important;
-          bottom: 0 !important;
-          left: 0 !important;
-          right: 0 !important;
-          pointer-events: auto !important;
-        }
-
-        /* TRAVA APENAS A BARRA DE PROGRESSO (IMPEDE ADIANTAR) */
+        /* MOSTRA APENAS A BARRA DE PROGRESSO VISUAL NA BASE */
         mux-player::part(time-range) {
           display: block !important;
           flex: 1 !important;
           height: 6px !important;
-          pointer-events: none !important; /* BLOQUEIA O ARRASTE/PULO */
+          pointer-events: none !important;
+          position: absolute !important;
+          bottom: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
           opacity: 0.9 !important;
+          margin: 0 !important;
+          padding: 0 !important;
         }
 
         mux-player {
           --media-range-track-background: rgba(255, 255, 255, 0.15);
           --media-range-bar-color: #dc2626;
-          --media-button-icon-width: 24px;
         }
       `}} />
     </main>
