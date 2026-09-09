@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -9,7 +10,7 @@ import MuxPlayer from '@mux/mux-player-react';
 
 export default function MobileSalesPage() {
   const [hasMounted, setHasMounted] = useState(false);
-  const [recoveryCount, setRecoveryCount] = useState(247);
+  const [recoveryCount, setRecoveryCount] = useState(2483);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isEnded, setIsEnded] = useState(false);
   const playerRef = useRef<any>(null);
@@ -19,11 +20,10 @@ export default function MobileSalesPage() {
 
   useEffect(() => {
     setHasMounted(true);
-    // Gera o ID do visitante no cliente para evitar erros de hidratação
-    visitorId.current = Math.random().toString(36).substring(7);
+    visitorId.current = 'vis_' + Math.random().toString(36).substr(2, 9);
     
     const interval = setInterval(() => {
-      setRecoveryCount(prev => prev + (Math.random() > 0.7 ? 1 : 0));
+      setRecoveryCount(prev => prev + Math.floor(Math.random() * 3));
     }, 15000);
     return () => clearInterval(interval);
   }, []);
@@ -69,23 +69,9 @@ export default function MobileSalesPage() {
       playerRef.current.pause();
       setIsPlaying(false);
     } else {
-      handlePlayVideo();
+      playerRef.current.play();
+      setIsPlaying(true);
     }
-  };
-
-  const handleTimeUpdate = (e: any) => {
-    const video = e.target;
-    if (!video.duration) return;
-
-    const progress = (video.currentTime / video.duration) * 100;
-    const milestones = [25, 50, 75, 90, 100];
-
-    milestones.forEach(m => {
-      if (progress >= m && !trackedMilestones.current.has(m)) {
-        trackedMilestones.current.add(m);
-        trackMetric(m, video.currentTime, video.duration);
-      }
-    });
   };
 
   if (!hasMounted) return null;
@@ -105,14 +91,14 @@ export default function MobileSalesPage() {
       <section className="w-full relative group max-w-[320px]">
         {/* Contador de urgência */}
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-20 bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-md shadow-xl flex items-center gap-2 whitespace-nowrap pointer-events-none">
-           <div className="w-2 h-2 bg-red-600 rounded-full animate-pulse" />
-           <span className="text-[10px] font-bold text-zinc-300 uppercase">+{recoveryCount} RECUPERAÇÕES HOJE!</span>
+          <div className="w-2 h-2 bg-red-600 rounded-full animate-ping" />
+          <span className="text-white text-[10px] font-bold uppercase tracking-widest">
+            {recoveryCount} JOGADORES RECUPERANDO AGORA
+          </span>
         </div>
 
-        {/* Player Container */}
         <div 
-          className="w-full aspect-[9/16] bg-zinc-900 rounded-2xl border-2 border-zinc-800 shadow-[0_0_40px_rgba(220,38,38,0.3)] relative overflow-hidden cursor-pointer"
-          onContextMenu={(e) => e.preventDefault()}
+          className="aspect-[9/16] w-full bg-zinc-900 rounded-3xl overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.8)] border border-zinc-800 relative"
           onClick={togglePlayPause}
         >
           {/* Overlay de Pausa / Escassez Extrema */}
@@ -135,18 +121,13 @@ export default function MobileSalesPage() {
                   </div>
                   
                   <div className="bg-white/5 border border-white/10 p-4 rounded-xl backdrop-blur-sm">
-                    <p className="text-white text-sm font-bold leading-tight uppercase">
-                      ESSE MACETE VAI SUMIR E <br />
-                      <span className="text-red-500 text-lg">NUNCA MAIS VOLTARÁ!</span>
-                    </p>
-                    <p className="text-zinc-400 text-[10px] mt-2 font-medium">
-                      Se você fechar ou parar o vídeo agora, perderá a única chance de ver como ele funciona.
+                    <p className="text-zinc-200 text-sm font-bold leading-tight">
+                      ESSE MACETE VAI SUMIR... <br />
+                      <span className="text-zinc-400 text-[11px] font-normal mt-2 block">
+                        Se você parar agora, outra pessoa pegará sua vaga no sistema de desbanimento. Continue assistindo.
+                      </span>
                     </p>
                   </div>
-                  
-                  <p className="text-zinc-200 text-xs font-black uppercase tracking-widest animate-pulse">
-                    CLIQUE PARA VOLTAR A ASSISTIR IMEDIATAMENTE
-                  </p>
                 </div>
               </div>
             </div>
@@ -162,7 +143,7 @@ export default function MobileSalesPage() {
                 <div className="w-20 h-20 bg-zinc-100 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.2)]">
                   <RefreshCcw className="w-10 h-10 text-black" />
                 </div>
-                <span className="text-white text-xs font-black uppercase tracking-widest">ASSISTIR NOVAMENTE</span>
+                <span className="text-white text-[10px] font-black uppercase tracking-widest">ASSISTIR NOVAMENTE</span>
               </div>
             </div>
           )}
@@ -177,18 +158,31 @@ export default function MobileSalesPage() {
             }}
             streamType="on-demand"
             className="w-full h-full object-cover"
-            onTimeUpdate={handleTimeUpdate}
-            onPlay={() => { setIsPlaying(true); setIsEnded(false); }}
+            onTimeUpdate={(e: any) => {
+              const currentTime = e.target.currentTime;
+              const duration = e.target.duration;
+              const progress = (currentTime / duration) * 100;
+              
+              [25, 50, 75, 90, 100].forEach(m => {
+                if (progress >= m && !trackedMilestones.current.has(m)) {
+                  trackedMilestones.current.add(m);
+                  trackMetric(m, currentTime, duration);
+                }
+              });
+            }}
+            onEnded={() => {
+              setIsPlaying(false);
+              setIsEnded(true);
+            }}
+            onPlay={() => setIsPlaying(true)}
             onPause={() => setIsPlaying(false)}
-            onEnded={() => { setIsPlaying(false); setIsEnded(true); }}
-            placeholder="https://picsum.photos/seed/vsl-ff-poster/720/1280"
           />
         </div>
 
-        {/* Chamada de Áudio */}
-        <div className="mt-6 flex flex-col items-center gap-2">
-          <div className="flex items-center gap-2 text-white/90 animate-pulse">
-            <Volume2 className="w-5 h-5 text-red-600" />
+        {/* Alerta de som abaixo do player */}
+        <div className="mt-4 flex flex-col items-center gap-2">
+          <div className="flex items-center gap-3 text-zinc-400 animate-pulse-slow">
+            <Volume2 className="w-5 h-5" />
             <span className="text-[12px] font-black uppercase tracking-tighter text-center">LIGUE O SOM PARA RECEBER AS INSTRUÇÕES</span>
           </div>
           <div className="w-full max-w-[180px] h-1 bg-zinc-800 rounded-full overflow-hidden relative opacity-30">
@@ -206,14 +200,21 @@ export default function MobileSalesPage() {
           QUERO DESBANIR AGORA!
           <span className="text-[10px] mt-1 not-italic tracking-normal">Acesso vitalício ao sistema bypass</span>
         </Button>
+        
+        <div className="mt-4 flex items-center gap-2 text-zinc-500">
+          <Lock className="w-3 h-3" />
+          <span className="text-[10px] font-bold uppercase tracking-tight">Pagamento 100% seguro via criptografia</span>
+        </div>
 
-        {/* Logos e Segurança */}
-        <div className="flex flex-col items-center gap-4 py-8 w-full">
-          <div className="flex items-center gap-4 grayscale opacity-40">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/0/05/Garena_logo.svg" alt="Garena" className="h-4" />
-            <div className="w-px h-4 bg-zinc-800" />
-            <div className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest text-zinc-400">
-              <Lock className="w-3 h-3" /> BYPASS ANTIBAN ATIVO
+        {/* Prova social minimalista */}
+        <div className="mt-6 w-full space-y-3">
+          <div className="bg-zinc-900/50 border border-zinc-800 p-3 rounded-xl flex gap-3">
+            <div className="w-10 h-10 rounded-full bg-zinc-800 flex-shrink-0 flex items-center justify-center text-zinc-500 font-bold">
+              JS
+            </div>
+            <div className="flex flex-col">
+              <span className="text-white text-[11px] font-black italic">JOÃO S.</span>
+              <p className="text-zinc-400 text-[10px] leading-tight mt-1">Funcionou na hora! Já recuperei minha conta com a Calça Angelical que tava banida faz 1 ano.</p>
             </div>
           </div>
         </div>
@@ -230,14 +231,14 @@ export default function MobileSalesPage() {
         
         /* OCULTA ABSOLUTAMENTE TUDO DO PAINEL DE CONTROLE NATIVO */
         mux-player::part(control-bar) {
-          background: transparent !important;
+          display: none !important;
+          opacity: 0 !important;
           pointer-events: none !important;
-          padding: 0 !important;
         }
 
-        /* OCULTA CADA ÍCONE INDIVIDUALMENTE COM FORÇA TOTAL */
-        mux-player::part(mute-button),
+        /* REMOVE QUALQUER ELEMENTO DE INTERAÇÃO NATIVO */
         mux-player::part(play-button),
+        mux-player::part(mute-button),
         mux-player::part(volume-range),
         mux-player::part(fullscreen-button),
         mux-player::part(settings-menu-button),
@@ -245,46 +246,29 @@ export default function MobileSalesPage() {
         mux-player::part(pip-button),
         mux-player::part(airplay-button),
         mux-player::part(cast-button),
-        mux-player::part(captions-button),
-        mux-player::part(seek-backward-button),
-        mux-player::part(seek-forward-button),
+        mux-player::part(center-controls),
         mux-player::part(top-chrome),
-        mux-player::part(bottom-chrome),
-        mux-player::part(replay-button) {
+        mux-player::part(bottom-chrome) {
           display: none !important;
-          visibility: hidden !important;
           opacity: 0 !important;
-          width: 0 !important;
-          height: 0 !important;
-          margin: 0 !important;
-          padding: 0 !important;
         }
 
-        /* MOSTRA APENAS A BARRA DE PROGRESSO VISUAL NA BASE */
+        /* MANTÉM APENAS A BARRA DE PROGRESSO VISUAL NA BASE SE NECESSÁRIO, 
+           MAS AQUI VAMOS OCULTAR TUDO PARA GARANTIR LIMPEZA TOTAL */
         mux-player::part(time-range) {
           display: block !important;
-          flex: 1 !important;
-          height: 4px !important;
-          pointer-events: none !important;
           position: absolute !important;
           bottom: 0 !important;
           left: 0 !important;
           right: 0 !important;
-          opacity: 0.9 !important;
-          margin: 0 !important;
-          padding: 0 !important;
+          height: 3px !important;
+          pointer-events: none !important;
           --media-range-thumb-display: none !important;
           --media-time-range-thumb-display: none !important;
         }
 
-        /* REMOVE A BOLINHA BRANCA (THUMB) DA BARRA DE PROGRESSO */
-        mux-player::part(time-range)::part(thumb) {
-          display: none !important;
-          opacity: 0 !important;
-        }
-
         mux-player {
-          --media-range-track-background: rgba(255, 255, 255, 0.15);
+          --media-range-track-background: rgba(255, 255, 255, 0.1);
           --media-range-bar-color: #dc2626;
         }
       `}} />
