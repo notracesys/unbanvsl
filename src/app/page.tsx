@@ -80,11 +80,11 @@ export default function MobileSalesPage() {
     <main className="min-h-screen bg-[#050505] flex flex-col items-center px-4 pt-4 pb-20 select-none overflow-x-hidden">
       <header className="w-full max-w-[360px] text-center mb-6 space-y-3">
         <h1 className="text-white text-2xl font-black italic uppercase tracking-tighter leading-[0.9]">
-          O ACESSO SERÁ <br />
-          <span className="text-red-600 text-[2.8rem] block animate-pulse text-glow-red">RETIRADO DO AR.</span>
+          ESSE MACETE IRÁ <br />
+          <span className="text-red-600 text-[2.8rem] block animate-pulse text-glow-red">SAIR DO AR A QUALQUER MOMENTO.</span>
         </h1>
         <p className="text-zinc-300 text-[13px] font-medium leading-tight px-2">
-          Já solicitaram a queda imediata deste site. Aproveite enquanto há tempo para recuperar sua conta.
+          Já solicitaram a queda deste site. Aproveite enquanto há tempo para recuperar sua conta.
         </p>
       </header>
 
