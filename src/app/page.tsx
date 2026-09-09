@@ -36,7 +36,7 @@ export default function MobileSalesPage() {
           </h1>
 
           <p className="text-zinc-300 text-[13px] font-medium leading-tight px-2">
-            A Garena já solicitou a queda deste site. Recupere sua conta <span className="text-white">em 5 minutos</span> ou perca suas skins e passes <span className="text-red-600">para sempre.</span>
+            A Garena já solicitou a queda deste site. Recupere sua conta enquanto há tempo.
           </p>
         </header>
 
