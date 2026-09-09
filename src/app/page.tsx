@@ -3,18 +3,19 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Volume2, Lock } from 'lucide-react';
-import { getFirestore, collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { Volume2, Lock, Play } from 'lucide-react';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { initializeFirebase } from '@/firebase';
+import MuxPlayer from '@mux/mux-player-react';
 
 export default function MobileSalesPage() {
   const [hasMounted, setHasMounted] = useState(false);
   const [recoveryCount, setRecoveryCount] = useState(247);
   const [isPlaying, setIsPlaying] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const playerRef = useRef<any>(null);
   const visitorId = useRef(`vis_${Math.random().toString(36).substr(2, 9)}`);
+  const trackedMilestones = useRef(new Set<number>());
   
-  // Firebase metrics
   const { firestore } = initializeFirebase();
 
   useEffect(() => {
@@ -28,48 +29,41 @@ export default function MobileSalesPage() {
     return () => clearInterval(interval);
   }, []);
 
-  const trackMetric = (milestone: number) => {
-    if (!firestore || !videoRef.current) return;
+  const trackMetric = (milestone: number, currentTime: number = 0, duration: number = 0) => {
+    if (!firestore) return;
     
     addDoc(collection(firestore, 'metrics'), {
       visitorId: visitorId.current,
-      watchTime: videoRef.current.currentTime,
-      totalDuration: videoRef.current.duration || 0,
+      watchTime: currentTime,
+      totalDuration: duration,
       percentage: milestone,
-      device: navigator.userAgent.includes('Mobi') ? 'mobile' : 'desktop',
+      device: typeof navigator !== 'undefined' && navigator.userAgent.includes('Mobi') ? 'mobile' : 'desktop',
       createdAt: serverTimestamp(),
-    }).catch(err => console.error("Error tracking metric:", err));
+    }).catch(err => {}); // Silent catch for metrics
   };
 
   const handlePlayVideo = () => {
-    if (videoRef.current) {
-      videoRef.current.play();
+    if (playerRef.current) {
+      playerRef.current.play();
       setIsPlaying(true);
       trackMetric(0); // Play event
     }
   };
 
-  // Track milestones
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
+  const handleTimeUpdate = (e: any) => {
+    const video = e.target;
+    if (!video.duration) return;
 
+    const progress = (video.currentTime / video.duration) * 100;
     const milestones = [25, 50, 75, 90, 100];
-    const tracked = new Set();
 
-    const handleTimeUpdate = () => {
-      const progress = (video.currentTime / video.duration) * 100;
-      milestones.forEach(m => {
-        if (progress >= m && !tracked.has(m)) {
-          tracked.add(m);
-          trackMetric(m);
-        }
-      });
-    };
-
-    video.addEventListener('timeupdate', handleTimeUpdate);
-    return () => video.removeEventListener('timeupdate', handleTimeUpdate);
-  }, [isPlaying]);
+    milestones.forEach(m => {
+      if (progress >= m && !trackedMilestones.current.has(m)) {
+        trackedMilestones.current.add(m);
+        trackMetric(m, video.currentTime, video.duration);
+      }
+    });
+  };
 
   if (!hasMounted) return null;
 
@@ -101,7 +95,7 @@ export default function MobileSalesPage() {
               >
                 <div className="flex flex-col items-center animate-bounce-slow">
                   <div className="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(220,38,38,0.8)] mb-6">
-                    <div className="w-0 h-0 border-t-[12px] border-t-transparent border-l-[22px] border-l-white border-b-[12px] border-b-transparent ml-2" />
+                    <Play className="w-10 h-10 text-white fill-current ml-1" />
                   </div>
                 </div>
 
@@ -117,14 +111,21 @@ export default function MobileSalesPage() {
               </div>
             )}
             
-            <video 
-              ref={videoRef}
+            <MuxPlayer
+              ref={playerRef}
+              playbackId="QDJSIlmrorxXFDYyElAGNofuG8lo01zgwpEdRNl8RgKw"
+              metadata={{
+                video_id: "vsl-ff-recovery",
+                video_title: "VSL Free Fire Recovery",
+                viewer_user_id: visitorId.current,
+              }}
+              streamType="on-demand"
               className="w-full h-full object-cover"
-              playsInline
-              poster="https://picsum.photos/seed/vsl-ff-poster/720/1280"
-            >
-              <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4" />
-            </video>
+              onTimeUpdate={handleTimeUpdate}
+              onPlay={() => setIsPlaying(true)}
+              placeholder="https://picsum.photos/seed/vsl-ff-poster/720/1280"
+              primaryColor="#ef4444"
+            />
           </div>
         </section>
 
