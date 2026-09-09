@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { ShieldAlert, Timer, Lock, Zap, ChevronRight, Volume2 } from 'lucide-react';
+import { ShieldAlert, Timer, Lock, ChevronRight, Volume2 } from 'lucide-react';
 
 export default function MobileSalesPage() {
   const [timeLeft, setTimeLeft] = useState(415); // 6m 55s
@@ -44,13 +44,6 @@ export default function MobileSalesPage() {
         
         {/* Hook Agressivo */}
         <header className="text-center space-y-4 mb-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-red-600/10 border border-red-600/30 rounded-full">
-            <Zap className="w-3 h-3 text-red-600 fill-current" />
-            <span className="text-red-600 text-[9px] font-bold uppercase tracking-widest">
-              Detectamos seu ID: Injeção Disponível
-            </span>
-          </div>
-          
           <h1 className="text-[26px] leading-[1.1] font-black italic uppercase tracking-tighter">
             RECUPERE SUA CONTA <span className="text-red-600 underline decoration-[6px]">BANIDA</span><br />
             <span className="text-white">EM MENOS DE</span> <span className="text-yellow-400 text-[32px]">5 MINUTOS</span><br />
@@ -115,7 +108,7 @@ export default function MobileSalesPage() {
             className="w-full py-10 text-xl font-black uppercase italic tracking-tighter bg-[#22c55e] hover:bg-[#16a34a] text-white rounded-2xl shadow-[0_8px_0_rgb(21,128,61)] active:translate-y-1 active:shadow-[0_4px_0_rgb(21,128,61)] transition-all duration-75 flex flex-col leading-none"
           >
             QUERO DESBANIR AGORA!
-            <span className="text-[10px] mt-1 opacity-80 not-italic tracking-normal">Acesso imediato ao sistema de injeção</span>
+            <span className="text-[10px] mt-1 not-italic tracking-normal">Acesso imediato ao sistema de injeção</span>
           </Button>
 
           {/* Social Proof Sutil de Segurança */}
