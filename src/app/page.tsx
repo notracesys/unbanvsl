@@ -29,7 +29,6 @@ export default function MobileSalesPage() {
     return () => clearInterval(interval);
   }, []);
 
-  // Efeito para rolar até o botão quando ele aparecer
   useEffect(() => {
     if (showCTA && ctaRef.current) {
       setTimeout(() => {
@@ -89,7 +88,7 @@ export default function MobileSalesPage() {
 
   return (
     <main className="min-h-screen bg-[#050505] flex flex-col items-center px-4 pt-4 pb-20 select-none overflow-x-hidden">
-      <header className="w-full max-w-[480px] text-center mb-6 space-y-2">
+      <header className="w-full max-w-[480px] text-center mb-10 space-y-2">
         <h1 className="text-white text-[1.4rem] font-black italic uppercase tracking-tighter leading-[1.1] mb-6">
           ESSE MACETE IRÁ <span className="text-red-600 text-[1.6rem] animate-pulse text-glow-red">SAIR DO AR A QUALQUER MOMENTO.</span>
         </h1>
@@ -173,7 +172,6 @@ export default function MobileSalesPage() {
               const duration = e.target.duration;
               const progress = (currentTime / duration) * 100;
               
-              // Mostrar CTA aos 2 minutos e 8 segundos (128 segundos)
               if (currentTime >= 128 && !showCTA) {
                 setShowCTA(true);
               }
@@ -225,7 +223,6 @@ export default function MobileSalesPage() {
             <span className="text-[10px] font-bold uppercase tracking-tight">Pagamento 100% seguro via criptografia</span>
           </div>
 
-          {/* Prova social minimalista */}
           <div className="mt-6 w-full space-y-3">
             <div className="bg-zinc-900/50 border border-zinc-800 p-3 rounded-xl flex gap-3">
               <div className="w-10 h-10 rounded-full bg-zinc-800 flex-shrink-0 flex items-center justify-center text-zinc-500 font-bold">
@@ -245,11 +242,9 @@ export default function MobileSalesPage() {
         Uso exclusivo para recuperação de contas legítimas.
       </footer>
 
-      {/* Estilos para blindar o player de forma agressiva */}
       <style dangerouslySetInnerHTML={{ __html: `
         .text-glow-red { text-shadow: 0 0 15px rgba(220, 38, 38, 0.7); }
         
-        /* OCULTA ABSOLUTAMENTE TUDO DO PAINEL DE CONTROLE NATIVO */
         mux-player::part(control-bar),
         mux-player::part(play-button),
         mux-player::part(mute-button),
@@ -269,7 +264,6 @@ export default function MobileSalesPage() {
           pointer-events: none !important;
         }
 
-        /* MANTÉM APENAS A BARRA DE PROGRESSO VISUAL NA BASE */
         mux-player::part(time-range) {
           display: block !important;
           position: absolute !important;
