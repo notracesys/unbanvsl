@@ -13,19 +13,15 @@ export default function MobileSalesPage() {
   const [recoveryCount, setRecoveryCount] = useState(247);
   const [isPlaying, setIsPlaying] = useState(false);
   const playerRef = useRef<any>(null);
-  const visitorId = useRef(`vis_${Math.random().toString(36).substr(2, 9)}`);
-  const trackedMilestones = useRef(new Set<number>());
-  
+  const visitorId = useRef<string>(Math.random().toString(36).substring(7));
+  const trackedMilestones = useRef<Set<number>>(new Set());
   const { firestore } = initializeFirebase();
 
   useEffect(() => {
     setHasMounted(true);
-    setRecoveryCount(Math.floor(Math.random() * (280 - 230 + 1)) + 230);
-
     const interval = setInterval(() => {
-      setRecoveryCount(prev => prev + Math.floor(Math.random() * 3) + 1);
-    }, 4500);
-
+      setRecoveryCount(prev => prev + (Math.random() > 0.7 ? 1 : 0));
+    }, 15000);
     return () => clearInterval(interval);
   }, []);
 
@@ -39,14 +35,14 @@ export default function MobileSalesPage() {
       percentage: milestone,
       device: typeof navigator !== 'undefined' && navigator.userAgent.includes('Mobi') ? 'mobile' : 'desktop',
       createdAt: serverTimestamp(),
-    }).catch(err => {}); // Silent catch for metrics
+    }).catch(() => {}); 
   };
 
   const handlePlayVideo = () => {
     if (playerRef.current) {
       playerRef.current.play();
       setIsPlaying(true);
-      trackMetric(0); // Play event
+      trackMetric(0); 
     }
   };
 
@@ -68,113 +64,100 @@ export default function MobileSalesPage() {
   if (!hasMounted) return null;
 
   return (
-    <main className="min-h-screen bg-[#050505] text-white font-sans selection:bg-red-600 overflow-x-hidden">
-      <div className="w-full max-w-[450px] mx-auto px-5 py-8 flex flex-col items-center">
-        
-        <header className="text-center space-y-4 mb-8">
-          <h1 className="text-[26px] leading-[1.1] font-black italic uppercase tracking-tighter">
-            ASSISTA AGORA ANTES QUE <br />
-            ESSE VÍDEO SEJA <span className="text-red-600 text-glow-red">RETIRADO DO AR.</span>
-          </h1>
-          <p className="text-zinc-300 text-[13px] font-medium leading-tight px-2 text-balance">
-            A Garena já solicitou a queda deste site. Recupere sua conta enquanto há tempo.
-          </p>
-        </header>
+    <main className="min-h-screen bg-[#050505] flex flex-col items-center px-4 pt-4 pb-20 select-none overflow-x-hidden">
+      <header className="w-full max-w-[360px] text-center mb-6 space-y-3">
+        <h1 className="text-white text-2xl font-black italic uppercase tracking-tighter leading-[0.9]">
+          O ACESSO SERÁ <br />
+          <span className="text-red-600 text-[2.8rem] block animate-pulse text-glow-red">RETIRADO DO AR.</span>
+        </h1>
+        <p className="text-zinc-300 text-[13px] font-medium leading-tight px-2">
+          A Garena já solicitou a queda deste site. Recupere sua conta enquanto há tempo.
+        </p>
+      </header>
 
-        <section className="w-full relative group max-w-[320px]">
-          <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-20 bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-md shadow-xl flex items-center gap-2 whitespace-nowrap">
-             <div className="w-2 h-2 bg-red-600 rounded-full animate-pulse" />
-             <span className="text-[10px] font-bold text-zinc-300 uppercase">+{recoveryCount} RECUPERAÇÕES HOJE!</span>
-          </div>
+      <section className="w-full relative group max-w-[320px]">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-20 bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-md shadow-xl flex items-center gap-2 whitespace-nowrap">
+           <div className="w-2 h-2 bg-red-600 rounded-full animate-pulse" />
+           <span className="text-[10px] font-bold text-zinc-300 uppercase">+{recoveryCount} RECUPERAÇÕES HOJE!</span>
+        </div>
 
-          <div 
-            className="w-full aspect-[9/16] bg-zinc-900 rounded-2xl border-2 border-zinc-800 shadow-[0_0_40px_rgba(220,38,38,0.3)] relative overflow-hidden"
-            onContextMenu={(e) => e.preventDefault()}
-          >
-            {!isPlaying && (
-              <div 
-                className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/80 transition-all active:bg-black/60 cursor-pointer"
-                onClick={handlePlayVideo}
-              >
-                <div className="flex flex-col items-center animate-bounce-slow">
-                  <div className="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(220,38,38,0.8)] mb-6">
-                    <Play className="w-10 h-10 text-white fill-current ml-1" />
-                  </div>
+        <div 
+          className="w-full aspect-[9/16] bg-zinc-900 rounded-2xl border-2 border-zinc-800 shadow-[0_0_40px_rgba(220,38,38,0.3)] relative overflow-hidden"
+          onContextMenu={(e) => e.preventDefault()}
+        >
+          {!isPlaying && (
+            <div 
+              className="absolute inset-0 z-10 flex items-center justify-center cursor-pointer bg-black/40 backdrop-blur-[2px]"
+              onClick={handlePlayVideo}
+            >
+              <div className="flex flex-col items-center gap-4">
+                <div className="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(220,38,38,0.6)] animate-bounce group-active:scale-95 transition-transform">
+                  <Play className="w-10 h-10 text-white fill-current ml-1" />
                 </div>
-
-                <div className="px-6 py-4 bg-red-600/90 backdrop-blur-md rounded-2xl border border-white/20 flex flex-col items-center gap-2 shadow-2xl mx-4">
-                  <div className="flex items-center gap-3">
-                    <Volume2 className="w-8 h-8 text-white animate-pulse" />
-                    <span className="text-lg font-black uppercase italic tracking-tighter text-white text-center">LIGUE O SOM!</span>
-                  </div>
-                  <p className="text-[10px] font-bold text-white/90 uppercase text-center leading-tight">
-                    INSTRUÇÕES DE DESBANIMENTO <br /> EXPOSTAS NESTE VÍDEO
-                  </p>
+                <div className="bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/20">
+                  <span className="text-white text-[10px] font-black uppercase tracking-widest">CLIQUE PARA ASSISTIR</span>
                 </div>
-              </div>
-            )}
-            
-            <MuxPlayer
-              ref={playerRef}
-              playbackId="QDJSIlmrorxXFDYyElAGNofuG8lo01zgwpEdRNl8RgKw"
-              metadata={{
-                video_id: "vsl-ff-recovery",
-                video_title: "VSL Free Fire Recovery",
-                viewer_user_id: visitorId.current,
-              }}
-              streamType="on-demand"
-              className="w-full h-full object-cover vsl-player"
-              onTimeUpdate={handleTimeUpdate}
-              onPlay={() => setIsPlaying(true)}
-              placeholder="https://picsum.photos/seed/vsl-ff-poster/720/1280"
-              primaryColor="#ef4444"
-              layout="vod"
-            />
-          </div>
-
-          <div className="mt-4 text-center">
-             <p className="text-red-500 text-[12px] font-black uppercase tracking-widest flex items-center justify-center gap-2 animate-pulse">
-                <Volume2 className="w-4 h-4 fill-current" />
-                Aumente o volume, o vídeo tem som!
-             </p>
-          </div>
-        </section>
-
-        <section className="w-full mt-10 flex flex-col items-center space-y-6">
-          <Button 
-            className="w-full py-10 text-xl font-black uppercase italic tracking-tighter bg-[#22c55e] hover:bg-[#16a34a] text-white rounded-2xl shadow-[0_8px_0_rgb(21,128,61)] active:translate-y-1 active:shadow-[0_4px_0_rgb(21,128,61)] transition-all duration-75 flex flex-col leading-none button-pulse"
-          >
-            QUERO DESBANIR AGORA!
-            <span className="text-[10px] mt-1 not-italic tracking-normal">Acesso vitalício ao sistema bypass</span>
-          </Button>
-
-          <div className="flex flex-col items-center gap-4 py-4 w-full">
-            <div className="flex items-center gap-4 grayscale opacity-40">
-              <img src="https://upload.wikimedia.org/wikipedia/commons/0/05/Garena_logo.svg" alt="Garena" className="h-4" />
-              <div className="w-px h-4 bg-zinc-800" />
-              <div className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest text-zinc-400">
-                <Lock className="w-3 h-3" /> BYPASS ANTIBAN ATIVO
               </div>
             </div>
+          )}
+          
+          <MuxPlayer
+            ref={playerRef}
+            playbackId="QDJSIlmrorxXFDYyElAGNofuG8lo01zgwpEdRNl8RgKw"
+            metadata={{
+              video_id: "vsl-ff-recovery",
+              video_title: "VSL Free Fire Recovery",
+              viewer_user_id: visitorId.current,
+            }}
+            streamType="on-demand"
+            className="w-full h-full object-cover vsl-player"
+            onTimeUpdate={handleTimeUpdate}
+            onPlay={() => setIsPlaying(true)}
+            placeholder="https://picsum.photos/seed/vsl-ff-poster/720/1280"
+          />
+        </div>
+
+        <div className="mt-6 flex flex-col items-center gap-2">
+          <div className="flex items-center gap-2 text-white/90 animate-pulse">
+            <Volume2 className="w-5 h-5 text-red-600" />
+            <span className="text-[12px] font-black uppercase tracking-tighter text-center">Aumente o som para receber as instruções</span>
           </div>
-        </section>
+          <div className="w-full max-w-[180px] h-1 bg-zinc-800 rounded-full overflow-hidden relative opacity-30">
+            <div className="absolute inset-0 bg-red-600/50 animate-pulse" />
+          </div>
+        </div>
+      </section>
 
-        <footer className="mt-12 text-[8px] text-zinc-700 text-center uppercase tracking-[0.15em] space-y-2 border-t border-zinc-900 pt-8 w-full">
-          <p>ESTE SITE NÃO POSSUI VÍNCULO COM A GARENA. USE POR SUA CONTA E RISCO.</p>
-          <p>UNBAN ELITE SYSTEM - © 2024</p>
-        </footer>
-      </div>
+      <section className="w-full max-w-[360px] mt-8 flex flex-col items-center">
+        <Button 
+          onClick={() => window.open('https://checkout.exemplo.com', '_blank')}
+          className="w-full h-16 text-lg font-black uppercase italic tracking-tighter bg-[#22c55e] hover:bg-[#16a34a] text-white rounded-2xl shadow-[0_8px_0_rgb(21,128,61)] active:translate-y-1 active:shadow-[0_4px_0_rgb(21,128,61)] transition-all duration-75 flex flex-col leading-none button-pulse"
+        >
+          QUERO DESBANIR AGORA!
+          <span className="text-[10px] mt-1 not-italic tracking-normal">Acesso vitalício ao sistema bypass</span>
+        </Button>
 
-      <style jsx global>{`
-        @keyframes bounce-slow { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-        .animate-bounce-slow { animation: bounce-slow 2s ease-in-out infinite; }
-        @keyframes pulse-cta { 0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6); } 70% { box-shadow: 0 0 0 15px rgba(34, 197, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
-        .button-pulse { animation: pulse-cta 2s infinite; }
-        .text-glow-red { text-shadow: 0 0 10px rgba(220, 38, 38, 0.5); }
+        <div className="flex flex-col items-center gap-4 py-8 w-full">
+          <div className="flex items-center gap-4 grayscale opacity-40">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/0/05/Garena_logo.svg" alt="Garena" className="h-4" />
+            <div className="w-px h-4 bg-zinc-800" />
+            <div className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest text-zinc-400">
+              <Lock className="w-3 h-3" /> BYPASS ANTIBAN ATIVO
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer className="mt-4 text-[8px] text-zinc-600 text-center uppercase font-bold tracking-widest max-w-[280px]">
+        Este site não possui vínculo com a Garena Free Fire. <br />
+        Uso exclusivo para recuperação de contas legítimas.
+      </footer>
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        .text-glow-red { text-shadow: 0 0 15px rgba(220, 38, 38, 0.7); }
         
-        /* 100% BLINDAGEM DO PLAYER - APENAS BARRA DE PROGRESSO VISUAL */
+        /* BLINDAGEM TOTAL DO PLAYER - REMOVE TUDO EXCETO BARRA DE PROGRESSO */
         
-        /* Oculta o menu de 3 pontos, volume, tela cheia e botões de busca */
         mux-player::part(play-button),
         mux-player::part(mute-button),
         mux-player::part(volume-range),
@@ -183,45 +166,41 @@ export default function MobileSalesPage() {
         mux-player::part(seek-forward-button),
         mux-player::part(captions-button),
         mux-player::part(airplay-button),
+        mux-player::part(settings-menu-button),
         mux-player::part(cast-button),
         mux-player::part(pip-button),
-        mux-player::part(playback-rate-button),
-        mux-player::part(time-display),
         mux-player::part(top-chrome),
         mux-player::part(center-controls) {
           display: none !important;
-          visibility: hidden !important;
-          pointer-events: none !important;
         }
 
-        /* Oculta qualquer menu de configurações ou overflow */
-        mux-player::part(settings-menu),
-        mux-player::part(settings-menu-button) {
-          display: none !important;
-        }
-
-        /* Configura a barra de controle para ser apenas um container da barra de tempo */
+        /* Configura a barra de controle para mostrar APENAS o progresso de forma passiva */
         mux-player::part(control-bar) {
           display: flex !important;
           background: transparent !important;
-          padding: 0 12px !important;
+          padding: 0 12px 12px 12px !important;
           position: absolute !important;
-          bottom: 12px !important;
+          bottom: 0 !important;
           left: 0 !important;
           right: 0 !important;
-          z-index: 10 !important;
-          pointer-events: none !important; /* IMPEDE QUALQUER CLIQUE NA BARRA INTEIRA */
+          pointer-events: none !important; /* BLOQUEIA QUALQUER CLIQUE NA BARRA */
         }
 
-        /* A barra de tempo fica visível mas NÃO INTERATIVA */
+        /* A barra de tempo fica visível para o lead ver o avanço, mas sem interação */
         mux-player::part(time-range) {
           display: block !important;
           flex: 1 !important;
-          height: 6px !important;
-          pointer-events: none !important; /* BLOQUEIA O ARRASTE/CLIQUE */
-          opacity: 1 !important;
+          height: 4px !important;
+          pointer-events: none !important; /* BLOQUEIA O ARRASTE/PULO */
+          opacity: 0.8 !important;
         }
-      `}</style>
+
+        mux-player {
+          --media-range-track-background: rgba(255, 255, 255, 0.1);
+          --media-range-bar-color: #dc2626;
+          --controls: none; /* Reforço Mux */
+        }
+      `}} />
     </main>
   );
 }
