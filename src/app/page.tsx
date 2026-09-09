@@ -125,8 +125,7 @@ export default function MobileSalesPage() {
               onPlay={() => setIsPlaying(true)}
               placeholder="https://picsum.photos/seed/vsl-ff-poster/720/1280"
               primaryColor="#ef4444"
-              noFullscreen
-              noPlaybackRate
+              layout="video"
             />
           </div>
         </section>
@@ -163,13 +162,27 @@ export default function MobileSalesPage() {
         .button-pulse { animation: pulse-cta 2s infinite; }
         .text-glow-red { text-shadow: 0 0 10px rgba(220, 38, 38, 0.5); }
         
-        /* Oculta barra de progresso e botões de busca para evitar pular vídeo */
-        .vsl-player::part(media-range),
+        /* Força a ocultação de qualquer elemento de controle que o Mux Player possa injetar */
+        .vsl-player::part(control-bar),
+        .vsl-player::part(media-controller),
+        .vsl-player::part(top-chrome),
+        .vsl-player::part(center-controls),
+        .vsl-player::part(play-button),
         .vsl-player::part(seek-backward-button),
         .vsl-player::part(seek-forward-button),
+        .vsl-player::part(mute-button),
+        .vsl-player::part(volume-range),
+        .vsl-player::part(time-range),
         .vsl-player::part(playback-rate-button),
-        .vsl-player::part(fullscreen-button) {
+        .vsl-player::part(fullscreen-button),
+        .vsl-player::part(cast-button),
+        .vsl-player::part(airplay-button),
+        .vsl-player::part(pip-button),
+        .vsl-player::part(captions-button) {
           display: none !important;
+          visibility: hidden !important;
+          opacity: 0 !important;
+          pointer-events: none !important;
         }
       `}</style>
     </main>
