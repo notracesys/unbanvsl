@@ -223,6 +223,7 @@ export default function MobileSalesPage() {
           </div>
 
           <div className="mt-6 w-full space-y-3">
+            {/* Depoimento 1 */}
             <div className="bg-zinc-900/50 border border-zinc-800 p-3 rounded-xl flex gap-3">
               <div className="w-10 h-10 rounded-full bg-zinc-800 flex-shrink-0 flex items-center justify-center text-zinc-500 font-bold">
                 JS
@@ -230,6 +231,39 @@ export default function MobileSalesPage() {
               <div className="flex flex-col">
                 <span className="text-white text-[11px] font-black italic">JOÃO S.</span>
                 <p className="text-zinc-400 text-[10px] leading-tight mt-1">Funcionou na hora! Já recuperei minha conta com a Calça Angelical que tava banida faz 1 ano.</p>
+              </div>
+            </div>
+
+            {/* Depoimento 2 */}
+            <div className="bg-zinc-900/50 border border-zinc-800 p-3 rounded-xl flex gap-3">
+              <div className="w-10 h-10 rounded-full bg-zinc-800 flex-shrink-0 flex items-center justify-center text-zinc-500 font-bold">
+                MR
+              </div>
+              <div className="flex flex-col">
+                <span className="text-white text-[11px] font-black italic">MATHEUS R.</span>
+                <p className="text-zinc-400 text-[10px] leading-tight mt-1">Mlk do céu, deu certo memo! Minha conta lvl 70 de volta, achei q tinha perdido tudo kkkk vlw demais!</p>
+              </div>
+            </div>
+
+            {/* Depoimento 3 */}
+            <div className="bg-zinc-900/50 border border-zinc-800 p-3 rounded-xl flex gap-3">
+              <div className="w-10 h-10 rounded-full bg-zinc-800 flex-shrink-0 flex items-center justify-center text-zinc-500 font-bold">
+                LP
+              </div>
+              <div className="flex flex-col">
+                <span className="text-white text-[11px] font-black italic">LUCAS P.</span>
+                <p className="text-zinc-400 text-[10px] leading-tight mt-1">Top demais, o suporte ajudou na hora q deu erro no login. Já to jogando ranqueada dnv.</p>
+              </div>
+            </div>
+
+            {/* Depoimento 4 */}
+            <div className="bg-zinc-900/50 border border-zinc-800 p-3 rounded-xl flex gap-3">
+              <div className="w-10 h-10 rounded-full bg-zinc-800 flex-shrink-0 flex items-center justify-center text-zinc-500 font-bold">
+                FG
+              </div>
+              <div className="flex flex-col">
+                <span className="text-white text-[11px] font-black italic">FELIPE G.</span>
+                <p className="text-zinc-400 text-[10px] leading-tight mt-1">Caraca, a garena é mto safada msm, mas o macete salvou. Recuperado com sucesso!</p>
               </div>
             </div>
           </div>
