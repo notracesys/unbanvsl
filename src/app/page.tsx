@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
@@ -24,7 +25,7 @@ export default function MobileSalesPage() {
   const visitorIdRef = useRef<string>('');
   const sessionIdRef = useRef<string>('');
   const hasStartedRef = useRef<boolean>(false);
-  const milestonesReachedRef = useRef<Set<number>>(new Set());
+  const lastTrackedTimeRef = useRef<number>(0);
 
   const firestore = useFirestore();
   const isConfigured = firebaseConfig.projectId && firebaseConfig.projectId !== 'project-id';
@@ -32,15 +33,12 @@ export default function MobileSalesPage() {
   const configRef = useMemo(() => firestore ? doc(firestore, 'config', 'sales') : null, [firestore]);
   const { data: appConfig } = useDoc(configRef);
 
-  // Link de checkout atualizado. O fallback agora é o link novo solicitado.
+  // Links forçados como fallback caso o Firestore esteja fora da cota
   const checkoutUrl = appConfig?.checkoutUrl || 'https://comprasseguras.org.ua/c/c9f3270011';
 
   const getLocalDateString = () => {
     const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
   };
 
   useEffect(() => {
@@ -67,20 +65,19 @@ export default function MobileSalesPage() {
     }
     sessionIdRef.current = currentSessionId;
     
-    const initTracking = async () => {
-      if (firestore && isConfigured) {
-        const todayStr = getLocalDateString();
+    if (firestore && isConfigured) {
+      const initTracking = async () => {
         const docRef = doc(firestore, 'metrics', sessionIdRef.current);
         setDoc(docRef, {
           id: sessionIdRef.current,
           visitorId: visitorIdRef.current,
-          dateStr: todayStr,
+          dateStr: getLocalDateString(),
           device: /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop',
           updatedAt: serverTimestamp()
         }, { merge: true }).catch(() => {});
-      }
-    };
-    initTracking();
+      };
+      initTracking();
+    }
 
     const interval = setInterval(() => {
       setRecoveryCount(prev => prev + Math.floor(Math.random() * 3));
@@ -96,18 +93,15 @@ export default function MobileSalesPage() {
     }
   }, [showCTA]);
 
-  const trackMetric = (currentTime: number, duration: number, extra = {}) => {
+  const trackMetric = (currentTime: number, extra = {}) => {
     if (!firestore || !isConfigured) return;
     
-    const videoDuration = 140;
+    const videoDuration = 140; // 02:20 aprox
     const docRef = doc(firestore, 'metrics', sessionIdRef.current);
-    const todayStr = getLocalDateString();
 
     setDoc(docRef, {
       watchTime: Math.floor(currentTime),
-      totalDuration: videoDuration,
       percentage: Math.min(Math.floor((currentTime / videoDuration) * 100), 100),
-      dateStr: todayStr,
       updatedAt: serverTimestamp(),
       ...extra
     }, { merge: true }).catch(() => {});
@@ -122,7 +116,7 @@ export default function MobileSalesPage() {
       
       if (!hasStartedRef.current) {
         hasStartedRef.current = true;
-        trackMetric(0, 140, { started: true });
+        trackMetric(0, { started: true });
       }
     }
   };
@@ -148,7 +142,6 @@ export default function MobileSalesPage() {
       const docRef = doc(firestore, 'metrics', sessionIdRef.current);
       setDoc(docRef, {
         clickedCTA: true,
-        clickedCtaAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       }, { merge: true }).catch(() => {});
     }
@@ -234,14 +227,12 @@ export default function MobileSalesPage() {
             </div>
           </ScrollArea>
 
-          <div className="space-y-4">
-            <Button 
-              onClick={handleAcceptTerms}
-              className="w-full h-14 bg-red-600 hover:bg-red-700 text-white font-black uppercase italic tracking-tighter rounded-2xl shadow-[0_0_20px_rgba(220,38,38,0.2)] flex items-center justify-center gap-2 group transition-all active:scale-[0.98]"
-            >
-              LI E CONCORDO COM OS TERMOS <CheckCircle2 className="w-5 h-5 group-hover:scale-110 transition-transform" />
-            </Button>
-          </div>
+          <Button 
+            onClick={handleAcceptTerms}
+            className="w-full h-14 bg-red-600 hover:bg-red-700 text-white font-black uppercase italic tracking-tighter rounded-2xl shadow-[0_0_20px_rgba(220,38,38,0.2)] flex items-center justify-center gap-2 group transition-all active:scale-[0.98]"
+          >
+            LI E CONCORDO COM OS TERMOS <CheckCircle2 className="w-5 h-5 group-hover:scale-110 transition-transform" />
+          </Button>
         </div>
       </div>
     );
@@ -252,7 +243,7 @@ export default function MobileSalesPage() {
   return (
     <main className="min-h-screen bg-[#050505] flex flex-col items-center px-4 pt-4 pb-20 select-none overflow-x-hidden font-sans">
       <header className="w-full max-w-[480px] text-center mb-6 space-y-4">
-        <h1 className="text-white text-[1.4rem] font-black italic uppercase tracking-tighter leading-[1.1] text-glow-red mb-2">
+        <h1 className="text-white text-[1.4rem] font-black italic uppercase tracking-tighter leading-[1.1] text-glow-red">
           ESSE MACETE IRÁ <span className="text-red-600 text-[1.6rem] animate-pulse">SAIR DO AR A QUALQUER MOMENTO.</span>
         </h1>
       </header>
@@ -270,10 +261,8 @@ export default function MobileSalesPage() {
         <div className="aspect-[9/16] w-full bg-zinc-900 rounded-3xl overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.8)] border border-zinc-800 relative cursor-pointer no-zoom-touch" onClick={togglePlayPause}>
           {!isPlaying && !isEnded && (
             <div className="absolute inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md transition-all duration-300">
-              <div className="flex flex-col items-center gap-6 px-6 text-center">
-                <div onClick={handlePlayVideo} className="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(220,38,38,0.8)] animate-pulse border-4 border-white/20 cursor-pointer">
-                  <Play className="w-10 h-10 text-white fill-current ml-1" />
-                </div>
+              <div onClick={handlePlayVideo} className="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(220,38,38,0.8)] animate-pulse border-4 border-white/20 cursor-pointer">
+                <Play className="w-10 h-10 text-white fill-current ml-1" />
               </div>
             </div>
           )}
@@ -292,17 +281,17 @@ export default function MobileSalesPage() {
             className="w-full h-full object-cover pointer-events-none"
             onTimeUpdate={(e: any) => {
               const currentTime = e.target.currentTime;
+              
+              // Mostrar botão exatamente aos 02:08 (128s)
               if (currentTime >= 128 && !showCTA) setShowCTA(true);
               
-              const milestones = [35, 70, 105]; 
-              milestones.forEach(m => {
-                if (currentTime >= m && !milestonesReachedRef.current.has(m)) {
-                   milestonesReachedRef.current.add(m);
-                   trackMetric(currentTime, 140);
-                }
-              });
+              // Rastrear a cada 10 segundos para maior precisão no dashboard
+              if (Math.floor(currentTime) % 10 === 0 && Math.floor(currentTime) !== lastTrackedTimeRef.current) {
+                lastTrackedTimeRef.current = Math.floor(currentTime);
+                trackMetric(currentTime);
+              }
             }}
-            onEnded={() => { setIsPlaying(false); setIsEnded(true); trackMetric(140, 140, { completed: true }); }}
+            onEnded={() => { setIsPlaying(false); setIsEnded(true); trackMetric(140, { completed: true }); }}
           />
         </div>
       </section>
