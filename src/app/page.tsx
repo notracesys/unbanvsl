@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import Image from 'next/next';
 import { Button } from '@/components/ui/button';
 import { Volume2, Lock, Play, AlertTriangle, RefreshCcw, ArrowRight } from 'lucide-react';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';

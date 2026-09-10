@@ -189,7 +189,7 @@ export default function AdvancedAnalyticsDashboard() {
           
           <div className="flex items-center gap-3 bg-zinc-900/40 border border-zinc-800/60 px-4 py-2 rounded-xl">
             <Database className="w-4 h-4 text-zinc-500" />
-            <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">Projeto: unban-a07e6</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">Projeto: {firebaseConfig.projectId}</span>
           </div>
         </header>
 
