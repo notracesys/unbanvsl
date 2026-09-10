@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { Volume2, Lock, Play, AlertTriangle, RefreshCcw, ArrowRight } from 'lucide-react';
+import { Volume2, Lock, Play, AlertTriangle, RefreshCcw, ArrowRight, MoreHorizontal, ExternalLink } from 'lucide-react';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useFirestore, useDoc } from '@/firebase';
 import MuxPlayer from '@mux/mux-player-react';
@@ -14,6 +14,7 @@ import { FirestorePermissionError } from '@/firebase/errors';
 
 export default function MobileSalesPage() {
   const [hasMounted, setHasMounted] = useState(false);
+  const [isTikTok, setIsTikTok] = useState(false);
   const [recoveryCount, setRecoveryCount] = useState(2483);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isEnded, setIsEnded] = useState(false);
@@ -45,6 +46,11 @@ export default function MobileSalesPage() {
   useEffect(() => {
     setHasMounted(true);
     
+    // Detect TikTok Browser
+    const ua = navigator.userAgent || navigator.vendor || (window as any).opera;
+    const isTikTokBrowser = /TikTok|musical_ly/i.test(ua);
+    setIsTikTok(isTikTokBrowser);
+
     let savedVisitorId = localStorage.getItem('vsl_visitor_id');
     if (!savedVisitorId) {
       savedVisitorId = 'vis_' + Math.random().toString(36).substring(2, 11);
@@ -149,6 +155,43 @@ export default function MobileSalesPage() {
   };
 
   if (!hasMounted) return null;
+
+  // Bloqueio do TikTok
+  if (isTikTok) {
+    return (
+      <div className="fixed inset-0 z-[9999] bg-black flex items-center justify-center p-6 text-center">
+        <div className="space-y-8 max-w-sm">
+          <div className="relative mx-auto w-20 h-20 bg-red-600/20 rounded-full flex items-center justify-center border border-red-600/30 animate-pulse">
+            <AlertTriangle className="w-10 h-10 text-red-600" />
+          </div>
+          <div className="space-y-4">
+            <h2 className="text-2xl font-black italic uppercase tracking-tighter text-white">
+              NAVEGADOR <span className="text-red-600">INCOMPATÍVEL</span>
+            </h2>
+            <p className="text-zinc-400 text-sm leading-relaxed font-medium italic">
+              O navegador do TikTok não suporta nosso sistema de segurança de alta velocidade.
+            </p>
+          </div>
+          
+          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 space-y-6">
+            <p className="text-white text-xs font-bold uppercase tracking-widest">Siga os passos abaixo:</p>
+            <div className="flex flex-col gap-4 text-left">
+              <div className="flex items-start gap-4">
+                <div className="w-6 h-6 rounded-full bg-red-600 flex items-center justify-center text-[10px] font-black shrink-0">1</div>
+                <p className="text-zinc-300 text-[11px] leading-tight font-medium uppercase italic">Clique nos <span className="text-white font-bold inline-flex items-center gap-1 bg-white/10 px-1 rounded"><MoreHorizontal className="w-3 h-3"/> três pontos</span> no topo da tela.</p>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="w-6 h-6 rounded-full bg-red-600 flex items-center justify-center text-[10px] font-black shrink-0">2</div>
+                <p className="text-zinc-300 text-[11px] leading-tight font-medium uppercase italic">Selecione <span className="text-white font-bold inline-flex items-center gap-1 bg-white/10 px-1 rounded"><ExternalLink className="w-3 h-3"/> Abrir no Navegador</span> (Chrome ou Safari).</p>
+              </div>
+            </div>
+          </div>
+
+          <p className="text-[9px] text-zinc-600 font-bold uppercase tracking-[0.2em] animate-bounce">Aguardando você trocar de navegador...</p>
+        </div>
+      </div>
+    );
+  }
 
   const getImg = (id: string) => PlaceHolderImages.find(img => img.id === id);
 
