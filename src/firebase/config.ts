@@ -1,9 +1,10 @@
-// Cole aqui os dados gerados no console do seu Firebase (Engrenagem > Configurações do Projeto)
+// Configurações reais do projeto unban-a07e6 extraídas do console
 export const firebaseConfig = {
-  apiKey: "COLE_SUA_API_KEY_AQUI", // Substitua isso pela sua apiKey real
+  apiKey: "AIzaSyD_VATEBiyjbG1Z7I2L7RZNdXYIkyyFXjw",
   authDomain: "unban-a07e6.firebaseapp.com",
   projectId: "unban-a07e6",
   storageBucket: "unban-a07e6.firebasestorage.app",
-  messagingSenderId: "367123908471", // Pode manter ou atualizar com o seu real
-  appId: "1:367123908471:web:substitua_pelo_seu_appid" // Substitua pelo seu appId real
+  messagingSenderId: "1076527811863",
+  appId: "1:1076527811863:web:d051419c3771087f40fb52",
+  measurementId: "G-NK37N578QL"
 };

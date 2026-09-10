@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useFirestore, useCollection } from '@/firebase';
 import { collection, query, orderBy, limit } from 'firebase/firestore';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -25,23 +25,28 @@ import {
   Zap,
   Clock,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  Database
 } from 'lucide-react';
 import { firebaseConfig } from '@/firebase/config';
 
 export default function AnalyticsDashboard() {
   const firestore = useFirestore();
+  const [mounted, setMounted] = useState(false);
   
-  // Verifica se as chaves reais foram inseridas
-  const isConfigured = firebaseConfig.projectId !== 'project-id';
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-  // Query memoizada para evitar o erro de Loop Infinito (Maximum Update Depth)
+  // Verifica se a API Key real foi inserida
+  const isConfigured = firebaseConfig.apiKey !== "COLE_SUA_API_KEY_AQUI";
+
   const metricsQuery = useMemo(() => {
     if (!firestore || !isConfigured) return null;
     return query(
       collection(firestore, 'metrics'), 
       orderBy('createdAt', 'desc'), 
-      limit(1000)
+      limit(2000)
     );
   }, [firestore, isConfigured]);
 
@@ -59,7 +64,6 @@ export default function AnalyticsDashboard() {
         visitorMap.set(m.visitorId, m.percentage);
       }
 
-      // Contagem única de dispositivos por visitante
       const devKey = m.visitorId + '_dev';
       if (!visitorMap.has(devKey)) {
         const dev = m.device || 'unknown';
@@ -77,7 +81,7 @@ export default function AnalyticsDashboard() {
         if (!key.endsWith('_dev') && val >= m) reached++;
       });
       return {
-        milestone: m === 0 ? 'Start' : `${m}%`,
+        milestone: m === 0 ? '0%' : `${m}%`,
         percentage: totalPlays > 0 ? parseFloat(((reached / totalPlays) * 100).toFixed(1)) : 0
       };
     });
@@ -104,21 +108,18 @@ export default function AnalyticsDashboard() {
     };
   }, [metrics]);
 
+  if (!mounted) return null;
+
   if (!isConfigured) {
     return (
       <div className="min-h-screen bg-[#050505] flex items-center justify-center p-6 text-center">
         <div className="max-w-md space-y-6 bg-zinc-900/50 border border-zinc-800 p-8 rounded-3xl">
-          <AlertCircle className="w-16 h-16 text-red-600 mx-auto animate-pulse" />
+          <Database className="w-16 h-16 text-yellow-600 mx-auto animate-pulse" />
           <div className="space-y-2">
-            <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter">Firebase Desconectado</h2>
-            <p className="text-zinc-500 text-sm">
-              Você ainda não configurou as chaves reais do Firebase. O rastreio só funciona com um banco de dados ativo.
+            <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter">Firebase Offline</h2>
+            <p className="text-zinc-500 text-sm leading-relaxed">
+              O Dashboard está pronto, mas as chaves de conexão ainda parecem ser as padrão. Insira a sua <code className="text-yellow-500">apiKey</code> no arquivo <code className="text-white">config.ts</code>.
             </p>
-            <div className="pt-4 text-[10px] text-zinc-600 font-mono text-left bg-black/50 p-3 rounded-lg overflow-x-auto">
-              1. Vá ao console do Firebase<br/>
-              2. Crie um Firestore Database<br/>
-              3. Cole as chaves em src/firebase/config.ts
-            </div>
           </div>
         </div>
       </div>
@@ -130,7 +131,7 @@ export default function AnalyticsDashboard() {
       <div className="min-h-screen bg-[#050505] flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-10 h-10 text-red-600 animate-spin" />
-          <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Sincronizando Inteligência...</span>
+          <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Conectando ao unban-a07e6...</span>
         </div>
       </div>
     );
@@ -139,39 +140,40 @@ export default function AnalyticsDashboard() {
   if (!stats || stats.totalPlays === 0) {
     return (
       <div className="min-h-screen bg-[#050505] flex items-center justify-center p-6 text-center">
-        <div className="max-w-md space-y-4">
+        <div className="max-w-md space-y-4 bg-zinc-900/20 p-10 rounded-3xl border border-zinc-800/50">
           <Zap className="w-12 h-12 text-zinc-800 mx-auto" />
-          <h2 className="text-xl font-bold text-white uppercase italic tracking-tighter">Aguardando Tráfego Real</h2>
-          <p className="text-zinc-500 text-sm">As métricas aparecerão aqui assim que o primeiro lead der play no vídeo.</p>
+          <h2 className="text-xl font-bold text-white uppercase italic tracking-tighter">Aguardando Tráfego</h2>
+          <p className="text-zinc-500 text-sm">Abra a página inicial em outro dispositivo e dê o play no vídeo para ver os dados surgirem aqui.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] text-zinc-100 p-6 lg:p-10 font-sans">
-      <div className="max-w-7xl mx-auto space-y-10">
+    <div className="min-h-screen bg-[#050505] text-zinc-100 p-4 lg:p-10 font-sans selection:bg-red-600/30">
+      <div className="max-w-7xl mx-auto space-y-8">
         
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-zinc-900 pb-8">
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-red-600 mb-2">
-              <TrendingUp className="w-4 h-4" />
-              <span className="text-[10px] font-black uppercase tracking-[0.2em]">Live Tracking</span>
+              <div className="w-2 h-2 bg-red-600 rounded-full animate-ping" />
+              <span className="text-[10px] font-black uppercase tracking-[0.2em]">Real-Time Intelligence</span>
             </div>
             <h1 className="text-4xl font-black italic uppercase tracking-tighter">
-              Performance <span className="text-red-600">VSL</span>
+              Performance <span className="text-red-600">VTurb</span>
             </h1>
           </div>
           
-          <div className="bg-zinc-900/50 border border-zinc-800 px-4 py-2 rounded-xl">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <span className="text-xs font-black uppercase tracking-widest text-white">VTURB ANALYTICS CLONE</span>
+          <div className="flex items-center gap-3">
+            <div className="bg-zinc-900/50 border border-zinc-800 px-4 py-2 rounded-xl">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-black uppercase tracking-widest text-zinc-400">ID: unban-a07e6</span>
+              </div>
             </div>
           </div>
         </header>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <KpiCard title="Total de Leads" value={stats.totalPlays} icon={<Play className="text-red-600" />} />
           <KpiCard title="Retenção Média" value={`${stats.avgRetention}%`} icon={<Clock className="text-red-600" />} />
           <KpiCard title="Engajamento" value="Monitorando" icon={<Zap className="text-red-600" />} />
@@ -179,33 +181,55 @@ export default function AnalyticsDashboard() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card className="lg:col-span-2 bg-zinc-900/20 border-zinc-800 overflow-hidden">
+          <Card className="lg:col-span-2 bg-zinc-900/20 border-zinc-800 overflow-hidden backdrop-blur-sm">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <h3 className="text-lg font-black uppercase italic tracking-tight text-white">Curva de Retenção VTurb</h3>
+              <h3 className="text-lg font-black uppercase italic tracking-tight text-white">Curva de Retenção</h3>
             </CardHeader>
             <CardContent className="h-[350px] w-full pt-4">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={stats.retentionData}>
                   <defs>
                     <linearGradient id="colorRet" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#dc2626" stopOpacity={0.3}/>
+                      <stop offset="5%" stopColor="#dc2626" stopOpacity={0.4}/>
                       <stop offset="95%" stopColor="#dc2626" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#18181b" vertical={false} />
-                  <XAxis dataKey="milestone" stroke="#52525b" fontSize={10} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#52525b" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => `${v}%`} />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: '#09090b', borderColor: '#27272a', borderRadius: '8px' }}
-                    itemStyle={{ color: '#dc2626' }}
+                  <XAxis 
+                    dataKey="milestone" 
+                    stroke="#52525b" 
+                    fontSize={10} 
+                    tickLine={false} 
+                    axisLine={false} 
                   />
-                  <Area type="monotone" dataKey="percentage" stroke="#dc2626" strokeWidth={3} fillOpacity={1} fill="url(#colorRet)" />
+                  <YAxis 
+                    stroke="#52525b" 
+                    fontSize={10} 
+                    tickLine={false} 
+                    axisLine={false} 
+                    tickFormatter={(v) => `${v}%`}
+                    domain={[0, 100]}
+                  />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#09090b', borderColor: '#27272a', borderRadius: '12px', border: '1px solid #3f3f46' }}
+                    itemStyle={{ color: '#dc2626', fontWeight: 'bold' }}
+                    cursor={{ stroke: '#52525b', strokeWidth: 1 }}
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="percentage" 
+                    stroke="#dc2626" 
+                    strokeWidth={4} 
+                    fillOpacity={1} 
+                    fill="url(#colorRet)" 
+                    animationDuration={1500}
+                  />
                 </AreaChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
 
-          <Card className="bg-zinc-900/20 border-zinc-800">
+          <Card className="bg-zinc-900/20 border-zinc-800 backdrop-blur-sm">
             <CardHeader>
               <h3 className="text-lg font-black uppercase italic tracking-tight text-white">Device Mix</h3>
             </CardHeader>
@@ -216,17 +240,20 @@ export default function AnalyticsDashboard() {
                     data={stats.deviceData}
                     cx="50%"
                     cy="50%"
-                    innerRadius={60}
-                    outerRadius={80}
-                    paddingAngle={5}
+                    innerRadius={70}
+                    outerRadius={90}
+                    paddingAngle={8}
                     dataKey="value"
+                    stroke="none"
                   >
                     <Cell fill="#dc2626" />
-                    <Cell fill="#27272a" />
-                    <Cell fill="#52525b" />
+                    <Cell fill="#3f3f46" />
+                    <Cell fill="#18181b" />
                   </Pie>
-                  <Tooltip contentStyle={{ backgroundColor: '#09090b', border: 'none' }} />
-                  <Legend />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#09090b', border: '1px solid #27272a', borderRadius: '8px' }} 
+                  />
+                  <Legend iconType="circle" />
                 </PieChart>
               </ResponsiveContainer>
             </CardContent>
@@ -239,10 +266,12 @@ export default function AnalyticsDashboard() {
 
 function KpiCard({ title, value, icon }: { title: string, value: string | number, icon: any }) {
   return (
-    <Card className="bg-zinc-900/20 border-zinc-800 hover:border-red-600/30 transition-all">
+    <Card className="bg-zinc-900/20 border-zinc-800 hover:border-red-600/30 transition-all duration-300 group cursor-default">
       <CardContent className="pt-6">
         <div className="flex items-center justify-between mb-4">
-          <div className="p-2 bg-zinc-950 rounded-lg">{React.cloneElement(icon, { size: 16 })}</div>
+          <div className="p-2 bg-zinc-950 rounded-lg group-hover:scale-110 transition-transform">
+            {React.cloneElement(icon, { size: 16 })}
+          </div>
         </div>
         <div className="space-y-1">
           <p className="text-[9px] font-black uppercase tracking-widest text-zinc-500">{title}</p>
