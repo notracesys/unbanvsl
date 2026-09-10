@@ -1,9 +1,6 @@
 
-// IMPORTANTE: Clique na opção "Config" no seu console do Firebase (onde você tirou o print)
-// e copie a sua apiKey real (que começa com "AIza...") para substituir abaixo.
-
 export const firebaseConfig = {
-  apiKey: "COLE_SUA_API_KEY_AQUI", // <-- Cole aqui a chave que aparece ao clicar em 'Config'
+  apiKey: "AIzaSyD_VATEBiyjbG1Z7i2L7RZndXYIkyyfXjw",
   authDomain: "unban-a07e6.firebaseapp.com",
   projectId: "unban-a07e6",
   storageBucket: "unban-a07e6.firebasestorage.app",
