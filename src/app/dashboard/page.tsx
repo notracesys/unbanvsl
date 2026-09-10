@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { initializeFirebase, useCollection } from '@/firebase';
+import { useFirestore, useCollection } from '@/firebase';
 import { collection, query, orderBy, limit } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { 
@@ -27,15 +27,15 @@ import {
 } from 'lucide-react';
 
 export default function AnalyticsDashboard() {
-  const { firestore } = initializeFirebase();
+  const firestore = useFirestore();
   
-  // Memoizamos a query para evitar que o hook useCollection entre em loop infinito
+  // Estabilizamos a query para evitar o loop de renderização (Maximum update depth)
   const metricsQuery = useMemo(() => {
     if (!firestore) return null;
     return query(
       collection(firestore, 'metrics'), 
       orderBy('createdAt', 'desc'), 
-      limit(5000)
+      limit(2000) // Reduzido para melhor performance no carregamento inicial
     );
   }, [firestore]);
 
@@ -80,7 +80,10 @@ export default function AnalyticsDashboard() {
       return acc;
     }, {});
     
-    const avgRetention = (Object.values(lastMilestones).reduce((a: any, b: any) => a + b, 0) as number) / totalPlays;
+    const avgRetentionValues = Object.values(lastMilestones) as number[];
+    const avgRetention = avgRetentionValues.length > 0 
+      ? avgRetentionValues.reduce((a, b) => a + b, 0) / totalPlays 
+      : 0;
 
     return {
       totalPlays,
@@ -90,10 +93,13 @@ export default function AnalyticsDashboard() {
     };
   }, [metrics]);
 
-  if (loading) {
+  if (loading && !metrics) {
     return (
       <div className="min-h-screen bg-[#050505] flex items-center justify-center">
-        <Zap className="w-12 h-12 text-red-600 animate-pulse" />
+        <div className="flex flex-col items-center gap-4">
+          <Zap className="w-12 h-12 text-red-600 animate-pulse" />
+          <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Sincronizando Dados...</span>
+        </div>
       </div>
     );
   }
@@ -143,7 +149,7 @@ export default function AnalyticsDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card className="lg:col-span-2 bg-zinc-900/20 border-zinc-800 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="text-lg font-black uppercase italic tracking-tight">Curva de Retenção (Estilo VTurb)</CardTitle>
+              <CardTitle className="text-lg font-black uppercase italic tracking-tight">Curva de Retenção</CardTitle>
               <CardDescription className="text-zinc-500">Acompanhe onde seu público perde o interesse no script.</CardDescription>
             </CardHeader>
             <CardContent className="h-[400px] w-full pt-4">

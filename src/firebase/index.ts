@@ -1,4 +1,3 @@
-
 'use client';
 
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
@@ -10,6 +9,10 @@ let app: FirebaseApp;
 let firestore: Firestore;
 let auth: Auth;
 
+/**
+ * Inicializa o Firebase de forma estável, garantindo que as instâncias
+ * sejam criadas apenas uma vez e reutilizadas.
+ */
 export function initializeFirebase() {
   if (typeof window !== 'undefined') {
     if (!getApps().length) {
@@ -17,8 +20,10 @@ export function initializeFirebase() {
     } else {
       app = getApp();
     }
-    firestore = getFirestore(app);
-    auth = getAuth(app);
+    
+    // Garantimos que firestore e auth sejam instanciados apenas uma vez
+    if (!firestore) firestore = getFirestore(app);
+    if (!auth) auth = getAuth(app);
   }
   return { app, firestore, auth };
 }
