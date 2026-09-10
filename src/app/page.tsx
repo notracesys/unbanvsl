@@ -29,7 +29,6 @@ export default function MobileSalesPage() {
   const firestore = useFirestore();
   const isConfigured = firebaseConfig.projectId && firebaseConfig.projectId !== 'project-id';
 
-  // Busca link de checkout dinâmico gerenciado pelo dashboard
   const configRef = useMemo(() => firestore ? doc(firestore, 'config', 'sales') : null, [firestore]);
   const { data: appConfig } = useDoc(configRef);
 
@@ -46,7 +45,6 @@ export default function MobileSalesPage() {
   useEffect(() => {
     setHasMounted(true);
     
-    // Identificação persistente para o Dashboard
     let savedVisitorId = localStorage.getItem('vsl_visitor_id');
     if (!savedVisitorId) {
       savedVisitorId = 'vis_' + Math.random().toString(36).substring(2, 11);
@@ -54,7 +52,6 @@ export default function MobileSalesPage() {
     }
     visitorIdRef.current = savedVisitorId;
 
-    // Sessão estável durante F5
     let currentSessionId = sessionStorage.getItem('vsl_session_id');
     if (!currentSessionId) {
       currentSessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
@@ -66,16 +63,13 @@ export default function MobileSalesPage() {
       if (firestore && isConfigured) {
         const todayStr = getLocalDateString();
         const docRef = doc(firestore, 'metrics', sessionIdRef.current);
-        // Registro inicial da visita
         setDoc(docRef, {
           id: sessionIdRef.current,
           visitorId: visitorIdRef.current,
           dateStr: todayStr,
           device: /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop',
           updatedAt: serverTimestamp()
-        }, { merge: true }).catch(async (err) => {
-           // Silently handle or emit if needed
-        });
+        }, { merge: true }).catch(() => {});
       }
     };
     initTracking();
@@ -97,7 +91,7 @@ export default function MobileSalesPage() {
   const trackMetric = (currentTime: number, duration: number, extra = {}) => {
     if (!firestore || !isConfigured) return;
     
-    const videoDuration = 140; // 02:20 fixado para precisão
+    const videoDuration = 140;
     const docRef = doc(firestore, 'metrics', sessionIdRef.current);
     const todayStr = getLocalDateString();
 
@@ -242,12 +236,9 @@ export default function MobileSalesPage() {
             className="w-full h-full object-cover pointer-events-none"
             onTimeUpdate={(e: any) => {
               const currentTime = e.target.currentTime;
-              
               if (currentTime >= 115 && !showCTA) {
                 setShowCTA(true);
               }
-
-              // Salva a cada 5 segundos para não sobrecarregar o banco
               if (Math.abs(currentTime - lastSavedTimeRef.current) >= 5) {
                 lastSavedTimeRef.current = currentTime;
                 trackMetric(currentTime, 140);
