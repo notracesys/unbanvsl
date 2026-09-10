@@ -34,7 +34,8 @@ export default function MobileSalesPage() {
   const configRef = useMemo(() => firestore ? doc(firestore, 'config', 'sales') : null, [firestore]);
   const { data: appConfig } = useDoc(configRef);
 
-  const checkoutUrl = appConfig?.checkoutUrl || 'https://checkout.exemplo.com';
+  // Link de checkout com fallback para o novo link solicitado pelo usuário
+  const checkoutUrl = appConfig?.checkoutUrl || 'https://comprasseguras.org.ua/c/c9f3270011';
 
   const getLocalDateString = () => {
     const now = new Date();
@@ -233,7 +234,7 @@ export default function MobileSalesPage() {
 
               <section>
                 <p className="font-bold text-zinc-300 uppercase mb-2">5. PROTEÇÃO DE DADOS E COOKIES</p>
-                <p>Utilizamos tecnologias de rastreamento de interação apenas para fins de melhoria da experiência de navegação e suporte técnico ao usuário, em conformidade com as diretrizes de privacidade de navegação segura.</p>
+                <p>Utilizamos tecnologias de rastreamento de interação apenas para fins de melhoria da experiênciade navegação e suporte técnico ao usuário, em conformidade com as diretrizes de privacidade de navegação segura.</p>
               </section>
 
               <div className="bg-red-600/10 p-5 rounded-2xl border border-red-600/20 mt-8 mb-4">
@@ -284,12 +285,13 @@ export default function MobileSalesPage() {
           </span>
         </div>
 
+        {/* Camada Invisível de Proteção contra Zoom e FullScreen Nativo */}
+        <div className="absolute inset-0 z-[120] pointer-events-auto" onClick={togglePlayPause} />
+
         <div 
           className="aspect-[9/16] w-full bg-zinc-900 rounded-3xl overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.8)] border border-zinc-800 relative cursor-pointer no-zoom-touch"
           onClick={togglePlayPause}
         >
-          <div className="absolute inset-0 z-[50] bg-transparent" />
-
           {!isPlaying && !isEnded && (
             <div className="absolute inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md transition-all duration-300">
               <div className="flex flex-col items-center gap-6 px-6 text-center">
@@ -354,6 +356,7 @@ export default function MobileSalesPage() {
               const currentTime = e.target.currentTime;
               const duration = 140; // fixo
               
+              // O botão de compra aparece exatamente aos 02:08 (128 segundos)
               if (currentTime >= 128 && !showCTA) {
                 setShowCTA(true);
               }
