@@ -1,4 +1,6 @@
-// Configurações reais do projeto unban-a07e6 extraídas do console
+// Configurações públicas do Firebase para o projeto unban-a07e6.
+// Estas chaves são identificadores e são seguras para uso no lado do cliente.
+// A segurança é garantida pelas Regras de Segurança do Firestore e Authentication.
 export const firebaseConfig = {
   apiKey: "AIzaSyD_VATEBiyjbG1Z7I2L7RZndXYIkyyfXjw",
   authDomain: "unban-a07e6.firebaseapp.com",
