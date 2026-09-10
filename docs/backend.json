@@ -26,7 +26,8 @@
       "description": "Configurações dinâmicas do aplicativo.",
       "type": "object",
       "properties": {
-        "checkoutUrl": { "type": "string" }
+        "checkoutUrl": { "type": "string" },
+        "upsellCheckoutUrl": { "type": "string" }
       }
     }
   },

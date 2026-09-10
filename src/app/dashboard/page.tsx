@@ -3,7 +3,7 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
 import { useFirestore, useCollection, useDoc } from '@/firebase';
-import { collection, query, where, limit, doc, setDoc, serverTimestamp, orderBy } from 'firebase/firestore';
+import { collection, query, where, limit, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   AreaChart, 
@@ -32,10 +32,11 @@ import {
   Calendar as CalendarIcon,
   ChevronLeft,
   ChevronRight,
-  Clock,
   Timer,
   ExternalLink,
-  Save
+  Save,
+  ShoppingCart,
+  ArrowUpCircle
 } from 'lucide-react';
 import { firebaseConfig } from '@/firebase/config';
 import { Button } from '@/components/ui/button';
@@ -54,15 +55,19 @@ export default function AdvancedAnalyticsDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedDate, setSelectedDate] = useState('');
   const [newCheckoutUrl, setNewCheckoutUrl] = useState('');
+  const [newUpsellUrl, setNewUpsellUrl] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [isSavingUpsell, setIsSavingUpsell] = useState(false);
 
-  // Busca config de checkout global
   const configRef = useMemo(() => firestore ? doc(firestore, 'config', 'sales') : null, [firestore]);
   const { data: appConfig } = useDoc(configRef);
 
   useEffect(() => {
     if (appConfig?.checkoutUrl && !newCheckoutUrl) {
       setNewCheckoutUrl(appConfig.checkoutUrl);
+    }
+    if (appConfig?.upsellCheckoutUrl && !newUpsellUrl) {
+      setNewUpsellUrl(appConfig.upsellCheckoutUrl);
     }
   }, [appConfig]);
 
@@ -76,8 +81,8 @@ export default function AdvancedAnalyticsDashboard() {
     }, { merge: true })
     .then(() => {
       toast({
-        title: "Link Atualizado!",
-        description: "A página de vendas já está usando o novo checkout.",
+        title: "Link VSL Atualizado!",
+        description: "A página principal já está usando o novo checkout.",
       });
     })
     .catch(async (err) => {
@@ -89,6 +94,31 @@ export default function AdvancedAnalyticsDashboard() {
       errorEmitter.emit('permission-error', permsError);
     })
     .finally(() => setIsSaving(false));
+  };
+
+  const handleSaveUpsell = () => {
+    if (!firestore || !newUpsellUrl || !configRef) return;
+    setIsSavingUpsell(true);
+    
+    setDoc(configRef, {
+      upsellCheckoutUrl: newUpsellUrl,
+      updatedAt: serverTimestamp()
+    }, { merge: true })
+    .then(() => {
+      toast({
+        title: "Link Upsell Atualizado!",
+        description: "A página de Upsell já está usando o novo checkout.",
+      });
+    })
+    .catch(async (err) => {
+      const permsError = new FirestorePermissionError({
+        path: configRef.path,
+        operation: 'update',
+        requestResourceData: { upsellCheckoutUrl: newUpsellUrl }
+      });
+      errorEmitter.emit('permission-error', permsError);
+    })
+    .finally(() => setIsSavingUpsell(false));
   };
 
   const formatTime = (seconds: number) => {
@@ -115,8 +145,6 @@ export default function AdvancedAnalyticsDashboard() {
 
   const metricsQuery = useMemo(() => {
     if (!firestore || !isConfigured || !selectedDate) return null;
-    // Filtramos por dataStr e ordenamos por updatedAt para ver os mais recentes primeiro
-    // Nota: A ordenação por updatedAt exige um índice, então usamos a ordenação em memória se o índice não existir
     return query(
       collection(firestore, 'metrics'), 
       where('dateStr', '==', selectedDate),
@@ -129,7 +157,6 @@ export default function AdvancedAnalyticsDashboard() {
   const stats = useMemo(() => {
     if (!metrics || metrics.length === 0) return null;
 
-    // Ordenação manual para evitar erro de índice no Firestore
     const sortedData = [...metrics].sort((a: any, b: any) => {
       const timeA = a.updatedAt?.seconds || 0;
       const timeB = b.updatedAt?.seconds || 0;
@@ -144,7 +171,7 @@ export default function AdvancedAnalyticsDashboard() {
     
     const maxDuration = VIDEO_DURATION_FIXED;
     const intervals: { label: string; sec: number; count: number }[] = [];
-    const step = 10; // Intervalos de 10s para alta fidelidade
+    const step = 10;
     
     for (let s = 0; s <= maxDuration; s += step) {
       intervals.push({ label: formatTime(s), sec: s, count: 0 });
@@ -254,34 +281,59 @@ export default function AdvancedAnalyticsDashboard() {
         </header>
 
         {/* Gestor Global de Checkout */}
-        <Card className="bg-zinc-900/40 border-zinc-800 border-l-4 border-l-green-600 overflow-hidden">
-          <CardContent className="pt-6">
-            <div className="flex flex-col md:flex-row items-center gap-6">
-              <div className="flex-1 space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card className="bg-zinc-900/40 border-zinc-800 border-l-4 border-l-green-600 overflow-hidden">
+            <CardContent className="pt-6">
+              <div className="space-y-3">
                 <div className="flex items-center gap-2 text-green-500">
-                  <ExternalLink className="w-4 h-4" />
-                  <h3 className="text-xs font-black uppercase tracking-widest">Link de Checkout Ativo</h3>
+                  <ShoppingCart className="w-4 h-4" />
+                  <h3 className="text-xs font-black uppercase tracking-widest">Oferta VSL Principal</h3>
                 </div>
                 <div className="flex gap-2">
                   <Input 
                     value={newCheckoutUrl} 
                     onChange={(e) => setNewCheckoutUrl(e.target.value)}
-                    placeholder="Cole seu link da Hotmart, Kiwify ou Eduzz..."
+                    placeholder="Link do checkout VSL..."
                     className="bg-black border-zinc-800 text-xs font-mono h-12"
                   />
                   <Button 
                     onClick={handleSaveCheckout} 
                     disabled={isSaving}
-                    className="bg-green-600 hover:bg-green-700 h-12 px-8 font-black uppercase italic tracking-tighter"
+                    className="bg-green-600 hover:bg-green-700 h-12 px-6 font-black uppercase italic tracking-tighter"
                   >
-                    {isSaving ? <Loader2 className="animate-spin" /> : <><Save className="w-4 h-4 mr-2" /> Salvar Link</>}
+                    {isSaving ? <Loader2 className="animate-spin" /> : <Save className="w-4 h-4" />}
                   </Button>
                 </div>
-                <p className="text-[9px] text-zinc-600 font-bold uppercase tracking-widest">Este link será alterado automaticamente em todos os botões da sua página de vendas.</p>
               </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-zinc-900/40 border-zinc-800 border-l-4 border-l-orange-600 overflow-hidden">
+            <CardContent className="pt-6">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-orange-500">
+                  <ArrowUpCircle className="w-4 h-4" />
+                  <h3 className="text-xs font-black uppercase tracking-widest">Oferta Upsell (Bypass)</h3>
+                </div>
+                <div className="flex gap-2">
+                  <Input 
+                    value={newUpsellUrl} 
+                    onChange={(e) => setNewUpsellUrl(e.target.value)}
+                    placeholder="Link do checkout Upsell..."
+                    className="bg-black border-zinc-800 text-xs font-mono h-12"
+                  />
+                  <Button 
+                    onClick={handleSaveUpsell} 
+                    disabled={isSavingUpsell}
+                    className="bg-orange-600 hover:bg-orange-700 h-12 px-6 font-black uppercase italic tracking-tighter"
+                  >
+                    {isSavingUpsell ? <Loader2 className="animate-spin" /> : <Save className="w-4 h-4" />}
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
         {(!stats || stats.totalSessions === 0) ? (
           <div className="py-32 text-center space-y-6 bg-zinc-950/50 rounded-[3rem] border-2 border-dashed border-zinc-900">
