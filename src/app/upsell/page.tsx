@@ -21,7 +21,7 @@ export default function UpsellPage() {
   };
 
   const handleSkip = () => {
-    window.location.href = appConfig?.checkoutUrl || '/';
+    window.location.href = 'https://unbansstrategy.netlify.app/';
   };
 
   return (
