@@ -15,7 +15,8 @@ import {
   CartesianGrid,
   BarChart,
   Bar,
-  Cell as RechartsCell
+  Cell as RechartsCell,
+  LabelList
 } from 'recharts';
 import { 
   Play, 
@@ -43,6 +44,7 @@ export default function AdvancedAnalyticsDashboard() {
   const [mounted, setMounted] = useState(false);
   const [manualReload, setManualReload] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
+  const [visitorId, setVisitorId] = useState<string | null>(null);
   
   // Função auxiliar para pegar a data local YYYY-MM-DD
   const getLocalDateString = () => {
@@ -57,6 +59,9 @@ export default function AdvancedAnalyticsDashboard() {
 
   useEffect(() => {
     setMounted(true);
+    if (typeof window !== 'undefined') {
+      setVisitorId(localStorage.getItem('vsl_visitor_id'));
+    }
   }, []);
 
   const isConfigured = firebaseConfig.projectId && firebaseConfig.projectId !== "project-id";
@@ -120,6 +125,7 @@ export default function AdvancedAnalyticsDashboard() {
     const retentionData = retentionBuckets.map((count, idx) => ({
       milestone: `${idx * 10}%`,
       'Retenção %': totalSessions > 0 ? parseFloat(((count / totalSessions) * 100).toFixed(1)) : 0,
+      'Quantidade': count
     }));
 
     return {
@@ -249,17 +255,20 @@ export default function AdvancedAnalyticsDashboard() {
                 </CardHeader>
                 <CardContent className="h-[350px] pt-4">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={stats.funnelData} layout="vertical" margin={{ left: 20 }}>
+                    <BarChart data={stats.funnelData} layout="vertical" margin={{ left: 20, right: 40 }}>
                       <XAxis type="number" hide />
                       <YAxis dataKey="name" type="category" stroke="#52525b" fontSize={11} width={80} />
                       <Tooltip 
                         cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                        contentStyle={{ backgroundColor: '#09090b', borderColor: '#27272a', borderRadius: '12px' }}
+                        contentStyle={{ backgroundColor: '#09090b', borderColor: '#27272a', borderRadius: '12px', color: '#fff' }}
+                        itemStyle={{ color: '#fff' }}
+                        formatter={(value: any) => [`${value} Leads`, 'Total']}
                       />
                       <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                         {stats.funnelData.map((entry, index) => (
                           <RechartsCell key={`cell-${index}`} fill={entry.fill} />
                         ))}
+                        <LabelList dataKey="value" position="right" fill="#fff" fontSize={10} fontWeight="bold" formatter={(val: number) => `${val}`} />
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
@@ -288,6 +297,7 @@ export default function AdvancedAnalyticsDashboard() {
                       <Tooltip 
                         contentStyle={{ backgroundColor: '#09090b', borderColor: '#27272a', borderRadius: '12px' }}
                         itemStyle={{ color: '#dc2626', fontWeight: 'bold' }}
+                        formatter={(value: any, name: string, props: any) => [`${value}% (${props.payload.Quantidade} Leads)`, name]}
                       />
                       <Area type="monotone" dataKey="Retenção %" stroke="#dc2626" strokeWidth={3} fillOpacity={1} fill="url(#glowRed)" />
                     </AreaChart>
@@ -339,7 +349,7 @@ export default function AdvancedAnalyticsDashboard() {
                       <tr key={i} className="hover:bg-zinc-900/30 transition-colors">
                         <td className="p-4 font-mono text-zinc-400">
                           {m.id?.substring(0, 12)}...
-                          {m.visitorId === (typeof window !== 'undefined' ? localStorage.getItem('vsl_visitor_id') : '') && <span className="ml-2 text-[8px] bg-red-600/20 text-red-500 px-1 rounded">VOCÊ</span>}
+                          {m.visitorId === visitorId && <span className="ml-2 text-[8px] bg-red-600/20 text-red-500 px-1 rounded font-black tracking-tighter">VOCÊ</span>}
                         </td>
                         <td className="p-4 uppercase text-[10px] font-bold text-zinc-500">
                           {m.device || 'N/A'}
