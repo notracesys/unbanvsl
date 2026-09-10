@@ -282,7 +282,8 @@ export default function MobileSalesPage() {
             className="w-full h-full object-cover pointer-events-none"
             onTimeUpdate={(e: any) => {
               const currentTime = e.target.currentTime;
-              if (currentTime >= 115 && !showCTA) {
+              // Ajustado para 02:08 (128 segundos)
+              if (currentTime >= 128 && !showCTA) {
                 setShowCTA(true);
               }
               if (Math.abs(currentTime - lastSavedTimeRef.current) >= 5) {
