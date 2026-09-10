@@ -1,7 +1,6 @@
 
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getFirestore, Firestore } from 'firebase/firestore';
 import { getAuth, Auth } from 'firebase/auth';
@@ -23,27 +22,6 @@ export function initializeFirebase() {
     if (!auth) auth = getAuth(app);
   }
   return { app, firestore, auth };
-}
-
-/**
- * Hook para estabilizar referências do Firebase (queries, docs, refs).
- * Essencial para evitar loops de renderização (Maximum update depth).
- */
-export function useMemoFirebase<T>(factory: () => T, deps: React.DependencyList): T {
-  const [ref, setRef] = useState<T>(factory);
-  const prevDeps = useRef(deps);
-
-  useEffect(() => {
-    const depsChanged = deps.length !== prevDeps.current.length || 
-                       deps.some((dep, i) => dep !== prevDeps.current[i]);
-    
-    if (depsChanged) {
-      prevDeps.current = deps;
-      setRef(factory());
-    }
-  }, deps);
-
-  return ref;
 }
 
 export { FirebaseProvider, useFirebase, useFirestore, useAuth, useFirebaseApp } from './provider';

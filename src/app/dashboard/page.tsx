@@ -2,9 +2,9 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { useFirestore, useCollection } from '@/firebase';
 import { collection, query, orderBy, limit } from 'firebase/firestore';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   AreaChart, 
   Area, 
@@ -25,50 +25,51 @@ import {
   Monitor, 
   Zap,
   Clock,
-  Loader2
+  Loader2,
+  AlertCircle
 } from 'lucide-react';
+import { firebaseConfig } from '@/firebase/config';
 
 export default function AnalyticsDashboard() {
   const firestore = useFirestore();
   
-  // Usamos useMemoFirebase para estabilizar a query 100%
-  const metricsQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
+  // Verificamos se as chaves ainda são as de placeholder
+  const isConfigured = firebaseConfig.projectId !== 'project-id';
+
+  // Memoizamos a query para ser 100% estável e evitar o loop de renderização
+  const metricsQuery = useMemo(() => {
+    if (!firestore || !isConfigured) return null;
     return query(
       collection(firestore, 'metrics'), 
       orderBy('createdAt', 'desc'), 
-      limit(1000) // Reduzido para garantir performance instantânea
+      limit(500)
     );
-  }, [firestore]);
+  }, [firestore, isConfigured]);
 
   const { data: metrics, loading } = useCollection(metricsQuery);
 
-  // Processamento ultra-otimizado das estatísticas
   const stats = useMemo(() => {
     if (!metrics || metrics.length === 0) return null;
 
     const visitorMap = new Map();
     const deviceCounts = new Map();
 
-    // Loop único para processar múltiplos dados (O(n))
-    metrics.forEach(m => {
-      // Retenção máxima por visitante
+    metrics.forEach((m: any) => {
       const currentMax = visitorMap.get(m.visitorId) || 0;
       if (m.percentage > currentMax) {
         visitorMap.set(m.visitorId, m.percentage);
       }
 
-      // Contagem de dispositivos (apenas uma vez por visitante)
-      if (!visitorMap.has(m.visitorId + '_dev')) {
+      const devKey = m.visitorId + '_dev';
+      if (!visitorMap.has(devKey)) {
         const dev = m.device || 'unknown';
         deviceCounts.set(dev, (deviceCounts.get(dev) || 0) + 1);
-        visitorMap.set(m.visitorId + '_dev', true);
+        visitorMap.set(devKey, true);
       }
     });
 
-    const totalPlays = visitorMap.size / 2; // Dividido por 2 por causa da chave de dispositivo
+    const totalPlays = Array.from(visitorMap.keys()).filter(k => !k.endsWith('_dev')).length;
 
-    // Milestones retention
     const milestones = [0, 25, 50, 75, 90, 100];
     const retentionData = milestones.map(m => {
       let reached = 0;
@@ -87,36 +88,57 @@ export default function AnalyticsDashboard() {
     }));
 
     let totalRetentionSum = 0;
+    let count = 0;
     visitorMap.forEach((val, key) => {
-      if (!key.endsWith('_dev')) totalRetentionSum += val;
+      if (!key.endsWith('_dev')) {
+        totalRetentionSum += val;
+        count++;
+      }
     });
 
     return {
-      totalPlays: Math.floor(totalPlays),
+      totalPlays,
       retentionData,
       deviceData,
-      avgRetention: totalPlays > 0 ? (totalRetentionSum / totalPlays).toFixed(1) : '0'
+      avgRetention: count > 0 ? (totalRetentionSum / count).toFixed(1) : '0'
     };
   }, [metrics]);
+
+  if (!isConfigured) {
+    return (
+      <div className="min-h-screen bg-[#050505] flex items-center justify-center p-6 text-center">
+        <div className="max-w-md space-y-6 bg-zinc-900/50 border border-zinc-800 p-8 rounded-3xl">
+          <AlertCircle className="w-16 h-16 text-red-600 mx-auto animate-pulse" />
+          <div className="space-y-2">
+            <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter">Firebase Desconectado</h2>
+            <p className="text-zinc-500 text-sm">
+              Você ainda não configurou as chaves reais do Firebase em <code className="text-red-500 font-mono">src/firebase/config.ts</code>. 
+              Sem isso, não conseguimos salvar ou ler os dados de retenção.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (loading && !metrics) {
     return (
       <div className="min-h-screen bg-[#050505] flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="w-10 h-10 text-red-600 animate-spin" />
-          <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Sincronizando Dados...</span>
+          <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Sincronizando Inteligência...</span>
         </div>
       </div>
     );
   }
 
-  if (!stats) {
+  if (!stats || stats.totalPlays === 0) {
     return (
       <div className="min-h-screen bg-[#050505] flex items-center justify-center p-6 text-center">
         <div className="max-w-md space-y-4">
           <Zap className="w-12 h-12 text-zinc-800 mx-auto" />
-          <h2 className="text-xl font-bold text-white uppercase italic tracking-tighter">Aguardando Tráfego</h2>
-          <p className="text-zinc-500 text-sm">Abra a VSL para começar a capturar os dados de retenção.</p>
+          <h2 className="text-xl font-bold text-white uppercase italic tracking-tighter">Aguardando Tráfego Real</h2>
+          <p className="text-zinc-500 text-sm">As métricas aparecerão aqui assim que o primeiro lead der play no vídeo.</p>
         </div>
       </div>
     );
@@ -130,7 +152,7 @@ export default function AnalyticsDashboard() {
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-red-600 mb-2">
               <TrendingUp className="w-4 h-4" />
-              <span className="text-[10px] font-black uppercase tracking-[0.2em]">Live Intelligence</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.2em]">Live Tracking</span>
             </div>
             <h1 className="text-4xl font-black italic uppercase tracking-tighter">
               Performance <span className="text-red-600">VSL</span>
@@ -140,22 +162,22 @@ export default function AnalyticsDashboard() {
           <div className="bg-zinc-900/50 border border-zinc-800 px-4 py-2 rounded-xl">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <span className="text-xs font-black uppercase tracking-widest">Monitoramento Ativo</span>
+              <span className="text-xs font-black uppercase tracking-widest">Analytics Ativo</span>
             </div>
           </div>
         </header>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <KpiCard title="Total de Plays" value={stats.totalPlays} icon={<Play className="text-red-600" />} />
+          <KpiCard title="Total de Leads" value={stats.totalPlays} icon={<Play className="text-red-600" />} />
           <KpiCard title="Retenção Média" value={`${stats.avgRetention}%`} icon={<Clock className="text-red-600" />} />
-          <KpiCard title="Mobile Leads" value={stats.deviceData.find(d => d.name === 'Mobile')?.value || 0} icon={<Smartphone className="text-red-600" />} />
-          <KpiCard title="Status" value="Escalando" icon={<Zap className="text-red-600" />} />
+          <KpiCard title="Engajamento" value="Alto" icon={<Zap className="text-red-600" />} />
+          <KpiCard title="Dispositivos" value={stats.deviceData.length} icon={<Smartphone className="text-red-600" />} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card className="lg:col-span-2 bg-zinc-900/20 border-zinc-800">
+          <Card className="lg:col-span-2 bg-zinc-900/20 border-zinc-800 overflow-hidden">
             <CardHeader>
-              <CardTitle className="text-lg font-black uppercase italic tracking-tight">Curva de Retenção (VTurb Style)</CardTitle>
+              <h3 className="text-lg font-black uppercase italic tracking-tight">Curva de Retenção</h3>
             </CardHeader>
             <CardContent className="h-[350px] w-full pt-4">
               <ResponsiveContainer width="100%" height="100%">
@@ -181,7 +203,7 @@ export default function AnalyticsDashboard() {
 
           <Card className="bg-zinc-900/20 border-zinc-800">
             <CardHeader>
-              <CardTitle className="text-lg font-black uppercase italic tracking-tight">Dispositivos</CardTitle>
+              <h3 className="text-lg font-black uppercase italic tracking-tight">Device Mix</h3>
             </CardHeader>
             <CardContent className="h-[350px]">
               <ResponsiveContainer width="100%" height="100%">
@@ -197,6 +219,7 @@ export default function AnalyticsDashboard() {
                   >
                     <Cell fill="#dc2626" />
                     <Cell fill="#27272a" />
+                    <Cell fill="#52525b" />
                   </Pie>
                   <Tooltip contentStyle={{ backgroundColor: '#09090b', border: 'none' }} />
                   <Legend />

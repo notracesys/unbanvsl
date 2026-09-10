@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -8,6 +9,7 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { initializeFirebase } from '@/firebase';
 import MuxPlayer from '@mux/mux-player-react';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { firebaseConfig } from '@/firebase/config';
 
 export default function MobileSalesPage() {
   const [hasMounted, setHasMounted] = useState(false);
@@ -17,14 +19,18 @@ export default function MobileSalesPage() {
   const [showCTA, setShowCTA] = useState(false);
   const playerRef = useRef<any>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
-  const visitorId = useRef<string>('');
+  const visitorIdRef = useRef<string>('');
   const trackedMilestones = useRef<Set<number>>(new Set());
   const { firestore } = initializeFirebase();
 
+  // Verificação de configuração
+  const isConfigured = firebaseConfig.projectId !== 'project-id';
+
   useEffect(() => {
     setHasMounted(true);
-    if (!visitorId.current) {
-      visitorId.current = 'vis_' + Math.random().toString(36).substring(2, 11);
+    // Garantimos que o ID do visitante e o User Agent só sejam acessados no cliente
+    if (!visitorIdRef.current) {
+      visitorIdRef.current = 'vis_' + Math.random().toString(36).substring(2, 11);
     }
     
     const interval = setInterval(() => {
@@ -42,18 +48,19 @@ export default function MobileSalesPage() {
   }, [showCTA]);
 
   const trackMetric = (milestone: number, currentTime: number = 0, duration: number = 0) => {
-    if (!firestore) return;
+    if (!firestore || !isConfigured) return;
     
+    const device = /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop';
+
     addDoc(collection(firestore, 'metrics'), {
-      visitorId: visitorId.current,
+      visitorId: visitorIdRef.current,
       watchTime: Math.floor(currentTime),
       totalDuration: Math.floor(duration),
       percentage: milestone,
-      device: typeof navigator !== 'undefined' && /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop',
+      device: device,
       createdAt: serverTimestamp(),
     }).catch((err) => {
-      // Falha silenciosa em produção, mas importante para o dashboard
-      console.error("Erro ao gravar métrica:", err);
+      // Falha silenciosa em produção
     }); 
   };
 
@@ -169,7 +176,7 @@ export default function MobileSalesPage() {
             metadata={{
               video_id: "vsl-ff-recovery",
               video_title: "VSL Free Fire Recovery",
-              viewer_user_id: visitorId.current,
+              viewer_user_id: visitorIdRef.current,
             }}
             streamType="on-demand"
             className="w-full h-full object-cover pointer-events-none"
