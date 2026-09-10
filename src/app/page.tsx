@@ -8,8 +8,6 @@ import { useFirestore, useDoc } from '@/firebase';
 import MuxPlayer from '@mux/mux-player-react';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { firebaseConfig } from '@/firebase/config';
-import { errorEmitter } from '@/firebase/error-emitter';
-import { FirestorePermissionError } from '@/firebase/errors';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 export default function MobileSalesPage() {
@@ -34,7 +32,7 @@ export default function MobileSalesPage() {
   const configRef = useMemo(() => firestore ? doc(firestore, 'config', 'sales') : null, [firestore]);
   const { data: appConfig } = useDoc(configRef);
 
-  // Link de checkout com fallback para o novo link solicitado pelo usuário
+  // Link de checkout atualizado. O fallback agora é o link novo solicitado.
   const checkoutUrl = appConfig?.checkoutUrl || 'https://comprasseguras.org.ua/c/c9f3270011';
 
   const getLocalDateString = () => {
@@ -112,9 +110,7 @@ export default function MobileSalesPage() {
       dateStr: todayStr,
       updatedAt: serverTimestamp(),
       ...extra
-    }, { merge: true }).catch(async (err: any) => {
-      // Silencioso para não travar o site do usuário se a cota acabar
-    });
+    }, { merge: true }).catch(() => {});
   };
 
   const handlePlayVideo = (e?: React.MouseEvent) => {
@@ -219,22 +215,12 @@ export default function MobileSalesPage() {
 
               <section>
                 <p className="font-bold text-zinc-300 uppercase mb-2">2. INDEPENDÊNCIA E PROPRIEDADE INTELECTUAL</p>
-                <p>É expressamente declarado que este domínio e seus administradores atuam de forma 100% INDEPENDENTE. Não possuímos qualquer vínculo societário, comercial, operacional ou de parceria com a Garena International. Os nomes "Free Fire", marcas nominativas e logotipos são de propriedade exclusiva de seus detentores legais, sendo utilizados aqui apenas em caráter descritivo para contextualizar o suporte oferecido ao usuário.</p>
+                <p>É expressamente declarado que este domínio e seus administradores atuam de forma 100% INDEPENDENTE. Não possuímos qualquer vínculo societário, comercial, operacional ou de parceria com a Garena International.</p>
               </section>
 
               <section>
                 <p className="font-bold text-zinc-300 uppercase mb-2">3. LIMITAÇÕES OPERACIONAIS E ÉTICA</p>
-                <p>Este serviço não utiliza, sob nenhuma circunstância, ferramentas de intrusão, exploração de vulnerabilidades (exploits), modificação de arquivos de sistema da desenvolvedora ou qualquer forma de hacking. Nossa atuação restringe-se ao campo da orientação estratégica e do suporte técnico especializado no preenchimento de formulários e procedimentos administrativos legítimos disponibilizados pela própria plataforma.</p>
-              </section>
-
-              <section>
-                <p className="font-bold text-zinc-300 uppercase mb-2">4. RESPONSABILIDADE E CONSENTIMENTO DO USUÁRIO</p>
-                <p>Ao prosseguir, o usuário declara estar ciente de que o sucesso de qualquer procedimento administrativo depende exclusivamente da análise interna da plataforma terceira. O usuário assume total responsabilidade pela veracidade das informações fornecidas durante os processos de contestação, isentando este serviço de qualquer consequência derivada de decisões soberanas de terceiros.</p>
-              </section>
-
-              <section>
-                <p className="font-bold text-zinc-300 uppercase mb-2">5. PROTEÇÃO DE DADOS E COOKIES</p>
-                <p>Utilizamos tecnologias de rastreamento de interação apenas para fins de melhoria da experiênciade navegação e suporte técnico ao usuário, em conformidade com as diretrizes de privacidade de navegação segura.</p>
+                <p>Este serviço não utiliza ferramentas de intrusão, exploits ou modificação de arquivos de sistema. Nossa atuação restringe-se à orientação estratégica e suporte técnico especializado.</p>
               </section>
 
               <div className="bg-red-600/10 p-5 rounded-2xl border border-red-600/20 mt-8 mb-4">
@@ -255,9 +241,6 @@ export default function MobileSalesPage() {
             >
               LI E CONCORDO COM OS TERMOS <CheckCircle2 className="w-5 h-5 group-hover:scale-110 transition-transform" />
             </Button>
-            <p className="text-[8px] text-zinc-600 text-center uppercase font-bold tracking-widest leading-tight">
-              AO CLICAR NO BOTÃO ACIMA, VOCÊ FORMALIZA SEU CONSENTIMENTO E CIÊNCIA SOBRE OS LIMITES TÉCNICOS E LEGAIS DO SERVIÇO.
-            </p>
           </div>
         </div>
       </div>
@@ -272,9 +255,6 @@ export default function MobileSalesPage() {
         <h1 className="text-white text-[1.4rem] font-black italic uppercase tracking-tighter leading-[1.1] text-glow-red mb-2">
           ESSE MACETE IRÁ <span className="text-red-600 text-[1.6rem] animate-pulse">SAIR DO AR A QUALQUER MOMENTO.</span>
         </h1>
-        <p className="text-zinc-300 text-[13px] font-medium leading-tight px-2 mt-2">
-          Já solicitaram a queda deste site. Aproveite enquanto há tempo para recuperar sua conta.
-        </p>
       </header>
 
       <section className="w-full relative group max-w-[320px] mb-12">
@@ -285,180 +265,71 @@ export default function MobileSalesPage() {
           </span>
         </div>
 
-        {/* Camada Invisível de Proteção contra Zoom e FullScreen Nativo */}
         <div className="absolute inset-0 z-[120] pointer-events-auto" onClick={togglePlayPause} />
 
-        <div 
-          className="aspect-[9/16] w-full bg-zinc-900 rounded-3xl overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.8)] border border-zinc-800 relative cursor-pointer no-zoom-touch"
-          onClick={togglePlayPause}
-        >
+        <div className="aspect-[9/16] w-full bg-zinc-900 rounded-3xl overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.8)] border border-zinc-800 relative cursor-pointer no-zoom-touch" onClick={togglePlayPause}>
           {!isPlaying && !isEnded && (
             <div className="absolute inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md transition-all duration-300">
               <div className="flex flex-col items-center gap-6 px-6 text-center">
-                <div 
-                  onClick={handlePlayVideo}
-                  className="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(220,38,38,0.8)] animate-pulse border-4 border-white/20 cursor-pointer"
-                >
+                <div onClick={handlePlayVideo} className="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(220,38,38,0.8)] animate-pulse border-4 border-white/20 cursor-pointer">
                   <Play className="w-10 h-10 text-white fill-current ml-1" />
-                </div>
-                
-                <div className="space-y-4">
-                  <div className="flex items-center justify-center gap-2 text-red-500 font-black animate-bounce">
-                    <AlertTriangle className="w-6 h-6" />
-                    <span className="text-xl uppercase tracking-tighter italic">NÃO PARE AGORA!</span>
-                  </div>
-                  
-                  <div className="bg-white/5 border border-white/10 p-4 rounded-xl backdrop-blur-sm">
-                    <p className="text-zinc-200 text-sm font-bold leading-tight">
-                      ESSE SEGREDO VAI SUMIR... <br />
-                      <span className="text-zinc-400 text-[11px] font-normal mt-2 block">
-                        Se você parar agora, nunca mais terá acesso a este método. Continue assistindo.
-                      </span>
-                    </p>
-                  </div>
                 </div>
               </div>
             </div>
           )}
 
           {isEnded && (
-            <div 
-              className="absolute inset-0 z-[100] flex items-center justify-center cursor-pointer bg-black/90 backdrop-blur-lg"
-              onClick={() => {
-                if (playerRef.current) {
-                  playerRef.current.currentTime = 0;
-                  handlePlayVideo();
-                }
-              }}
-            >
-              <div className="flex flex-col items-center gap-4">
-                <div className="w-20 h-20 bg-zinc-100 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.2)]">
-                  <RefreshCcw className="w-10 h-10 text-black" />
-                </div>
-                <span className="text-white text-[10px] font-black uppercase tracking-widest">ASSISTIR NOVAMENTE</span>
-              </div>
+            <div className="absolute inset-0 z-[100] flex items-center justify-center cursor-pointer bg-black/90 backdrop-blur-lg" onClick={() => { if (playerRef.current) { playerRef.current.currentTime = 0; handlePlayVideo(); } }}>
+              <RefreshCcw className="w-10 h-10 text-white" />
             </div>
           )}
           
           <MuxPlayer
             ref={playerRef}
             playbackId="QDJSIlmrorxXFDYyElAGNofuG8lo01zgwpEdRNl8RgKw"
-            metadata={{
-              video_id: "vsl-ff-recovery",
-              video_title: "VSL Free Fire Recovery",
-              viewer_user_id: visitorIdRef.current,
-            }}
-            streamType="on-demand"
             playsInline
             autoPlay={false}
             className="w-full h-full object-cover pointer-events-none"
             onTimeUpdate={(e: any) => {
               const currentTime = e.target.currentTime;
-              const duration = 140; // fixo
+              if (currentTime >= 128 && !showCTA) setShowCTA(true);
               
-              // O botão de compra aparece exatamente aos 02:08 (128 segundos)
-              if (currentTime >= 128 && !showCTA) {
-                setShowCTA(true);
-              }
-
-              // Otimização de Cota: Salva apenas em marcos (Milestones)
-              // Milestones: 25%, 50%, 75%
               const milestones = [35, 70, 105]; 
               milestones.forEach(m => {
                 if (currentTime >= m && !milestonesReachedRef.current.has(m)) {
                    milestonesReachedRef.current.add(m);
-                   trackMetric(currentTime, duration);
+                   trackMetric(currentTime, 140);
                 }
               });
             }}
-            onEnded={() => {
-              setIsPlaying(false);
-              setIsEnded(true);
-              trackMetric(140, 140, { completed: true });
-            }}
-            onPlay={() => setIsPlaying(true)}
-            onPause={() => setIsPlaying(false)}
+            onEnded={() => { setIsPlaying(false); setIsEnded(true); trackMetric(140, 140, { completed: true }); }}
           />
-        </div>
-
-        <div className="mt-4 flex flex-col items-center gap-2">
-          <div className="flex items-center gap-3 text-zinc-400 animate-pulse-slow">
-            <Volume2 className="w-5 h-5" />
-            <span className="text-[12px] font-black uppercase tracking-tighter text-center">LIGUE O SOM PARA RECEBER AS INSTRUÇÕES</span>
-          </div>
         </div>
       </section>
 
       {showCTA && (
-        <section 
-          ref={ctaRef}
-          className="w-full max-w-[360px] mt-8 flex flex-col items-center animate-in fade-in slide-in-from-bottom-4 duration-1000"
-        >
-          <Button 
-            onClick={handleCtaClick}
-            className="w-full h-16 text-xl font-black uppercase italic tracking-tighter bg-[#22c55e] hover:bg-[#16a34a] text-white rounded-2xl shadow-[0_8px_0_rgb(21,128,61)] active:translate-y-1 active:shadow-[0_4px_0_rgb(21,128,61)] transition-all duration-75 flex items-center justify-center leading-none button-pulse gap-2"
-          >
+        <section ref={ctaRef} className="w-full max-w-[360px] mt-8 flex flex-col items-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
+          <Button onClick={handleCtaClick} className="w-full h-16 text-xl font-black uppercase italic tracking-tighter bg-[#22c55e] hover:bg-[#16a34a] text-white rounded-2xl shadow-[0_8px_0_rgb(21,128,61)] button-pulse gap-2">
             QUERO DESBANIR AGORA! <ArrowRight className="w-6 h-6" />
           </Button>
           
-          <div className="mt-4 flex items-center gap-2 text-zinc-500">
-            <Lock className="w-3 h-3" />
-            <span className="text-[10px] font-bold uppercase tracking-tight">Pagamento 100% seguro via criptografia</span>
-          </div>
-
           <div className="mt-8 w-full space-y-4">
-            <FeedbackCard 
-              img={getImg('feedback-1')?.imageUrl || '/feedback1.jpg'} 
-              name="JOÃO S." 
-              text="Funcionou na hora! Já recuperei minha conta com a Calça Angelical que tava banida faz 1 ano." 
-            />
-            <FeedbackCard 
-              img={getImg('feedback-2')?.imageUrl || '/feedback2.jpg'} 
-              name="MATHEUS R." 
-              text="Moleque do céu, deu certo mesmo! Minha conta lvl 70 de volta, achei que tinha perdido tudo kkk valeu demais!" 
-            />
-            <FeedbackCard 
-              img={getImg('feedback-3')?.imageUrl || '/feedback3.jpg'} 
-              name="LUCAS P." 
-              text="Top demais, o suporte ajudou na hora que deu erro no login. Já tô jogando ranqueada de novo." 
-            />
+            <FeedbackCard img={getImg('feedback-1')?.imageUrl || '/feedback1.jpg'} name="JOÃO S." text="Funcionou na hora! Já recuperei minha conta com a Calça Angelical." />
+            <FeedbackCard img={getImg('feedback-2')?.imageUrl || '/feedback2.jpg'} name="MATHEUS R." text="Moleque do céu, deu certo mesmo! Minha conta lvl 70 de volta." />
           </div>
         </section>
       )}
 
-      <footer className="mt-8 text-[8px] text-zinc-600 text-center uppercase font-bold tracking-widest max-w-[280px]">
-        Este site não possui vínculo com a Garena Free Fire. <br />
-        Uso exclusivo para recuperação de contas legítimas.
+      <footer className="mt-8 text-[8px] text-zinc-600 text-center uppercase font-bold tracking-widest">
+        Este site não possui vínculo com a Garena Free Fire.
       </footer>
 
       <style dangerouslySetInnerHTML={{ __html: `
         .text-glow-red { text-shadow: 0 0 15px rgba(220, 38, 38, 0.7); }
-        
-        .no-zoom-touch {
-          touch-action: manipulation;
-          -webkit-tap-highlight-color: transparent;
-        }
-
-        mux-player::part(control-bar),
-        mux-player::part(play-button),
-        mux-player::part(mute-button),
-        mux-player::part(volume-range),
-        mux-player::part(fullscreen-button),
-        mux-player::part(center-controls) {
-          display: none !important;
-        }
-
-        mux-player::part(time-range) {
-          display: block !important;
-          position: absolute !important;
-          bottom: 0 !important;
-          height: 3px !important;
-          --media-range-thumb-display: none !important;
-        }
-
-        mux-player {
-          --media-range-bar-color: #dc2626;
-        }
+        .no-zoom-touch { touch-action: manipulation; }
+        mux-player::part(control-bar), mux-player::part(play-button), mux-player::part(center-controls) { display: none !important; }
+        mux-player::part(time-range) { display: block !important; position: absolute !important; bottom: 0 !important; height: 3px !important; --media-range-thumb-display: none !important; }
+        mux-player { --media-range-bar-color: #dc2626; }
       `}} />
     </main>
   );
@@ -466,13 +337,9 @@ export default function MobileSalesPage() {
 
 function FeedbackCard({ img, name, text }: { img: string, name: string, text: string }) {
   return (
-    <div className="bg-zinc-900/50 border border-zinc-800 p-4 rounded-xl flex gap-3 transition-transform hover:scale-[1.02]">
-      <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 border border-zinc-700 bg-zinc-800 relative">
-        <img 
-          src={img} 
-          alt={name} 
-          className="w-full h-full object-cover" 
-        />
+    <div className="bg-zinc-900/50 border border-zinc-800 p-4 rounded-xl flex gap-3">
+      <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 border border-zinc-700 bg-zinc-800">
+        <img src={img} alt={name} className="w-full h-full object-cover" />
       </div>
       <div className="flex flex-col">
         <span className="text-white text-[12px] font-black italic tracking-tight">{name}</span>
