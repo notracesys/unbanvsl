@@ -5,6 +5,7 @@ import React, { createContext, useContext, ReactNode, useMemo } from 'react';
 import { FirebaseApp } from 'firebase/app';
 import { Firestore } from 'firebase/firestore';
 import { Auth } from 'firebase/auth';
+import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 
 interface FirebaseContextType {
   app: FirebaseApp | null;
@@ -29,8 +30,6 @@ export function FirebaseProvider({
   firestore: Firestore;
   auth: Auth;
 }) {
-  // Memoizamos o objeto do contexto para evitar que consumidores re-renderizem
-  // a menos que as instâncias do Firebase realmente mudem.
   const value = useMemo(() => ({
     app,
     firestore,
@@ -39,6 +38,7 @@ export function FirebaseProvider({
 
   return (
     <FirebaseContext.Provider value={value}>
+      <FirebaseErrorListener />
       {children}
     </FirebaseContext.Provider>
   );

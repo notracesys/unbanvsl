@@ -9,6 +9,8 @@ import { useFirestore, useDoc } from '@/firebase';
 import MuxPlayer from '@mux/mux-player-react';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { firebaseConfig } from '@/firebase/config';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 export default function MobileSalesPage() {
   const [hasMounted, setHasMounted] = useState(false);
@@ -27,32 +29,32 @@ export default function MobileSalesPage() {
   const firestore = useFirestore();
   const isConfigured = firebaseConfig.projectId && firebaseConfig.projectId !== 'project-id';
 
-  // Busca link de checkout dinâmico
+  // Busca link de checkout dinâmico gerenciado pelo dashboard
   const configRef = useMemo(() => firestore ? doc(firestore, 'config', 'sales') : null, [firestore]);
   const { data: appConfig } = useDoc(configRef);
 
   const checkoutUrl = appConfig?.checkoutUrl || 'https://checkout.exemplo.com';
 
   const getLocalDateString = () => {
-    const date = new Date();
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   };
 
   useEffect(() => {
     setHasMounted(true);
     
-    const savedVisitorId = localStorage.getItem('vsl_visitor_id');
-    if (savedVisitorId) {
-      visitorIdRef.current = savedVisitorId;
-    } else {
-      const newId = 'vis_' + Math.random().toString(36).substring(2, 11);
-      visitorIdRef.current = newId;
-      localStorage.setItem('vsl_visitor_id', newId);
+    // Identificação persistente para o Dashboard
+    let savedVisitorId = localStorage.getItem('vsl_visitor_id');
+    if (!savedVisitorId) {
+      savedVisitorId = 'vis_' + Math.random().toString(36).substring(2, 11);
+      localStorage.setItem('vsl_visitor_id', savedVisitorId);
     }
+    visitorIdRef.current = savedVisitorId;
 
+    // Sessão estável durante F5
     let currentSessionId = sessionStorage.getItem('vsl_session_id');
     if (!currentSessionId) {
       currentSessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
@@ -64,13 +66,16 @@ export default function MobileSalesPage() {
       if (firestore && isConfigured) {
         const todayStr = getLocalDateString();
         const docRef = doc(firestore, 'metrics', sessionIdRef.current);
+        // Registro inicial da visita
         setDoc(docRef, {
           id: sessionIdRef.current,
           visitorId: visitorIdRef.current,
           dateStr: todayStr,
           device: /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop',
           updatedAt: serverTimestamp()
-        }, { merge: true });
+        }, { merge: true }).catch(async (err) => {
+           // Silently handle or emit if needed
+        });
       }
     };
     initTracking();
@@ -92,19 +97,25 @@ export default function MobileSalesPage() {
   const trackMetric = (currentTime: number, duration: number, extra = {}) => {
     if (!firestore || !isConfigured) return;
     
-    const videoDuration = duration || 140; // 02:20 solicitado
-    const progressPercentage = Math.floor((currentTime / videoDuration) * 100);
+    const videoDuration = 140; // 02:20 fixado para precisão
     const docRef = doc(firestore, 'metrics', sessionIdRef.current);
     const todayStr = getLocalDateString();
 
     setDoc(docRef, {
       watchTime: Math.floor(currentTime),
-      totalDuration: Math.floor(videoDuration),
-      percentage: Math.min(progressPercentage, 100),
+      totalDuration: videoDuration,
+      percentage: Math.min(Math.floor((currentTime / videoDuration) * 100), 100),
       dateStr: todayStr,
       updatedAt: serverTimestamp(),
       ...extra
-    }, { merge: true });
+    }, { merge: true }).catch(async (err) => {
+      const permsError = new FirestorePermissionError({
+        path: docRef.path,
+        operation: 'update',
+        requestResourceData: { watchTime: currentTime, ...extra }
+      });
+      errorEmitter.emit('permission-error', permsError);
+    });
   };
 
   const handlePlayVideo = (e?: React.MouseEvent) => {
@@ -116,7 +127,7 @@ export default function MobileSalesPage() {
       
       if (!hasStartedRef.current) {
         hasStartedRef.current = true;
-        trackMetric(0, playerRef.current.duration || 140, { started: true });
+        trackMetric(0, 140, { started: true });
       }
     }
   };
@@ -138,7 +149,7 @@ export default function MobileSalesPage() {
         clickedCTA: true,
         clickedCtaAt: serverTimestamp(),
         updatedAt: serverTimestamp()
-      }, { merge: true });
+      }, { merge: true }).catch(() => {});
     }
     window.open(checkoutUrl, '_blank');
   };
@@ -148,7 +159,7 @@ export default function MobileSalesPage() {
   const getImg = (id: string) => PlaceHolderImages.find(img => img.id === id);
 
   return (
-    <main className="min-h-screen bg-[#050505] flex flex-col items-center px-4 pt-4 pb-20 select-none overflow-x-hidden">
+    <main className="min-h-screen bg-[#050505] flex flex-col items-center px-4 pt-4 pb-20 select-none overflow-x-hidden font-sans">
       <header className="w-full max-w-[480px] text-center mb-6 space-y-4">
         <h1 className="text-white text-[1.4rem] font-black italic uppercase tracking-tighter leading-[1.1] text-glow-red mb-2">
           ESSE MACETE IRÁ <span className="text-red-600 text-[1.6rem] animate-pulse">SAIR DO AR A QUALQUER MOMENTO.</span>
@@ -230,15 +241,15 @@ export default function MobileSalesPage() {
             className="w-full h-full object-cover pointer-events-none"
             onTimeUpdate={(e: any) => {
               const currentTime = e.target.currentTime;
-              const duration = 140; // Forçamos 2:20 solicitado
               
-              if (currentTime >= 115 && !showCTA) { // CTA aparece aos 1:55 aprox
+              if (currentTime >= 115 && !showCTA) {
                 setShowCTA(true);
               }
 
+              // Salva a cada 5 segundos para não sobrecarregar o banco
               if (Math.abs(currentTime - lastSavedTimeRef.current) >= 5) {
                 lastSavedTimeRef.current = currentTime;
-                trackMetric(currentTime, duration);
+                trackMetric(currentTime, 140);
               }
             }}
             onEnded={() => {
