@@ -28,7 +28,17 @@ import {
 
 export default function AnalyticsDashboard() {
   const { firestore } = initializeFirebase();
-  const metricsQuery = firestore ? query(collection(firestore, 'metrics'), orderBy('createdAt', 'desc'), limit(5000)) : null;
+  
+  // Memoizamos a query para evitar que o hook useCollection entre em loop infinito
+  const metricsQuery = useMemo(() => {
+    if (!firestore) return null;
+    return query(
+      collection(firestore, 'metrics'), 
+      orderBy('createdAt', 'desc'), 
+      limit(5000)
+    );
+  }, [firestore]);
+
   const { data: metrics, loading } = useCollection(metricsQuery);
 
   const stats = useMemo(() => {
