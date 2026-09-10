@@ -238,6 +238,7 @@ export default function MobileSalesPage() {
               viewer_user_id: visitorIdRef.current,
             }}
             streamType="on-demand"
+            playsInline
             className="w-full h-full object-cover pointer-events-none"
             onTimeUpdate={(e: any) => {
               const currentTime = e.target.currentTime;
