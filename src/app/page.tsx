@@ -8,7 +8,6 @@ import { Volume2, Lock, Play, AlertTriangle, RefreshCcw } from 'lucide-react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { initializeFirebase } from '@/firebase';
 import MuxPlayer from '@mux/mux-player-react';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export default function MobileSalesPage() {
   const [hasMounted, setHasMounted] = useState(false);
@@ -24,7 +23,10 @@ export default function MobileSalesPage() {
 
   useEffect(() => {
     setHasMounted(true);
-    visitorId.current = 'vis_' + Math.random().toString(36).substring(2, 11);
+    // Gerar ID de visitante persistente na sessão
+    if (!visitorId.current) {
+      visitorId.current = 'vis_' + Math.random().toString(36).substring(2, 11);
+    }
     
     const interval = setInterval(() => {
       setRecoveryCount(prev => prev + Math.floor(Math.random() * 3));
@@ -35,7 +37,7 @@ export default function MobileSalesPage() {
   useEffect(() => {
     if (showCTA && ctaRef.current) {
       setTimeout(() => {
-        ctaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        ctaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 100);
     }
   }, [showCTA]);
@@ -43,12 +45,13 @@ export default function MobileSalesPage() {
   const trackMetric = (milestone: number, currentTime: number = 0, duration: number = 0) => {
     if (!firestore) return;
     
+    // Gravação não-bloqueante das métricas
     addDoc(collection(firestore, 'metrics'), {
       visitorId: visitorId.current,
-      watchTime: currentTime,
-      totalDuration: duration,
+      watchTime: Math.floor(currentTime),
+      totalDuration: Math.floor(duration),
       percentage: milestone,
-      device: typeof navigator !== 'undefined' && navigator.userAgent.includes('Mobi') ? 'mobile' : 'desktop',
+      device: typeof navigator !== 'undefined' && /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop',
       createdAt: serverTimestamp(),
     }).catch(() => {}); 
   };
@@ -59,6 +62,7 @@ export default function MobileSalesPage() {
       playerRef.current.play();
       setIsPlaying(true);
       setIsEnded(false);
+      // Track Play (0%)
       if (!trackedMilestones.current.has(0)) {
         trackedMilestones.current.add(0);
         trackMetric(0);
@@ -89,20 +93,18 @@ export default function MobileSalesPage() {
 
   if (!hasMounted) return null;
 
-  const getImg = (id: string) => PlaceHolderImages.find(img => img.id === id);
-
   return (
     <main className="min-h-screen bg-[#050505] flex flex-col items-center px-4 pt-4 pb-20 select-none overflow-x-hidden">
-      <header className="w-full max-w-[480px] text-center mb-10 space-y-4">
-        <h1 className="text-white text-[1.4rem] font-black italic uppercase tracking-tighter leading-[1.1] mb-6">
-          ESSE MACETE IRÁ <span className="text-red-600 text-[1.6rem] animate-pulse text-glow-red">SAIR DO AR A QUALQUER MOMENTO.</span>
+      <header className="w-full max-w-[480px] text-center mb-10 space-y-6">
+        <h1 className="text-white text-[1.4rem] font-black italic uppercase tracking-tighter leading-[1.1] text-glow-red">
+          ESSE MACETE IRÁ <span className="text-red-600 text-[1.6rem] animate-pulse">SAIR DO AR A QUALQUER MOMENTO.</span>
         </h1>
-        <p className="text-zinc-300 text-[13px] font-medium leading-tight px-2">
+        <p className="text-zinc-300 text-[13px] font-medium leading-tight px-2 mt-4">
           Já solicitaram a queda deste site. Aproveite enquanto há tempo para recuperar sua conta.
         </p>
       </header>
 
-      <section className="w-full relative group max-w-[320px]">
+      <section className="w-full relative group max-w-[320px] mb-8">
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-[110] bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-md shadow-xl flex items-center gap-2 whitespace-nowrap pointer-events-none">
           <div className="w-2 h-2 bg-red-600 rounded-full animate-ping" />
           <span className="text-white text-[10px] font-bold uppercase tracking-widest">
@@ -174,10 +176,12 @@ export default function MobileSalesPage() {
               const duration = e.target.duration;
               const progress = (currentTime / duration) * 100;
               
+              // CTA at 02:08 (128 seconds)
               if (currentTime >= 128 && !showCTA) {
                 setShowCTA(true);
               }
 
+              // Tracking milestones
               [25, 50, 75, 90, 100].forEach(m => {
                 if (progress >= m && !trackedMilestones.current.has(m)) {
                   trackedMilestones.current.add(m);
@@ -199,9 +203,6 @@ export default function MobileSalesPage() {
             <Volume2 className="w-5 h-5" />
             <span className="text-[12px] font-black uppercase tracking-tighter text-center">LIGUE O SOM PARA RECEBER AS INSTRUÇÕES</span>
           </div>
-          <div className="w-full max-w-[180px] h-1 bg-zinc-800 rounded-full overflow-hidden relative opacity-30">
-            <div className="absolute inset-0 bg-red-600/50 animate-pulse" />
-          </div>
         </div>
       </section>
 
@@ -212,7 +213,7 @@ export default function MobileSalesPage() {
         >
           <Button 
             onClick={() => window.open('https://checkout.exemplo.com', '_blank')}
-            className="w-full h-16 text-lg font-black uppercase italic tracking-tighter bg-[#22c55e] hover:bg-[#16a34a] text-white rounded-2xl shadow-[0_8px_0_rgb(21,128,61)] active:translate-y-1 active:shadow-[0_4px_0_rgb(21,128,61)] transition-all duration-75 flex flex-col items-center justify-center leading-none button-pulse"
+            className="w-full h-16 text-xl font-black uppercase italic tracking-tighter bg-[#22c55e] hover:bg-[#16a34a] text-white rounded-2xl shadow-[0_8px_0_rgb(21,128,61)] active:translate-y-1 active:shadow-[0_4px_0_rgb(21,128,61)] transition-all duration-75 flex items-center justify-center leading-none button-pulse"
           >
             QUERO DESBANIR AGORA!
           </Button>
@@ -222,75 +223,32 @@ export default function MobileSalesPage() {
             <span className="text-[10px] font-bold uppercase tracking-tight">Pagamento 100% seguro via criptografia</span>
           </div>
 
-          <div className="mt-6 w-full space-y-3">
-            {/* Depoimento 1 */}
-            <div className="bg-zinc-900/50 border border-zinc-800 p-3 rounded-xl flex gap-3">
-              <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-zinc-700 relative">
-                {getImg('feedback-1')?.imageUrl && (
-                  <Image 
-                    src={getImg('feedback-1')!.imageUrl} 
-                    alt="João S." width={40} height={40} className="object-cover" 
-                  />
-                )}
-              </div>
-              <div className="flex flex-col">
-                <span className="text-white text-[11px] font-black italic">JOÃO S.</span>
-                <p className="text-zinc-400 text-[10px] leading-tight mt-1">Funcionou na hr! Já recuperei minha conta com a Calça Angelical q tava banida faz 1 ano.</p>
-              </div>
-            </div>
-
-            {/* Depoimento 2 */}
-            <div className="bg-zinc-900/50 border border-zinc-800 p-3 rounded-xl flex gap-3">
-              <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-zinc-700 relative">
-                {getImg('feedback-2')?.imageUrl && (
-                  <Image 
-                    src={getImg('feedback-2')!.imageUrl} 
-                    alt="Matheus R." width={40} height={40} className="object-cover" 
-                  />
-                )}
-              </div>
-              <div className="flex flex-col">
-                <span className="text-white text-[11px] font-black italic">MATHEUS R.</span>
-                <p className="text-zinc-400 text-[10px] leading-tight mt-1">Mlk do céu, deu certo memo! Minha conta lvl 70 de volta, achei q tinha perdido td kkkk vlw demais!</p>
-              </div>
-            </div>
-
-            {/* Depoimento 3 */}
-            <div className="bg-zinc-900/50 border border-zinc-800 p-3 rounded-xl flex gap-3">
-              <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-zinc-700 relative">
-                {getImg('feedback-3')?.imageUrl && (
-                  <Image 
-                    src={getImg('feedback-3')!.imageUrl} 
-                    alt="Lucas P." width={40} height={40} className="object-cover" 
-                  />
-                )}
-              </div>
-              <div className="flex flex-col">
-                <span className="text-white text-[11px] font-black italic">LUCAS P.</span>
-                <p className="text-zinc-400 text-[10px] leading-tight mt-1">Top demais, o suporte ajudou na hr q deu erro no login. Já to jogando ranqueada dnv. Vc é o cara!</p>
-              </div>
-            </div>
-
-            {/* Depoimento 4 */}
-            <div className="bg-zinc-900/50 border border-zinc-800 p-3 rounded-xl flex gap-3">
-              <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-zinc-700 relative">
-                {getImg('feedback-4')?.imageUrl && (
-                  <Image 
-                    src={getImg('feedback-4')!.imageUrl} 
-                    alt="Gabriela F." width={40} height={40} className="object-cover" 
-                  />
-                )}
-              </div>
-              <div className="flex flex-col">
-                <span className="text-white text-[11px] font-black italic">GABRIELA F.</span>
-                <p className="text-zinc-400 text-[10px] leading-tight mt-1">Caraca, a garena é mto safada msm, mas o macete salvou. Se vc fizer certinho volta na hr!</p>
-              </div>
-            </div>
+          <div className="mt-8 w-full space-y-4">
+            <FeedbackCard 
+              img="/feedback1.jpg" 
+              name="JOÃO S." 
+              text="Funcionou na hr! Já recuperei minha conta com a Calça Angelical q tava banida faz 1 ano." 
+            />
+            <FeedbackCard 
+              img="/feedback2.jpg" 
+              name="MATHEUS R." 
+              text="Mlk do céu, deu certo memo! Minha conta lvl 70 de volta, achei q tinha perdido td kkkk vlw demais!" 
+            />
+            <FeedbackCard 
+              img="/feedback3.jpg" 
+              name="LUCAS P." 
+              text="Top demais, o suporte ajudou na hr q deu erro no login. Já to jogando ranqueada dnv. Vc é o cara!" 
+            />
+            <FeedbackCard 
+              img="/feedback4.jpg" 
+              name="GABRIELA F." 
+              text="Caraca, a garena é mto safada msm, mas o macete salvou. Se vc fizer certinho volta na hr!" 
+            />
           </div>
         </section>
       )}
 
-      <footer className="mt-4 text-[8px] text-zinc-600 text-center uppercase font-bold tracking-widest max-w-[280px]">
+      <footer className="mt-8 text-[8px] text-zinc-600 text-center uppercase font-bold tracking-widest max-w-[280px]">
         Este site não possui vínculo com a Garena Free Fire. <br />
         Uso exclusivo para recuperação de contas legítimas.
       </footer>
@@ -303,38 +261,43 @@ export default function MobileSalesPage() {
         mux-player::part(mute-button),
         mux-player::part(volume-range),
         mux-player::part(fullscreen-button),
-        mux-player::part(settings-menu-button),
-        mux-player::part(playback-rate-button),
-        mux-player::part(pip-button),
-        mux-player::part(airplay-button),
-        mux-player::part(cast-button),
-        mux-player::part(center-controls),
-        mux-player::part(top-chrome),
-        mux-player::part(bottom-chrome) {
+        mux-player::part(center-controls) {
           display: none !important;
-          opacity: 0 !important;
-          visibility: hidden !important;
-          pointer-events: none !important;
         }
 
         mux-player::part(time-range) {
           display: block !important;
           position: absolute !important;
           bottom: 0 !important;
-          left: 0 !important;
-          right: 0 !important;
           height: 3px !important;
-          pointer-events: none !important;
           --media-range-thumb-display: none !important;
-          --media-time-range-thumb-display: none !important;
-          z-index: 50 !important;
         }
 
         mux-player {
-          --media-range-track-background: rgba(255, 255, 255, 0.1);
           --media-range-bar-color: #dc2626;
         }
       `}} />
     </main>
+  );
+}
+
+function FeedbackCard({ img, name, text }: { img: string, name: string, text: string }) {
+  return (
+    <div className="bg-zinc-900/50 border border-zinc-800 p-4 rounded-xl flex gap-3 transition-transform hover:scale-[1.02]">
+      <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 border border-zinc-700 bg-zinc-800 relative">
+        <Image 
+          src={img} 
+          alt={name} 
+          width={48} 
+          height={48} 
+          className="object-cover" 
+          unoptimized 
+        />
+      </div>
+      <div className="flex flex-col">
+        <span className="text-white text-[12px] font-black italic tracking-tight">{name}</span>
+        <p className="text-zinc-400 text-[11px] leading-snug mt-1">{text}</p>
+      </div>
+    </div>
   );
 }

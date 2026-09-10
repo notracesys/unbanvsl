@@ -19,7 +19,7 @@
     }
   },
   "auth": {
-    "providers": ["google.com", "anonymous"]
+    "providers": ["anonymous"]
   },
   "firestore": {
     "/metrics/{metricId}": {
