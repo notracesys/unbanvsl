@@ -3,19 +3,22 @@
   "entities": {
     "VSLMetric": {
       "title": "VSL Metric",
-      "description": "Métricas de visualização da VSL para análise de retenção.",
+      "description": "Métricas detalhadas de visualização para análise de funil e retenção.",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
         "visitorId": { "type": "string" },
-        "watchTime": { "type": "number", "description": "Segundos assistidos" },
-        "totalDuration": { "type": "number", "description": "Duração total do vídeo" },
-        "percentage": { "type": "number", "description": "Porcentagem concluída" },
-        "lastMilestone": { "type": "number", "enum": [0, 25, 50, 75, 90, 100] },
-        "device": { "type": "string" },
-        "createdAt": { "type": "string", "format": "date-time" }
+        "watchTime": { "type": "number", "description": "Segundos assistidos no vídeo" },
+        "totalDuration": { "type": "number" },
+        "percentage": { "type": "number" },
+        "device": { "type": "string", "enum": ["mobile", "desktop"] },
+        "clickedCTA": { "type": "boolean" },
+        "started": { "type": "boolean" },
+        "completed": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["visitorId", "watchTime", "createdAt"]
+      "required": ["visitorId", "updatedAt"]
     }
   },
   "auth": {
@@ -24,7 +27,7 @@
   "firestore": {
     "/metrics/{metricId}": {
       "schema": "VSLMetric",
-      "description": "Registros de eventos de visualização da VSL."
+      "description": "Coleção central de rastreamento de leads da VSL."
     }
   }
 }

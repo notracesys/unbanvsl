@@ -1,10 +1,11 @@
+
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Volume2, Lock, Play, AlertTriangle, RefreshCcw, ArrowRight } from 'lucide-react';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { initializeFirebase } from '@/firebase';
+import { useFirestore } from '@/firebase';
 import MuxPlayer from '@mux/mux-player-react';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { firebaseConfig } from '@/firebase/config';
@@ -23,23 +24,48 @@ export default function MobileSalesPage() {
   const lastSavedTimeRef = useRef<number>(0);
   const hasStartedRef = useRef<boolean>(false);
 
-  const { firestore } = initializeFirebase();
+  const firestore = useFirestore();
   const isConfigured = firebaseConfig.projectId && firebaseConfig.projectId !== 'project-id';
 
   useEffect(() => {
     setHasMounted(true);
-    if (!visitorIdRef.current) {
-      visitorIdRef.current = 'vis_' + Math.random().toString(36).substring(2, 11);
-    }
-    if (!sessionIdRef.current) {
-      sessionIdRef.current = 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
-    }
     
+    // Recupera ou cria ID persistente do visitante
+    const savedVisitorId = localStorage.getItem('vsl_visitor_id');
+    if (savedVisitorId) {
+      visitorIdRef.current = savedVisitorId;
+    } else {
+      const newId = 'vis_' + Math.random().toString(36).substring(2, 11);
+      visitorIdRef.current = newId;
+      localStorage.setItem('vsl_visitor_id', newId);
+    }
+
+    // ID Único para esta sessão/visita atual
+    sessionIdRef.current = 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
+    
+    // Evento inicial de "Lead Entrou na Página"
+    const initTracking = async () => {
+      if (firestore && isConfigured) {
+        const docRef = doc(firestore, 'metrics', sessionIdRef.current);
+        setDoc(docRef, {
+          id: sessionIdRef.current,
+          visitorId: visitorIdRef.current,
+          watchTime: 0,
+          device: /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop',
+          started: false,
+          clickedCTA: false,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        }, { merge: true });
+      }
+    };
+    initTracking();
+
     const interval = setInterval(() => {
       setRecoveryCount(prev => prev + Math.floor(Math.random() * 3));
     }, 15000);
     return () => clearInterval(interval);
-  }, []);
+  }, [firestore, isConfigured]);
 
   useEffect(() => {
     if (showCTA && ctaRef.current) {
@@ -52,22 +78,16 @@ export default function MobileSalesPage() {
   const trackMetric = (currentTime: number, duration: number, extra = {}) => {
     if (!firestore || !isConfigured) return;
     
-    const device = /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop';
     const progressPercentage = duration > 0 ? Math.floor((currentTime / duration) * 100) : 0;
-
     const docRef = doc(firestore, 'metrics', sessionIdRef.current);
+
     setDoc(docRef, {
-      id: sessionIdRef.current,
-      visitorId: visitorIdRef.current,
       watchTime: Math.floor(currentTime),
       totalDuration: Math.floor(duration || 180),
       percentage: progressPercentage,
-      device: device,
       updatedAt: serverTimestamp(),
       ...extra
-    }, { merge: true }).catch(() => {
-      // Silencioso em produção
-    });
+    }, { merge: true });
   };
 
   const handlePlayVideo = (e?: React.MouseEvent) => {
@@ -79,21 +99,8 @@ export default function MobileSalesPage() {
       
       if (!hasStartedRef.current) {
         hasStartedRef.current = true;
-        trackMetric(0, playerRef.current.duration || 0, {
-          createdAt: serverTimestamp(),
-          started: true
-        });
+        trackMetric(0, playerRef.current.duration || 0, { started: true });
       }
-    }
-  };
-
-  const handleRestartVideo = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (playerRef.current) {
-      playerRef.current.currentTime = 0;
-      playerRef.current.play();
-      setIsPlaying(true);
-      setIsEnded(false);
     }
   };
 
@@ -112,8 +119,9 @@ export default function MobileSalesPage() {
       const docRef = doc(firestore, 'metrics', sessionIdRef.current);
       setDoc(docRef, {
         clickedCTA: true,
-        clickedCtaAt: serverTimestamp()
-      }, { merge: true }).catch(() => {});
+        clickedCtaAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      }, { merge: true });
     }
     window.open('https://checkout.exemplo.com', '_blank');
   };
@@ -148,13 +156,11 @@ export default function MobileSalesPage() {
           {!isPlaying && !isEnded && (
             <div className="absolute inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md transition-all duration-300">
               <div className="flex flex-col items-center gap-6 px-6 text-center">
-                <div className="flex justify-center">
-                  <div 
-                    onClick={handlePlayVideo}
-                    className="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(220,38,38,0.8)] animate-pulse border-4 border-white/20 cursor-pointer"
-                  >
-                    <Play className="w-10 h-10 text-white fill-current ml-1" />
-                  </div>
+                <div 
+                  onClick={handlePlayVideo}
+                  className="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(220,38,38,0.8)] animate-pulse border-4 border-white/20 cursor-pointer"
+                >
+                  <Play className="w-10 h-10 text-white fill-current ml-1" />
                 </div>
                 
                 <div className="space-y-4">
@@ -167,7 +173,7 @@ export default function MobileSalesPage() {
                     <p className="text-zinc-200 text-sm font-bold leading-tight">
                       ESSE MACETE VAI SUMIR... <br />
                       <span className="text-zinc-400 text-[11px] font-normal mt-2 block">
-                        Se vc parar agora, nunca mais terá acesso a este segredo. Continue assistindo.
+                        Se você parar agora, nunca mais terá acesso a este segredo. Continue assistindo.
                       </span>
                     </p>
                   </div>
@@ -179,7 +185,12 @@ export default function MobileSalesPage() {
           {isEnded && (
             <div 
               className="absolute inset-0 z-[100] flex items-center justify-center cursor-pointer bg-black/90 backdrop-blur-lg"
-              onClick={handleRestartVideo}
+              onClick={() => {
+                if (playerRef.current) {
+                  playerRef.current.currentTime = 0;
+                  handlePlayVideo();
+                }
+              }}
             >
               <div className="flex flex-col items-center gap-4">
                 <div className="w-20 h-20 bg-zinc-100 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.2)]">
@@ -208,8 +219,8 @@ export default function MobileSalesPage() {
                 setShowCTA(true);
               }
 
-              // Salva a cada 4 segundos de progresso para métricas cirúrgicas e precisas
-              if (Math.abs(currentTime - lastSavedTimeRef.current) >= 4) {
+              // Salva a cada 5 segundos para não sobrecarregar mas manter precisão
+              if (Math.abs(currentTime - lastSavedTimeRef.current) >= 5) {
                 lastSavedTimeRef.current = currentTime;
                 trackMetric(currentTime, duration);
               }
@@ -255,22 +266,17 @@ export default function MobileSalesPage() {
             <FeedbackCard 
               img={getImg('feedback-1')?.imageUrl || '/feedback1.jpg'} 
               name="JOÃO S." 
-              text="Funcionou na hr! Já recuperei minha conta com a Calça Angelical q tava banida faz 1 ano." 
+              text="Funcionou na hora! Já recuperei minha conta com a Calça Angelical que tava banida faz 1 ano." 
             />
             <FeedbackCard 
               img={getImg('feedback-2')?.imageUrl || '/feedback2.jpg'} 
               name="MATHEUS R." 
-              text="Mlk do céu, deu certo memo! Minha conta lvl 70 de volta, achei q tinha perdido td kkkk vlw demais!" 
+              text="Moleque do céu, deu certo mesmo! Minha conta lvl 70 de volta, achei que tinha perdido tudo kkk valeu demais!" 
             />
             <FeedbackCard 
               img={getImg('feedback-3')?.imageUrl || '/feedback3.jpg'} 
               name="LUCAS P." 
-              text="Top demais, o suporte ajudou na hr q deu erro no login. Já to jogar ranqueada dnv. Vc é o cara!" 
-            />
-            <FeedbackCard 
-              img={getImg('feedback-4')?.imageUrl || '/feedback4.jpg'} 
-              name="GABRIELA F." 
-              text="Caraca, a garena é mto safada msm, mas o macete salvou. Se vc fizer certinho volta na hr!" 
+              text="Top demais, o suporte ajudou na hora que deu erro no login. Já tô jogando ranqueada de novo." 
             />
           </div>
         </section>
