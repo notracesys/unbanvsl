@@ -2,45 +2,33 @@
 {
   "placeholderImages": [
     {
-      "id": "couple-hero",
-      "description": "Happy couple hugging and smiling, soft focus romantic atmosphere",
-      "imageUrl": "https://picsum.photos/seed/lovelink-hero/800/600",
-      "imageHint": "happy couple romantic"
-    },
-    {
-      "id": "mockup-phone",
-      "description": "Smartphone display showing a romantic digital gift interface",
-      "imageUrl": "https://picsum.photos/seed/phone-mock/400/800",
-      "imageHint": "smartphone screen romance"
-    },
-    {
-      "id": "testimonial-1",
-      "description": "Young woman smiling with a phone in her hands",
-      "imageUrl": "https://picsum.photos/seed/user1/100/100",
-      "imageHint": "woman smiling happy"
+      "id": "hero-laptop",
+      "description": "Modern laptop showing digital marketing charts and graphs",
+      "imageUrl": "https://picsum.photos/seed/laptop-mkt/800/600",
+      "imageHint": "laptop marketing"
     },
     {
       "id": "feedback-1",
       "description": "User testimonial avatar 1",
-      "imageUrl": "https://picsum.photos/seed/user-ff-1/100/100",
+      "imageUrl": "/feedback1.jpg",
       "imageHint": "man gamer"
     },
     {
       "id": "feedback-2",
       "description": "User testimonial avatar 2",
-      "imageUrl": "https://picsum.photos/seed/user-ff-2/100/100",
+      "imageUrl": "/feedback2.jpg",
       "imageHint": "teenager gamer"
     },
     {
       "id": "feedback-3",
       "description": "User testimonial avatar 3",
-      "imageUrl": "https://picsum.photos/seed/user-ff-3/100/100",
+      "imageUrl": "/feedback3.jpg",
       "imageHint": "guy smiling"
     },
     {
       "id": "feedback-4",
       "description": "User testimonial avatar 4 - woman",
-      "imageUrl": "https://picsum.photos/seed/user-ff-4-female/100/100",
+      "imageUrl": "/feedback4.jpg",
       "imageHint": "woman smiling"
     }
   ]

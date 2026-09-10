@@ -24,8 +24,7 @@ export default function MobileSalesPage() {
 
   useEffect(() => {
     setHasMounted(true);
-    // Para evitar erro de hidratação com Math.random
-    visitorId.current = 'vis_' + Math.random().toString(36).substr(2, 9);
+    visitorId.current = 'vis_' + Math.random().toString(36).substring(2, 11);
     
     const interval = setInterval(() => {
       setRecoveryCount(prev => prev + Math.floor(Math.random() * 3));
@@ -104,7 +103,6 @@ export default function MobileSalesPage() {
       </header>
 
       <section className="w-full relative group max-w-[320px]">
-        {/* Contador de urgência - Z-Index mais alto para ficar visível na pausa */}
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-[110] bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-md shadow-xl flex items-center gap-2 whitespace-nowrap pointer-events-none">
           <div className="w-2 h-2 bg-red-600 rounded-full animate-ping" />
           <span className="text-white text-[10px] font-bold uppercase tracking-widest">
@@ -116,7 +114,6 @@ export default function MobileSalesPage() {
           className="aspect-[9/16] w-full bg-zinc-900 rounded-3xl overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.8)] border border-zinc-800 relative cursor-pointer"
           onClick={togglePlayPause}
         >
-          {/* Overlay de Pausa / Escassez Extrema */}
           {!isPlaying && !isEnded && (
             <div className="absolute inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md transition-all duration-300">
               <div className="flex flex-col items-center gap-6 px-6 text-center">
@@ -148,7 +145,6 @@ export default function MobileSalesPage() {
             </div>
           )}
 
-          {/* Overlay de Replay ao Final */}
           {isEnded && (
             <div 
               className="absolute inset-0 z-[100] flex items-center justify-center cursor-pointer bg-black/90 backdrop-blur-lg"
@@ -178,7 +174,6 @@ export default function MobileSalesPage() {
               const duration = e.target.duration;
               const progress = (currentTime / duration) * 100;
               
-              // Aparece aos 02:08 (128 segundos)
               if (currentTime >= 128 && !showCTA) {
                 setShowCTA(true);
               }
@@ -199,7 +194,6 @@ export default function MobileSalesPage() {
           />
         </div>
 
-        {/* Alerta de som abaixo do player */}
         <div className="mt-4 flex flex-col items-center gap-2">
           <div className="flex items-center gap-3 text-zinc-400 animate-pulse-slow">
             <Volume2 className="w-5 h-5" />
@@ -211,7 +205,6 @@ export default function MobileSalesPage() {
         </div>
       </section>
 
-      {/* Botão de Chamada para Ação - Aparece apenas após 02:08 */}
       {showCTA && (
         <section 
           ref={ctaRef}
@@ -232,12 +225,11 @@ export default function MobileSalesPage() {
           <div className="mt-6 w-full space-y-3">
             {/* Depoimento 1 */}
             <div className="bg-zinc-900/50 border border-zinc-800 p-3 rounded-xl flex gap-3">
-              <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-zinc-700">
-                {getImg('feedback-1') && (
+              <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-zinc-700 relative">
+                {getImg('feedback-1')?.imageUrl && (
                   <Image 
                     src={getImg('feedback-1')!.imageUrl} 
                     alt="João S." width={40} height={40} className="object-cover" 
-                    data-ai-hint="man gamer"
                   />
                 )}
               </div>
@@ -249,12 +241,11 @@ export default function MobileSalesPage() {
 
             {/* Depoimento 2 */}
             <div className="bg-zinc-900/50 border border-zinc-800 p-3 rounded-xl flex gap-3">
-              <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-zinc-700">
-                {getImg('feedback-2') && (
+              <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-zinc-700 relative">
+                {getImg('feedback-2')?.imageUrl && (
                   <Image 
                     src={getImg('feedback-2')!.imageUrl} 
                     alt="Matheus R." width={40} height={40} className="object-cover" 
-                    data-ai-hint="teenager gamer"
                   />
                 )}
               </div>
@@ -266,12 +257,11 @@ export default function MobileSalesPage() {
 
             {/* Depoimento 3 */}
             <div className="bg-zinc-900/50 border border-zinc-800 p-3 rounded-xl flex gap-3">
-              <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-zinc-700">
-                {getImg('feedback-3') && (
+              <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-zinc-700 relative">
+                {getImg('feedback-3')?.imageUrl && (
                   <Image 
                     src={getImg('feedback-3')!.imageUrl} 
                     alt="Lucas P." width={40} height={40} className="object-cover" 
-                    data-ai-hint="guy smiling"
                   />
                 )}
               </div>
@@ -283,12 +273,11 @@ export default function MobileSalesPage() {
 
             {/* Depoimento 4 */}
             <div className="bg-zinc-900/50 border border-zinc-800 p-3 rounded-xl flex gap-3">
-              <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-zinc-700">
-                {getImg('feedback-4') && (
+              <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-zinc-700 relative">
+                {getImg('feedback-4')?.imageUrl && (
                   <Image 
                     src={getImg('feedback-4')!.imageUrl} 
                     alt="Gabriela F." width={40} height={40} className="object-cover" 
-                    data-ai-hint="woman smiling"
                   />
                 )}
               </div>
@@ -306,7 +295,6 @@ export default function MobileSalesPage() {
         Uso exclusivo para recuperação de contas legítimas.
       </footer>
 
-      {/* CSS para Blindar o Player de Controles indesejados e customizar a barra */}
       <style dangerouslySetInnerHTML={{ __html: `
         .text-glow-red { text-shadow: 0 0 15px rgba(220, 38, 38, 0.7); }
         
