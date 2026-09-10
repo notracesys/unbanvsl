@@ -1,7 +1,8 @@
+
 'use client';
 
 import React, { useMemo } from 'react';
-import { useFirestore, useCollection } from '@/firebase';
+import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy, limit } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { 
@@ -23,73 +24,78 @@ import {
   Smartphone, 
   Monitor, 
   Zap,
-  Clock
+  Clock,
+  Loader2
 } from 'lucide-react';
 
 export default function AnalyticsDashboard() {
   const firestore = useFirestore();
   
-  // Estabilizamos a query para evitar o loop de renderização (Maximum update depth)
-  const metricsQuery = useMemo(() => {
+  // Usamos useMemoFirebase para estabilizar a query 100%
+  const metricsQuery = useMemoFirebase(() => {
     if (!firestore) return null;
     return query(
       collection(firestore, 'metrics'), 
       orderBy('createdAt', 'desc'), 
-      limit(2000) // Reduzido para melhor performance no carregamento inicial
+      limit(1000) // Reduzido para garantir performance instantânea
     );
   }, [firestore]);
 
   const { data: metrics, loading } = useCollection(metricsQuery);
 
+  // Processamento ultra-otimizado das estatísticas
   const stats = useMemo(() => {
     if (!metrics || metrics.length === 0) return null;
 
-    const uniqueVisitors = new Set(metrics.map(m => m.visitorId));
-    const totalPlays = uniqueVisitors.size;
+    const visitorMap = new Map();
+    const deviceCounts = new Map();
+
+    // Loop único para processar múltiplos dados (O(n))
+    metrics.forEach(m => {
+      // Retenção máxima por visitante
+      const currentMax = visitorMap.get(m.visitorId) || 0;
+      if (m.percentage > currentMax) {
+        visitorMap.set(m.visitorId, m.percentage);
+      }
+
+      // Contagem de dispositivos (apenas uma vez por visitante)
+      if (!visitorMap.has(m.visitorId + '_dev')) {
+        const dev = m.device || 'unknown';
+        deviceCounts.set(dev, (deviceCounts.get(dev) || 0) + 1);
+        visitorMap.set(m.visitorId + '_dev', true);
+      }
+    });
+
+    const totalPlays = visitorMap.size / 2; // Dividido por 2 por causa da chave de dispositivo
 
     // Milestones retention
     const milestones = [0, 25, 50, 75, 90, 100];
     const retentionData = milestones.map(m => {
-      const reached = new Set(metrics.filter(met => met.percentage >= m).map(met => met.visitorId)).size;
-      const pct = totalPlays > 0 ? (reached / totalPlays) * 100 : 0;
+      let reached = 0;
+      visitorMap.forEach((val, key) => {
+        if (!key.endsWith('_dev') && val >= m) reached++;
+      });
       return {
         milestone: m === 0 ? 'Start' : `${m}%`,
-        leads: reached,
-        percentage: parseFloat(pct.toFixed(1))
+        percentage: totalPlays > 0 ? parseFloat(((reached / totalPlays) * 100).toFixed(1)) : 0
       };
     });
 
-    // Device breakdown
-    const devices = metrics.reduce((acc: any, curr) => {
-      const dev = curr.device || 'unknown';
-      if (!acc[dev]) acc[dev] = new Set();
-      acc[dev].add(curr.visitorId);
-      return acc;
-    }, {});
-
-    const deviceData = Object.keys(devices).map(key => ({
-      name: key.charAt(0).toUpperCase() + key.slice(1),
-      value: devices[key].size
+    const deviceData = Array.from(deviceCounts.entries()).map(([name, value]) => ({
+      name: name.charAt(0).toUpperCase() + name.slice(1),
+      value
     }));
 
-    // Average watch time
-    const lastMilestones = metrics.reduce((acc: any, curr) => {
-      if (!acc[curr.visitorId] || acc[curr.visitorId] < curr.percentage) {
-        acc[curr.visitorId] = curr.percentage;
-      }
-      return acc;
-    }, {});
-    
-    const avgRetentionValues = Object.values(lastMilestones) as number[];
-    const avgRetention = avgRetentionValues.length > 0 
-      ? avgRetentionValues.reduce((a, b) => a + b, 0) / totalPlays 
-      : 0;
+    let totalRetentionSum = 0;
+    visitorMap.forEach((val, key) => {
+      if (!key.endsWith('_dev')) totalRetentionSum += val;
+    });
 
     return {
-      totalPlays,
+      totalPlays: Math.floor(totalPlays),
       retentionData,
       deviceData,
-      avgRetention: avgRetention.toFixed(1)
+      avgRetention: totalPlays > 0 ? (totalRetentionSum / totalPlays).toFixed(1) : '0'
     };
   }, [metrics]);
 
@@ -97,7 +103,7 @@ export default function AnalyticsDashboard() {
     return (
       <div className="min-h-screen bg-[#050505] flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <Zap className="w-12 h-12 text-red-600 animate-pulse" />
+          <Loader2 className="w-10 h-10 text-red-600 animate-spin" />
           <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Sincronizando Dados...</span>
         </div>
       </div>
@@ -108,15 +114,16 @@ export default function AnalyticsDashboard() {
     return (
       <div className="min-h-screen bg-[#050505] flex items-center justify-center p-6 text-center">
         <div className="max-w-md space-y-4">
-          <h2 className="text-xl font-bold text-white uppercase italic tracking-tighter">Nenhum dado capturado</h2>
-          <p className="text-zinc-500 text-sm">Rode tráfego para sua VSL para começar a ver a curva de retenção aqui.</p>
+          <Zap className="w-12 h-12 text-zinc-800 mx-auto" />
+          <h2 className="text-xl font-bold text-white uppercase italic tracking-tighter">Aguardando Tráfego</h2>
+          <p className="text-zinc-500 text-sm">Abra a VSL para começar a capturar os dados de retenção.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#050505] text-zinc-100 p-6 lg:p-10">
+    <div className="min-h-screen bg-[#050505] text-zinc-100 p-6 lg:p-10 font-sans">
       <div className="max-w-7xl mx-auto space-y-10">
         
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-zinc-900 pb-8">
@@ -128,13 +135,12 @@ export default function AnalyticsDashboard() {
             <h1 className="text-4xl font-black italic uppercase tracking-tighter">
               Performance <span className="text-red-600">VSL</span>
             </h1>
-            <p className="text-zinc-500 text-xs uppercase font-bold tracking-widest">Análise Cirúrgica de Retenção</p>
           </div>
           
           <div className="bg-zinc-900/50 border border-zinc-800 px-4 py-2 rounded-xl">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <span className="text-xs font-black uppercase tracking-widest">Monitorando em Tempo Real</span>
+              <span className="text-xs font-black uppercase tracking-widest">Monitoramento Ativo</span>
             </div>
           </div>
         </header>
@@ -142,17 +148,16 @@ export default function AnalyticsDashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <KpiCard title="Total de Plays" value={stats.totalPlays} icon={<Play className="text-red-600" />} />
           <KpiCard title="Retenção Média" value={`${stats.avgRetention}%`} icon={<Clock className="text-red-600" />} />
-          <KpiCard title="Dispositivo Dominante" value={stats.deviceData.sort((a,b) => b.value - a.value)[0]?.name || 'N/A'} icon={<Smartphone className="text-red-600" />} />
-          <KpiCard title="Health Score" value="A+" icon={<Zap className="text-red-600" />} />
+          <KpiCard title="Mobile Leads" value={stats.deviceData.find(d => d.name === 'Mobile')?.value || 0} icon={<Smartphone className="text-red-600" />} />
+          <KpiCard title="Status" value="Escalando" icon={<Zap className="text-red-600" />} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card className="lg:col-span-2 bg-zinc-900/20 border-zinc-800 backdrop-blur-sm">
+          <Card className="lg:col-span-2 bg-zinc-900/20 border-zinc-800">
             <CardHeader>
-              <CardTitle className="text-lg font-black uppercase italic tracking-tight">Curva de Retenção</CardTitle>
-              <CardDescription className="text-zinc-500">Acompanhe onde seu público perde o interesse no script.</CardDescription>
+              <CardTitle className="text-lg font-black uppercase italic tracking-tight">Curva de Retenção (VTurb Style)</CardTitle>
             </CardHeader>
-            <CardContent className="h-[400px] w-full pt-4">
+            <CardContent className="h-[350px] w-full pt-4">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={stats.retentionData}>
                   <defs>
@@ -165,20 +170,20 @@ export default function AnalyticsDashboard() {
                   <XAxis dataKey="milestone" stroke="#52525b" fontSize={10} tickLine={false} axisLine={false} />
                   <YAxis stroke="#52525b" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(v) => `${v}%`} />
                   <Tooltip 
-                    contentStyle={{ backgroundColor: '#09090b', borderColor: '#27272a', borderRadius: '12px', fontSize: '12px' }}
-                    itemStyle={{ color: '#dc2626', fontWeight: 'bold' }}
+                    contentStyle={{ backgroundColor: '#09090b', borderColor: '#27272a', borderRadius: '8px' }}
+                    itemStyle={{ color: '#dc2626' }}
                   />
-                  <Area type="monotone" dataKey="percentage" stroke="#dc2626" strokeWidth={3} fillOpacity={1} fill="url(#colorRet)" name="Leads Ativos" />
+                  <Area type="monotone" dataKey="percentage" stroke="#dc2626" strokeWidth={3} fillOpacity={1} fill="url(#colorRet)" />
                 </AreaChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
 
-          <Card className="bg-zinc-900/20 border-zinc-800 backdrop-blur-sm">
+          <Card className="bg-zinc-900/20 border-zinc-800">
             <CardHeader>
               <CardTitle className="text-lg font-black uppercase italic tracking-tight">Dispositivos</CardTitle>
             </CardHeader>
-            <CardContent className="h-[300px] flex flex-col items-center justify-center">
+            <CardContent className="h-[350px]">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -191,56 +196,15 @@ export default function AnalyticsDashboard() {
                     dataKey="value"
                   >
                     <Cell fill="#dc2626" />
-                    <Cell fill="#18181b" />
+                    <Cell fill="#27272a" />
                   </Pie>
-                  <Tooltip contentStyle={{ backgroundColor: '#09090b', borderColor: '#27272a', borderRadius: '12px' }} />
-                  <Legend verticalAlign="bottom" height={36}/>
+                  <Tooltip contentStyle={{ backgroundColor: '#09090b', border: 'none' }} />
+                  <Legend />
                 </PieChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
         </div>
-
-        <Card className="bg-zinc-900/20 border-zinc-800">
-          <CardHeader>
-            <CardTitle className="text-lg font-black uppercase italic tracking-tight">Análise de Drop-off</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="border-b border-zinc-800">
-                    <th className="pb-4 font-black uppercase text-[10px] tracking-widest text-zinc-500">Ponto do Vídeo</th>
-                    <th className="pb-4 font-black uppercase text-[10px] tracking-widest text-zinc-500">Leads Retidos</th>
-                    <th className="pb-4 font-black uppercase text-[10px] tracking-widest text-zinc-500">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-zinc-900">
-                  {stats.retentionData.map((row, i) => (
-                    <tr key={i} className="hover:bg-white/5 transition-colors">
-                      <td className="py-4 font-bold text-sm">{row.milestone}</td>
-                      <td className="py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="flex-1 h-1 bg-zinc-800 rounded-full overflow-hidden max-w-[120px]">
-                            <div className="h-full bg-red-600" style={{ width: `${row.percentage}%` }} />
-                          </div>
-                          <span className="text-xs font-black">{row.percentage}%</span>
-                        </div>
-                      </td>
-                      <td className="py-4">
-                        {row.percentage > 60 ? (
-                          <span className="text-[9px] font-black uppercase text-green-500">Escalável</span>
-                        ) : (
-                          <span className="text-[9px] font-black uppercase text-red-600">Revisar Script</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );
@@ -248,10 +212,10 @@ export default function AnalyticsDashboard() {
 
 function KpiCard({ title, value, icon }: { title: string, value: string | number, icon: any }) {
   return (
-    <Card className="bg-zinc-900/20 border-zinc-800 hover:border-red-600/30 transition-all group">
+    <Card className="bg-zinc-900/20 border-zinc-800 hover:border-red-600/30 transition-all">
       <CardContent className="pt-6">
-        <div className="flex items-center justify-between mb-2">
-          <div className="p-2 bg-zinc-950 rounded-lg border border-zinc-800">{React.cloneElement(icon, { size: 16 })}</div>
+        <div className="flex items-center justify-between mb-4">
+          <div className="p-2 bg-zinc-950 rounded-lg">{React.cloneElement(icon, { size: 16 })}</div>
         </div>
         <div className="space-y-1">
           <p className="text-[9px] font-black uppercase tracking-widest text-zinc-500">{title}</p>
