@@ -36,16 +36,28 @@ export default function LoginPage() {
     setIsSubmitting(true);
     setError('');
 
+    // Remove espaços em branco acidentais do e-mail
+    const cleanEmail = email.trim();
+
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      await signInWithEmailAndPassword(auth, cleanEmail, password);
       router.push('/dashboard');
     } catch (err: any) {
-      console.error("Login failed", err);
-      setError('Credenciais inválidas. Verifique o e-mail e a senha.');
+      console.error("Login failed", err.code, err.message);
+      
+      let friendlyMessage = 'Credenciais inválidas. Verifique o e-mail e a senha.';
+      
+      if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
+        friendlyMessage = 'E-mail ou senha incorretos. Verifique no Console do Firebase se o usuário existe.';
+      } else if (err.code === 'auth/too-many-requests') {
+        friendlyMessage = 'Muitas tentativas malsucedidas. Tente novamente mais tarde.';
+      }
+
+      setError(friendlyMessage);
       toast({
         variant: "destructive",
         title: "Erro de Acesso",
-        description: "E-mail ou senha incorretos.",
+        description: friendlyMessage,
       });
     } finally {
       setIsSubmitting(false);
@@ -106,7 +118,7 @@ export default function LoginPage() {
             {error && (
               <div className="bg-red-500/10 border border-red-500/20 p-3 rounded-xl flex items-center gap-2 text-red-500 text-[11px] font-bold">
                 <AlertCircle className="w-4 h-4 shrink-0" />
-                {error}
+                <span className="leading-tight">{error}</span>
               </div>
             )}
 
@@ -125,7 +137,7 @@ export default function LoginPage() {
             </Button>
             
             <p className="text-center text-[9px] text-zinc-600 font-bold uppercase tracking-widest">
-              Caso tenha esquecido sua senha, entre em contato com o suporte técnico.
+              Caso tenha esquecido sua senha, redefina-a no Console do Firebase.
             </p>
           </form>
         </CardContent>
