@@ -25,8 +25,8 @@ export default function MobileSalesPage() {
   
   const visitorIdRef = useRef<string>('');
   const sessionIdRef = useRef<string>('');
-  const lastSavedTimeRef = useRef<number>(0);
   const hasStartedRef = useRef<boolean>(false);
+  const milestonesReachedRef = useRef<Set<number>>(new Set());
 
   const firestore = useFirestore();
   const isConfigured = firebaseConfig.projectId && firebaseConfig.projectId !== 'project-id';
@@ -112,14 +112,7 @@ export default function MobileSalesPage() {
       updatedAt: serverTimestamp(),
       ...extra
     }, { merge: true }).catch(async (err: any) => {
-      if (err.code === 'permission-denied') {
-        const permsError = new FirestorePermissionError({
-          path: docRef.path,
-          operation: 'update',
-          requestResourceData: { watchTime: currentTime, ...extra }
-        });
-        errorEmitter.emit('permission-error', permsError);
-      }
+      // Silencioso para não travar o site do usuário se a cota acabar
     });
   };
 
@@ -359,14 +352,21 @@ export default function MobileSalesPage() {
             className="w-full h-full object-cover pointer-events-none"
             onTimeUpdate={(e: any) => {
               const currentTime = e.target.currentTime;
+              const duration = 140; // fixo
+              
               if (currentTime >= 128 && !showCTA) {
                 setShowCTA(true);
               }
-              // Otimizado: Grava apenas a cada 30 segundos para economizar cota do Firebase
-              if (Math.abs(currentTime - lastSavedTimeRef.current) >= 30) {
-                lastSavedTimeRef.current = currentTime;
-                trackMetric(currentTime, 140);
-              }
+
+              // Otimização de Cota: Salva apenas em marcos (Milestones)
+              // Milestones: 25%, 50%, 75%
+              const milestones = [35, 70, 105]; 
+              milestones.forEach(m => {
+                if (currentTime >= m && !milestonesReachedRef.current.has(m)) {
+                   milestonesReachedRef.current.add(m);
+                   trackMetric(currentTime, duration);
+                }
+              });
             }}
             onEnded={() => {
               setIsPlaying(false);
