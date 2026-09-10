@@ -38,8 +38,8 @@ export default function AnalyticsDashboard() {
     setMounted(true);
   }, []);
 
-  // Verifica se a API Key real foi inserida
-  const isConfigured = firebaseConfig.apiKey !== "COLE_SUA_API_KEY_AQUI";
+  // Verifica se o Firebase está configurado (não é o ID padrão)
+  const isConfigured = firebaseConfig.projectId === "unban-a07e6";
 
   const metricsQuery = useMemo(() => {
     if (!firestore || !isConfigured) return null;
@@ -59,11 +59,13 @@ export default function AnalyticsDashboard() {
     const deviceCounts = new Map();
 
     metrics.forEach((m: any) => {
+      // Pega a maior porcentagem assistida por cada visitante único
       const currentMax = visitorMap.get(m.visitorId) || 0;
       if (m.percentage > currentMax) {
         visitorMap.set(m.visitorId, m.percentage);
       }
 
+      // Conta dispositivos por visitante único
       const devKey = m.visitorId + '_dev';
       if (!visitorMap.has(devKey)) {
         const dev = m.device || 'unknown';
@@ -74,6 +76,7 @@ export default function AnalyticsDashboard() {
 
     const totalPlays = Array.from(visitorMap.keys()).filter(k => !k.endsWith('_dev')).length;
 
+    // Milestones do VTurb
     const milestones = [0, 25, 50, 75, 90, 100];
     const retentionData = milestones.map(m => {
       let reached = 0;
@@ -91,6 +94,7 @@ export default function AnalyticsDashboard() {
       value
     }));
 
+    // Retenção média ponderada
     let totalRetentionSum = 0;
     let count = 0;
     visitorMap.forEach((val, key) => {
@@ -109,22 +113,6 @@ export default function AnalyticsDashboard() {
   }, [metrics]);
 
   if (!mounted) return null;
-
-  if (!isConfigured) {
-    return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center p-6 text-center">
-        <div className="max-w-md space-y-6 bg-zinc-900/50 border border-zinc-800 p-8 rounded-3xl">
-          <Database className="w-16 h-16 text-yellow-600 mx-auto animate-pulse" />
-          <div className="space-y-2">
-            <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter">Firebase Offline</h2>
-            <p className="text-zinc-500 text-sm leading-relaxed">
-              O Dashboard está pronto, mas as chaves de conexão ainda parecem ser as padrão. Insira a sua <code className="text-yellow-500">apiKey</code> no arquivo <code className="text-white">config.ts</code>.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   if (loading && !metrics) {
     return (
@@ -173,6 +161,7 @@ export default function AnalyticsDashboard() {
           </div>
         </header>
 
+        {/* KPIs Principais */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <KpiCard title="Total de Leads" value={stats.totalPlays} icon={<Play className="text-red-600" />} />
           <KpiCard title="Retenção Média" value={`${stats.avgRetention}%`} icon={<Clock className="text-red-600" />} />
@@ -181,6 +170,7 @@ export default function AnalyticsDashboard() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Gráfico de Retenção */}
           <Card className="lg:col-span-2 bg-zinc-900/20 border-zinc-800 overflow-hidden backdrop-blur-sm">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <h3 className="text-lg font-black uppercase italic tracking-tight text-white">Curva de Retenção</h3>
@@ -229,6 +219,7 @@ export default function AnalyticsDashboard() {
             </CardContent>
           </Card>
 
+          {/* Device Mix */}
           <Card className="bg-zinc-900/20 border-zinc-800 backdrop-blur-sm">
             <CardHeader>
               <h3 className="text-lg font-black uppercase italic tracking-tight text-white">Device Mix</h3>

@@ -1,6 +1,6 @@
 // Configurações reais do projeto unban-a07e6 extraídas do console
 export const firebaseConfig = {
-  apiKey: "AIzaSyD_VATEBiyjbG1Z7I2L7RZNdXYIkyyFXjw",
+  apiKey: "AIzaSyD_VATEBiyjbG1Z7I2L7RZndXYIkyyfXjw",
   authDomain: "unban-a07e6.firebaseapp.com",
   projectId: "unban-a07e6",
   storageBucket: "unban-a07e6.firebasestorage.app",
