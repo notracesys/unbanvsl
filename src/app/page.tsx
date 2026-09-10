@@ -27,10 +27,19 @@ export default function MobileSalesPage() {
   const firestore = useFirestore();
   const isConfigured = firebaseConfig.projectId && firebaseConfig.projectId !== 'project-id';
 
+  // Função auxiliar para pegar a data local YYYY-MM-DD
+  const getLocalDateString = () => {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   useEffect(() => {
     setHasMounted(true);
     
-    // Recupera ou cria ID persistente do visitante
+    // Recupera ou cria ID persistente do visitante (longo prazo)
     const savedVisitorId = localStorage.getItem('vsl_visitor_id');
     if (savedVisitorId) {
       visitorIdRef.current = savedVisitorId;
@@ -40,23 +49,24 @@ export default function MobileSalesPage() {
       localStorage.setItem('vsl_visitor_id', newId);
     }
 
-    // ID Único para esta sessão/visita atual
-    sessionIdRef.current = 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
+    // ID Único para esta sessão (persiste ao F5, mas reseta ao fechar aba)
+    let currentSessionId = sessionStorage.getItem('vsl_session_id');
+    if (!currentSessionId) {
+      currentSessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
+      sessionStorage.setItem('vsl_session_id', currentSessionId);
+    }
+    sessionIdRef.current = currentSessionId;
     
     // Evento inicial de "Lead Entrou na Página"
     const initTracking = async () => {
       if (firestore && isConfigured) {
-        const todayStr = new Date().toISOString().split('T')[0];
+        const todayStr = getLocalDateString();
         const docRef = doc(firestore, 'metrics', sessionIdRef.current);
         setDoc(docRef, {
           id: sessionIdRef.current,
           visitorId: visitorIdRef.current,
           dateStr: todayStr,
-          watchTime: 0,
           device: /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop',
-          started: false,
-          clickedCTA: false,
-          createdAt: serverTimestamp(),
           updatedAt: serverTimestamp()
         }, { merge: true });
       }
@@ -82,7 +92,7 @@ export default function MobileSalesPage() {
     
     const progressPercentage = duration > 0 ? Math.floor((currentTime / duration) * 100) : 0;
     const docRef = doc(firestore, 'metrics', sessionIdRef.current);
-    const todayStr = new Date().toISOString().split('T')[0];
+    const todayStr = getLocalDateString();
 
     setDoc(docRef, {
       watchTime: Math.floor(currentTime),
@@ -223,7 +233,7 @@ export default function MobileSalesPage() {
                 setShowCTA(true);
               }
 
-              // Salva a cada 5 segundos para não sobrecarregar mas manter precisão
+              // Salva a cada 5 segundos para precisão sem spam no banco
               if (Math.abs(currentTime - lastSavedTimeRef.current) >= 5) {
                 lastSavedTimeRef.current = currentTime;
                 trackMetric(currentTime, duration);

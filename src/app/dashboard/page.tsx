@@ -44,9 +44,16 @@ export default function AdvancedAnalyticsDashboard() {
   const [manualReload, setManualReload] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   
-  const [selectedDate, setSelectedDate] = useState(() => {
-    return new Date().toISOString().split('T')[0];
-  });
+  // Função auxiliar para pegar a data local YYYY-MM-DD
+  const getLocalDateString = () => {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const [selectedDate, setSelectedDate] = useState(() => getLocalDateString());
 
   useEffect(() => {
     setMounted(true);
@@ -54,8 +61,6 @@ export default function AdvancedAnalyticsDashboard() {
 
   const isConfigured = firebaseConfig.projectId && firebaseConfig.projectId !== "project-id";
 
-  // Query simplificada para evitar a necessidade de índices compostos manuais
-  // Ordenamos os dados no cliente dentro do useMemo(stats)
   const metricsQuery = useMemo(() => {
     if (!firestore || !isConfigured) return null;
     return query(
@@ -201,7 +206,7 @@ export default function AdvancedAnalyticsDashboard() {
               <h2 className="text-xl font-bold text-zinc-400">Nenhum lead encontrado em {selectedDate}</h2>
               <p className="text-zinc-600 text-sm">Gere tráfego ou mude a data para ver os dados.</p>
             </div>
-            <Button onClick={() => setSelectedDate(new Date().toISOString().split('T')[0])} variant="link" className="text-red-600">Ir para Hoje</Button>
+            <Button onClick={() => setSelectedDate(getLocalDateString())} variant="link" className="text-red-600">Ir para Hoje</Button>
           </div>
         ) : (
           <>
