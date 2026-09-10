@@ -111,13 +111,15 @@ export default function MobileSalesPage() {
       dateStr: todayStr,
       updatedAt: serverTimestamp(),
       ...extra
-    }, { merge: true }).catch(async (err) => {
-      const permsError = new FirestorePermissionError({
-        path: docRef.path,
-        operation: 'update',
-        requestResourceData: { watchTime: currentTime, ...extra }
-      });
-      errorEmitter.emit('permission-error', permsError);
+    }, { merge: true }).catch(async (err: any) => {
+      if (err.code === 'permission-denied') {
+        const permsError = new FirestorePermissionError({
+          path: docRef.path,
+          operation: 'update',
+          requestResourceData: { watchTime: currentTime, ...extra }
+        });
+        errorEmitter.emit('permission-error', permsError);
+      }
     });
   };
 
@@ -246,7 +248,7 @@ export default function MobileSalesPage() {
                   CLÁUSULA DE ISENÇÃO FINAL
                 </p>
                 <p className="text-zinc-300 font-bold italic underline decoration-red-600/50 leading-relaxed text-justify">
-                  É expressamente reconhecido e aceito pelo usuário que o CONTRATADO não garante, promete, assegura ou afiança a efetiva reversão, desbloqueio, recuperação ou restabelecimento de contas, ativos digitais, progressos, patentes ou itens virtuais, visto que a decisão final, deliberativa e absoluta pertence exclusivamente à plataforma responsável (Garena), em conformidade com seus termos de serviço próprios.
+                  É expressamente reconhecido e aceito pelo usuário que o CONTRATADO não garante, promete, assegura ou afiança a efetiva reversão, desbloqueio, recuperação ou restabelecimentos de contas, ativos digitais, progressos, patentes ou itens virtuais, visto que a decisão final, deliberativa e absoluta pertence exclusivamente à plataforma responsável (Garena), em conformidade com seus termos de serviço próprios.
                 </p>
               </div>
             </div>
@@ -360,7 +362,8 @@ export default function MobileSalesPage() {
               if (currentTime >= 128 && !showCTA) {
                 setShowCTA(true);
               }
-              if (Math.abs(currentTime - lastSavedTimeRef.current) >= 5) {
+              // Otimizado: Grava apenas a cada 30 segundos para economizar cota do Firebase
+              if (Math.abs(currentTime - lastSavedTimeRef.current) >= 30) {
                 lastSavedTimeRef.current = currentTime;
                 trackMetric(currentTime, 140);
               }

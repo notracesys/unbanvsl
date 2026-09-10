@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -28,7 +27,7 @@ export function useDoc<T = DocumentData>(docRef: DocumentReference<T> | null) {
         setLoading(false);
       },
       (err) => {
-        console.error("Firestore useDoc error:", err);
+        // Removido console.error para evitar disparar overlays de erro do Next.js desnecessariamente
         setError(err);
         setLoading(false);
       }

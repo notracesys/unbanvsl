@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -38,7 +37,7 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
       },
       (err) => {
         if (!isMounted) return;
-        console.error("Firestore useCollection error:", err);
+        // Removido console.error para evitar disparar overlays de erro do Next.js desnecessariamente
         setError(err);
         setLoading(false);
       }
