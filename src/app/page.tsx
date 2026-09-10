@@ -1,11 +1,14 @@
+
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Volume2, Lock, Play, AlertTriangle, RefreshCcw } from 'lucide-react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { initializeFirebase } from '@/firebase';
 import MuxPlayer from '@mux/mux-player-react';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export default function MobileSalesPage() {
   const [hasMounted, setHasMounted] = useState(false);
@@ -85,6 +88,8 @@ export default function MobileSalesPage() {
   };
 
   if (!hasMounted) return null;
+
+  const getImg = (id: string) => PlaceHolderImages.find(img => img.id === id);
 
   return (
     <main className="min-h-screen bg-[#050505] flex flex-col items-center px-4 pt-4 pb-20 select-none overflow-x-hidden">
@@ -225,8 +230,12 @@ export default function MobileSalesPage() {
           <div className="mt-6 w-full space-y-3">
             {/* Depoimento 1 */}
             <div className="bg-zinc-900/50 border border-zinc-800 p-3 rounded-xl flex gap-3">
-              <div className="w-10 h-10 rounded-full bg-zinc-800 flex-shrink-0 flex items-center justify-center text-zinc-500 font-bold">
-                JS
+              <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-zinc-700">
+                <Image 
+                  src={getImg('feedback-1')?.imageUrl || ''} 
+                  alt="João S." width={40} height={40} className="object-cover" 
+                  data-ai-hint="man gamer"
+                />
               </div>
               <div className="flex flex-col">
                 <span className="text-white text-[11px] font-black italic">JOÃO S.</span>
@@ -236,8 +245,12 @@ export default function MobileSalesPage() {
 
             {/* Depoimento 2 */}
             <div className="bg-zinc-900/50 border border-zinc-800 p-3 rounded-xl flex gap-3">
-              <div className="w-10 h-10 rounded-full bg-zinc-800 flex-shrink-0 flex items-center justify-center text-zinc-500 font-bold">
-                MR
+              <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-zinc-700">
+                <Image 
+                  src={getImg('feedback-2')?.imageUrl || ''} 
+                  alt="Matheus R." width={40} height={40} className="object-cover" 
+                  data-ai-hint="teenager gamer"
+                />
               </div>
               <div className="flex flex-col">
                 <span className="text-white text-[11px] font-black italic">MATHEUS R.</span>
@@ -247,8 +260,12 @@ export default function MobileSalesPage() {
 
             {/* Depoimento 3 */}
             <div className="bg-zinc-900/50 border border-zinc-800 p-3 rounded-xl flex gap-3">
-              <div className="w-10 h-10 rounded-full bg-zinc-800 flex-shrink-0 flex items-center justify-center text-zinc-500 font-bold">
-                LP
+              <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-zinc-700">
+                <Image 
+                  src={getImg('feedback-3')?.imageUrl || ''} 
+                  alt="Lucas P." width={40} height={40} className="object-cover" 
+                  data-ai-hint="guy smiling"
+                />
               </div>
               <div className="flex flex-col">
                 <span className="text-white text-[11px] font-black italic">LUCAS P.</span>
@@ -258,11 +275,15 @@ export default function MobileSalesPage() {
 
             {/* Depoimento 4 */}
             <div className="bg-zinc-900/50 border border-zinc-800 p-3 rounded-xl flex gap-3">
-              <div className="w-10 h-10 rounded-full bg-zinc-800 flex-shrink-0 flex items-center justify-center text-zinc-500 font-bold">
-                FG
+              <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-zinc-700">
+                <Image 
+                  src={getImg('feedback-4')?.imageUrl || ''} 
+                  alt="Gabriela F." width={40} height={40} className="object-cover" 
+                  data-ai-hint="woman smiling"
+                />
               </div>
               <div className="flex flex-col">
-                <span className="text-white text-[11px] font-black italic">FELIPE G.</span>
+                <span className="text-white text-[11px] font-black italic">GABRIELA F.</span>
                 <p className="text-zinc-400 text-[10px] leading-tight mt-1">Caraca, a garena é mto safada msm, mas o macete salvou. Se vc fizer certinho volta na hr!</p>
               </div>
             </div>

@@ -18,6 +18,30 @@
       "description": "Young woman smiling with a phone in her hands",
       "imageUrl": "https://picsum.photos/seed/user1/100/100",
       "imageHint": "woman smiling happy"
+    },
+    {
+      "id": "feedback-1",
+      "description": "User testimonial avatar 1",
+      "imageUrl": "https://picsum.photos/seed/user-ff-1/100/100",
+      "imageHint": "man gamer"
+    },
+    {
+      "id": "feedback-2",
+      "description": "User testimonial avatar 2",
+      "imageUrl": "https://picsum.photos/seed/user-ff-2/100/100",
+      "imageHint": "teenager gamer"
+    },
+    {
+      "id": "feedback-3",
+      "description": "User testimonial avatar 3",
+      "imageUrl": "https://picsum.photos/seed/user-ff-3/100/100",
+      "imageHint": "guy smiling"
+    },
+    {
+      "id": "feedback-4",
+      "description": "User testimonial avatar 4 - woman",
+      "imageUrl": "https://picsum.photos/seed/user-ff-4-female/100/100",
+      "imageHint": "woman smiling"
     }
   ]
 }
