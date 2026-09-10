@@ -133,7 +133,7 @@ export default function MobileSalesPage() {
                     <p className="text-zinc-200 text-sm font-bold leading-tight">
                       ESSE MACETE VAI SUMIR... <br />
                       <span className="text-zinc-400 text-[11px] font-normal mt-2 block">
-                        Se você parar agora, nunca mais terá acesso a este segredo. Continue assistindo.
+                        Se vc parar agora, nunca mais terá acesso a este segredo. Continue assistindo.
                       </span>
                     </p>
                   </div>
@@ -230,7 +230,7 @@ export default function MobileSalesPage() {
               </div>
               <div className="flex flex-col">
                 <span className="text-white text-[11px] font-black italic">JOÃO S.</span>
-                <p className="text-zinc-400 text-[10px] leading-tight mt-1">Funcionou na hora! Já recuperei minha conta com a Calça Angelical que tava banida faz 1 ano.</p>
+                <p className="text-zinc-400 text-[10px] leading-tight mt-1">Funcionou na hr! Já recuperei minha conta com a Calça Angelical q tava banida faz 1 ano.</p>
               </div>
             </div>
 
@@ -241,7 +241,7 @@ export default function MobileSalesPage() {
               </div>
               <div className="flex flex-col">
                 <span className="text-white text-[11px] font-black italic">MATHEUS R.</span>
-                <p className="text-zinc-400 text-[10px] leading-tight mt-1">Mlk do céu, deu certo memo! Minha conta lvl 70 de volta, achei q tinha perdido tudo kkkk vlw demais!</p>
+                <p className="text-zinc-400 text-[10px] leading-tight mt-1">Mlk do céu, deu certo memo! Minha conta lvl 70 de volta, achei q tinha perdido td kkkk vlw demais!</p>
               </div>
             </div>
 
@@ -252,7 +252,7 @@ export default function MobileSalesPage() {
               </div>
               <div className="flex flex-col">
                 <span className="text-white text-[11px] font-black italic">LUCAS P.</span>
-                <p className="text-zinc-400 text-[10px] leading-tight mt-1">Top demais, o suporte ajudou na hora q deu erro no login. Já to jogando ranqueada dnv.</p>
+                <p className="text-zinc-400 text-[10px] leading-tight mt-1">Top demais, o suporte ajudou na hr q deu erro no login. Já to jogando ranqueada dnv. Vc é o cara!</p>
               </div>
             </div>
 
@@ -263,7 +263,7 @@ export default function MobileSalesPage() {
               </div>
               <div className="flex flex-col">
                 <span className="text-white text-[11px] font-black italic">FELIPE G.</span>
-                <p className="text-zinc-400 text-[10px] leading-tight mt-1">Caraca, a garena é mto safada msm, mas o macete salvou. Recuperado com sucesso!</p>
+                <p className="text-zinc-400 text-[10px] leading-tight mt-1">Caraca, a garena é mto safada msm, mas o macete salvou. Se vc fizer certinho volta na hr!</p>
               </div>
             </div>
           </div>
