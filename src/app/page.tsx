@@ -172,9 +172,12 @@ export default function MobileSalesPage() {
         </div>
 
         <div 
-          className="aspect-[9/16] w-full bg-zinc-900 rounded-3xl overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.8)] border border-zinc-800 relative cursor-pointer"
+          className="aspect-[9/16] w-full bg-zinc-900 rounded-3xl overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.8)] border border-zinc-800 relative cursor-pointer no-zoom-touch"
           onClick={togglePlayPause}
         >
+          {/* Escudo Protetor contra interação nativa do navegador */}
+          <div className="absolute inset-0 z-[50] bg-transparent" />
+
           {!isPlaying && !isEnded && (
             <div className="absolute inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md transition-all duration-300">
               <div className="flex flex-col items-center gap-6 px-6 text-center">
@@ -233,6 +236,7 @@ export default function MobileSalesPage() {
             }}
             streamType="on-demand"
             playsInline
+            autoPlay={false}
             className="w-full h-full object-cover pointer-events-none"
             onTimeUpdate={(e: any) => {
               const currentTime = e.target.currentTime;
@@ -307,6 +311,12 @@ export default function MobileSalesPage() {
       <style dangerouslySetInnerHTML={{ __html: `
         .text-glow-red { text-shadow: 0 0 15px rgba(220, 38, 38, 0.7); }
         
+        /* Bloqueio de zoom por toque */
+        .no-zoom-touch {
+          touch-action: manipulation;
+          -webkit-tap-highlight-color: transparent;
+        }
+
         mux-player::part(control-bar),
         mux-player::part(play-button),
         mux-player::part(mute-button),
