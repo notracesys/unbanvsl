@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useState, useEffect } from 'react';
@@ -31,7 +30,9 @@ import {
   CheckCircle2,
   Calendar as CalendarIcon,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Clock,
+  Timer
 } from 'lucide-react';
 import { firebaseConfig } from '@/firebase/config';
 import { Button } from '@/components/ui/button';
@@ -45,6 +46,15 @@ export default function AdvancedAnalyticsDashboard() {
   const [manualReload, setManualReload] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [visitorId, setVisitorId] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState('');
+
+  // Função auxiliar para formatar segundos em MM:SS
+  const formatTime = (seconds: number) => {
+    if (!seconds || isNaN(seconds)) return '00:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  };
   
   // Função auxiliar para pegar a data local YYYY-MM-DD
   const getLocalDateString = () => {
@@ -55,10 +65,9 @@ export default function AdvancedAnalyticsDashboard() {
     return `${year}-${month}-${day}`;
   };
 
-  const [selectedDate, setSelectedDate] = useState(() => getLocalDateString());
-
   useEffect(() => {
     setMounted(true);
+    setSelectedDate(getLocalDateString());
     if (typeof window !== 'undefined') {
       setVisitorId(localStorage.getItem('vsl_visitor_id'));
     }
@@ -67,7 +76,7 @@ export default function AdvancedAnalyticsDashboard() {
   const isConfigured = firebaseConfig.projectId && firebaseConfig.projectId !== "project-id";
 
   const metricsQuery = useMemo(() => {
-    if (!firestore || !isConfigured) return null;
+    if (!firestore || !isConfigured || !selectedDate) return null;
     return query(
       collection(firestore, 'metrics'), 
       where('dateStr', '==', selectedDate),
@@ -80,7 +89,6 @@ export default function AdvancedAnalyticsDashboard() {
   const stats = useMemo(() => {
     if (!metrics || metrics.length === 0) return null;
 
-    // Ordenação client-side para evitar erro de índice do Firestore
     const sortedMetrics = [...metrics].sort((a: any, b: any) => {
       const timeA = a.updatedAt?.seconds || 0;
       const timeB = b.updatedAt?.seconds || 0;
@@ -93,6 +101,20 @@ export default function AdvancedAnalyticsDashboard() {
     let completedCount = 0;
     let ctaClicks = 0;
     
+    // Intervalos de tempo em segundos para análise precisa da minutagem (de 30 em 30 segundos até 5 minutos)
+    const timelineIntervals = [
+      { label: '00:30', maxSec: 30, count: 0 },
+      { label: '01:00', maxSec: 60, count: 0 },
+      { label: '01:30', maxSec: 90, count: 0 },
+      { label: '02:00', maxSec: 120, count: 0 },
+      { label: '02:30', maxSec: 150, count: 0 },
+      { label: '03:00', maxSec: 180, count: 0 },
+      { label: '03:30', maxSec: 210, count: 0 },
+      { label: '04:00', maxSec: 240, count: 0 },
+      { label: '04:30', maxSec: 270, count: 0 },
+      { label: '05:00+', maxSec: 9999, count: 0 },
+    ];
+
     const retentionBuckets = Array(11).fill(0); 
 
     sortedMetrics.forEach((m: any) => {
@@ -100,8 +122,17 @@ export default function AdvancedAnalyticsDashboard() {
       if (m.clickedCTA) ctaClicks++;
       
       const pct = m.percentage || 0;
+      const wTime = m.watchTime || 0;
+
       if (pct >= 50) midRetentionCount++;
       if (pct >= 90 || m.completed) completedCount++;
+
+      // Agrupa na minutagem real por segundo
+      timelineIntervals.forEach(interval => {
+        if (wTime >= interval.maxSec || (interval.maxSec === 9999 && wTime >= 300)) {
+          interval.count++;
+        }
+      });
 
       for (let i = 0; i <= 10; i++) {
         if (pct >= i * 10) {
@@ -115,17 +146,18 @@ export default function AdvancedAnalyticsDashboard() {
     const conversionRate = totalSessions > 0 ? ((ctaClicks / totalSessions) * 100).toFixed(1) : '0';
 
     const funnelData = [
-      { name: 'Visitas', value: totalSessions, fill: '#3f3f46' },
-      { name: 'Plays', value: startedCount, fill: '#71717a' },
-      { name: 'Ret. 50%', value: midRetentionCount, fill: '#dc2626' },
-      { name: 'Ret. Final', value: completedCount, fill: '#ef4444' },
-      { name: 'Checkout', value: ctaClicks, fill: '#22c55e' }
+      { name: 'Visitas', value: totalSessions, fill: '#27272a' },
+      { name: 'Plays', value: startedCount, fill: '#52525b' },
+      { name: 'Metade (50%)', value: midRetentionCount, fill: '#dc2626' },
+      { name: 'Fim (90%+)', value: completedCount, fill: '#ef4444' },
+      { name: 'Checkout Click', value: ctaClicks, fill: '#22c55e' }
     ];
 
-    const retentionData = retentionBuckets.map((count, idx) => ({
-      milestone: `${idx * 10}%`,
-      'Retenção %': totalSessions > 0 ? parseFloat(((count / totalSessions) * 100).toFixed(1)) : 0,
-      'Quantidade': count
+    // Converte dados da minutagem para o gráfico de linha do tempo real
+    const preciseTimelineData = timelineIntervals.map(interval => ({
+      tempo: interval.label,
+      'Retidos': interval.count,
+      'Porcentagem': startedCount > 0 ? parseFloat(((interval.count / startedCount) * 100).toFixed(1)) : 0
     }));
 
     return {
@@ -136,7 +168,7 @@ export default function AdvancedAnalyticsDashboard() {
       conversionRate,
       ctaClicks,
       funnelData,
-      retentionData,
+      preciseTimelineData,
       sortedMetrics
     };
   }, [metrics]);
@@ -196,7 +228,7 @@ export default function AdvancedAnalyticsDashboard() {
                   setSelectedDate(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="bg-zinc-900 border-zinc-800 pl-10 text-xs w-[180px] focus:ring-red-600"
+                className="bg-zinc-900 border-zinc-800 pl-10 text-xs w-[180px] focus:ring-red-600 text-white"
               />
             </div>
             <Button onClick={() => setManualReload(s => s + 1)} variant="outline" className="bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white">
@@ -250,25 +282,25 @@ export default function AdvancedAnalyticsDashboard() {
                 <CardHeader>
                   <CardTitle className="text-base font-black uppercase tracking-wider text-zinc-300 flex items-center gap-2">
                     <Filter className="w-4 h-4 text-red-600" />
-                    Funil de Conversão
+                    Funil de Conversão Comercial
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="h-[350px] pt-4">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={stats.funnelData} layout="vertical" margin={{ left: 20, right: 40 }}>
                       <XAxis type="number" hide />
-                      <YAxis dataKey="name" type="category" stroke="#52525b" fontSize={11} width={80} />
+                      <YAxis dataKey="name" type="category" stroke="#a1a1aa" fontSize={11} width={90} />
                       <Tooltip 
-                        cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                        cursor={{ fill: 'rgba(255,255,255,0.03)' }}
                         contentStyle={{ backgroundColor: '#09090b', borderColor: '#27272a', borderRadius: '12px', color: '#fff' }}
                         itemStyle={{ color: '#fff' }}
-                        formatter={(value: any) => [`${value} Leads`, 'Total']}
+                        formatter={(value: any) => [`${value} Leads`, 'Volume']}
                       />
                       <Bar dataKey="value" radius={[0, 4, 4, 0]}>
                         {stats.funnelData.map((entry, index) => (
                           <RechartsCell key={`cell-${index}`} fill={entry.fill} />
                         ))}
-                        <LabelList dataKey="value" position="right" fill="#fff" fontSize={10} fontWeight="bold" formatter={(val: number) => `${val}`} />
+                        <LabelList dataKey="value" position="right" fill="#fff" fontSize={10} fontWeight="bold" />
                       </Bar>
                     </BarChart>
                   </ResponsiveContainer>
@@ -276,15 +308,15 @@ export default function AdvancedAnalyticsDashboard() {
               </Card>
 
               <Card className="lg:col-span-2 bg-zinc-900/20 border-zinc-800 backdrop-blur-sm">
-                <CardHeader>
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-base font-black uppercase tracking-wider text-zinc-300 flex items-center gap-2">
-                    <Activity className="w-4 h-4 text-red-600" />
-                    Curva de Retenção Detalhada
+                    <Timer className="w-4 h-4 text-red-600" />
+                    Retenção Cirúrgica por Minutagem do Vídeo
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="h-[350px] pt-4">
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={stats.retentionData}>
+                    <AreaChart data={stats.preciseTimelineData}>
                       <defs>
                         <linearGradient id="glowRed" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="#dc2626" stopOpacity={0.45}/>
@@ -292,14 +324,14 @@ export default function AdvancedAnalyticsDashboard() {
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="#161619" vertical={false} />
-                      <XAxis dataKey="milestone" stroke="#52525b" fontSize={11} tickLine={false} />
-                      <YAxis stroke="#52525b" fontSize={11} tickLine={false} tickFormatter={(v) => `${v}%`} domain={[0, 100]} />
+                      <XAxis dataKey="tempo" stroke="#71717a" fontSize={11} tickLine={false} />
+                      <YAxis stroke="#71717a" fontSize={11} tickLine={false} tickFormatter={(v) => `${v}%`} domain={[0, 100]} />
                       <Tooltip 
                         contentStyle={{ backgroundColor: '#09090b', borderColor: '#27272a', borderRadius: '12px' }}
-                        itemStyle={{ color: '#dc2626', fontWeight: 'bold' }}
-                        formatter={(value: any, name: string, props: any) => [`${value}% (${props.payload.Quantidade} Leads)`, name]}
+                        itemStyle={{ color: '#ffffff' }}
+                        formatter={(value: any, name: string, props: any) => [`${value}% (${props.payload.Retidos} leads ativos)`, 'Retenção Real']}
                       />
-                      <Area type="monotone" dataKey="Retenção %" stroke="#dc2626" strokeWidth={3} fillOpacity={1} fill="url(#glowRed)" />
+                      <Area type="monotone" dataKey="Porcentagem" stroke="#dc2626" strokeWidth={3} fillOpacity={1} fill="url(#glowRed)" />
                     </AreaChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -309,8 +341,8 @@ export default function AdvancedAnalyticsDashboard() {
             <Card className="bg-zinc-900/10 border-zinc-900 overflow-hidden">
               <CardHeader className="bg-zinc-950/40 p-4 border-b border-zinc-900 flex flex-row items-center justify-between">
                 <div>
-                  <h3 className="text-xs font-black uppercase tracking-widest text-zinc-400">Lista de Leads</h3>
-                  <p className="text-[10px] text-zinc-600 uppercase font-bold mt-1">Exibindo {paginatedLeads.length} de {stats.totalSessions} registros</p>
+                  <h3 className="text-xs font-black uppercase tracking-widest text-zinc-400">Linha de Tempo Individual de Audiência</h3>
+                  <p className="text-[10px] text-zinc-600 uppercase font-bold mt-1">Exibindo {paginatedLeads.length} de {stats.totalSessions} registros na minutagem exata</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <Button 
@@ -338,37 +370,42 @@ export default function AdvancedAnalyticsDashboard() {
                 <table className="w-full text-left text-xs">
                   <thead className="text-[10px] uppercase font-black tracking-widest text-zinc-500 border-b border-zinc-900 bg-zinc-950/20">
                     <tr>
-                      <th className="p-4">ID Sessão</th>
-                      <th className="p-4">Dispositivo</th>
-                      <th className="p-4">Progresso</th>
-                      <th className="p-4 text-right">Ação Final</th>
+                      <th className="p-4">ID do Player</th>
+                      <th className="p-4">Plataforma</th>
+                      <th className="p-4">Minutagem Precisa Assistida</th>
+                      <th className="p-4 text-right">Ação Comercial Final</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-900 bg-zinc-950/10">
                     {paginatedLeads.map((m: any, i: number) => (
                       <tr key={i} className="hover:bg-zinc-900/30 transition-colors">
-                        <td className="p-4 font-mono text-zinc-400">
+                        <td className="p-4 font-mono text-zinc-400 flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-zinc-700" />
                           {m.id?.substring(0, 12)}...
                           {m.visitorId === visitorId && <span className="ml-2 text-[8px] bg-red-600/20 text-red-500 px-1 rounded font-black tracking-tighter">VOCÊ</span>}
                         </td>
                         <td className="p-4 uppercase text-[10px] font-bold text-zinc-500">
-                          {m.device || 'N/A'}
+                          {m.device || 'desktop'}
                         </td>
                         <td className="p-4">
-                          <div className="flex items-center gap-2">
-                            <div className="w-20 bg-zinc-800 h-1 rounded-full overflow-hidden">
-                              <div className="bg-red-600 h-full" style={{ width: `${m.percentage || 0}%` }} />
+                          <div className="flex items-center gap-4">
+                            <span className="font-mono text-[11px] font-bold bg-zinc-900 px-2 py-1 rounded border border-zinc-800 text-zinc-300 flex items-center gap-1.5">
+                              <Clock className="w-3 h-3 text-red-500" />
+                              {formatTime(m.watchTime)} / {formatTime(m.totalDuration)}
+                            </span>
+                            <div className="flex-1 max-w-[120px] bg-zinc-800 h-1.5 rounded-full overflow-hidden">
+                              <div className="bg-red-600 h-full transition-all duration-300" style={{ width: `${m.percentage || 0}%` }} />
                             </div>
-                            <span className="font-mono text-[10px]">{m.percentage || 0}%</span>
+                            <span className="font-mono text-[10px] text-zinc-500 font-bold">{m.percentage || 0}%</span>
                           </div>
                         </td>
                         <td className="p-4 text-right">
                           {m.clickedCTA ? (
-                            <span className="text-green-500 font-black">CLICK CHECKOUT ✅</span>
+                            <span className="text-green-500 font-black tracking-tighter bg-green-950/30 border border-green-900/40 px-2 py-1 rounded text-[10px]">CLICK CHECKOUT ✅</span>
                           ) : m.completed ? (
-                            <span className="text-red-400">ASSISTIU TUDO</span>
+                            <span className="text-red-400 font-bold bg-red-950/20 px-2 py-1 rounded text-[10px]">ASSISTIU ATÉ O FIM</span>
                           ) : (
-                            <span className="text-zinc-600 italic">ABANDONOU</span>
+                            <span className="text-zinc-600 italic">ABANDONOU NO CAMINHO</span>
                           )}
                         </td>
                       </tr>
