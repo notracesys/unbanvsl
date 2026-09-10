@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo } from 'react';
@@ -14,13 +13,15 @@ export default function UpsellPage() {
   const configRef = useMemo(() => firestore ? doc(firestore, 'config', 'sales') : null, [firestore]);
   const { data: appConfig } = useDoc(configRef);
 
-  const upsellUrl = appConfig?.upsellCheckoutUrl || 'https://checkout.exemplo.com/upsell';
+  // Link de fallback atualizado conforme solicitado
+  const upsellUrl = appConfig?.upsellCheckoutUrl || 'https://comprasseguras.org.ua/c/f901da2ee5';
 
   const handleCtaClick = () => {
     window.location.href = upsellUrl;
   };
 
   const handleSkip = () => {
+    // Redireciona para o link de bypass caso o usuário recuse
     window.location.href = 'https://unbansstrategy.netlify.app/';
   };
 
@@ -54,7 +55,7 @@ export default function UpsellPage() {
           </h2>
           
           <p className="text-zinc-400 text-sm leading-relaxed font-medium">
-            Identificamos que seu processo de recuperação deixa rastros digitais fatais. A Garena saberá que você está tentando usar métodos proibidos e seu pedido de recuperação será <span className="text-white font-bold">NEGADO na hora</span>, e pode ser que nem dê certo para recuperar.
+            Identificamos que seu processo de recuperação deixa rastros digitais fatais. A Garena saberá que você está tentando usar métodos proibidos e seu pedido de recuperação será <span className="text-white font-bold">NEGADO na hora</span>. O protocolo de segurança avançada é a única forma de garantir o desbanimento permanente.
           </p>
         </div>
 
@@ -69,7 +70,7 @@ export default function UpsellPage() {
         <div className="space-y-6">
           <Button 
             onClick={handleCtaClick}
-            className="w-full h-16 bg-gradient-to-b from-orange-400 to-orange-600 hover:from-orange-500 hover:to-orange-700 text-black text-lg font-black uppercase italic tracking-tighter rounded-2xl shadow-[0_6px_0_rgb(154,52,18)] active:translate-y-1 active:shadow-[0_2px_0_rgb(154,52,18)] transition-all flex items-center justify-center gap-2 group"
+            className="w-full h-16 bg-gradient-to-b from-orange-400 to-orange-600 hover:from-orange-500 hover:to-orange-700 text-black text-lg font-black uppercase italic tracking-tighter rounded-2xl shadow-[0_6px_0_rgb(154,52,18)] active:translate-y-1 active:shadow-[0_2px_0_rgb(154,52,18)] transition-all flex items-center justify-center gap-2 group orange-glow-btn"
           >
             ATIVAR BYPASS ANTI-BAN 
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
