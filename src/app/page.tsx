@@ -46,10 +46,12 @@ export default function MobileSalesPage() {
     // Evento inicial de "Lead Entrou na Página"
     const initTracking = async () => {
       if (firestore && isConfigured) {
+        const todayStr = new Date().toISOString().split('T')[0];
         const docRef = doc(firestore, 'metrics', sessionIdRef.current);
         setDoc(docRef, {
           id: sessionIdRef.current,
           visitorId: visitorIdRef.current,
+          dateStr: todayStr,
           watchTime: 0,
           device: /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop',
           started: false,
@@ -80,11 +82,13 @@ export default function MobileSalesPage() {
     
     const progressPercentage = duration > 0 ? Math.floor((currentTime / duration) * 100) : 0;
     const docRef = doc(firestore, 'metrics', sessionIdRef.current);
+    const todayStr = new Date().toISOString().split('T')[0];
 
     setDoc(docRef, {
       watchTime: Math.floor(currentTime),
       totalDuration: Math.floor(duration || 180),
       percentage: progressPercentage,
+      dateStr: todayStr,
       updatedAt: serverTimestamp(),
       ...extra
     }, { merge: true });

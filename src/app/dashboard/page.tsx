@@ -3,7 +3,7 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
 import { useFirestore, useCollection } from '@/firebase';
-import { collection, query, limit, orderBy } from 'firebase/firestore';
+import { collection, query, where, orderBy, limit } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   AreaChart, 
@@ -28,21 +28,24 @@ import {
   Filter,
   Users,
   CheckCircle2,
-  Calendar as CalendarIcon
+  Calendar as CalendarIcon,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { firebaseConfig } from '@/firebase/config';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
+const ITEMS_PER_PAGE = 50;
+
 export default function AdvancedAnalyticsDashboard() {
   const firestore = useFirestore();
   const [mounted, setMounted] = useState(false);
   const [manualReload, setManualReload] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   
-  // Data selecionada para o filtro (padrão hoje)
   const [selectedDate, setSelectedDate] = useState(() => {
-    const d = new Date();
-    return d.toISOString().split('T')[0];
+    return new Date().toISOString().split('T')[0];
   });
 
   useEffect(() => {
@@ -51,35 +54,24 @@ export default function AdvancedAnalyticsDashboard() {
 
   const isConfigured = firebaseConfig.projectId && firebaseConfig.projectId !== "project-id";
 
+  // Query otimizada por data específica (dateStr)
+  // Nota: Se você receber um erro de índice no console, clique no link gerado para criá-lo.
   const metricsQuery = useMemo(() => {
     if (!firestore || !isConfigured) return null;
-    // Buscamos um volume maior para permitir filtragem em memória para o MVP
     return query(
       collection(firestore, 'metrics'), 
+      where('dateStr', '==', selectedDate),
       orderBy('updatedAt', 'desc'),
-      limit(5000)
+      limit(5000) // Carrega até 5k por dia para analytics, mas paginamos na UI
     );
-  }, [firestore, isConfigured, manualReload]);
+  }, [firestore, isConfigured, selectedDate, manualReload]);
 
   const { data: metrics, loading, error } = useCollection(metricsQuery);
 
   const stats = useMemo(() => {
     if (!metrics || metrics.length === 0) return null;
 
-    const todayStr = new Date().toISOString().split('T')[0];
-    
-    // Filtrar métricas pelo dia selecionado e calcular total de hoje
-    let todayLeadsCount = 0;
-    const filteredMetrics = metrics.filter((m: any) => {
-      const date = m.updatedAt?.seconds 
-        ? new Date(m.updatedAt.seconds * 1000).toISOString().split('T')[0]
-        : null;
-      
-      if (date === todayStr) todayLeadsCount++;
-      return date === selectedDate;
-    });
-
-    const totalSessions = filteredMetrics.length;
+    const totalSessions = metrics.length;
     let startedCount = 0;
     let midRetentionCount = 0;
     let completedCount = 0;
@@ -87,7 +79,7 @@ export default function AdvancedAnalyticsDashboard() {
     
     const retentionBuckets = Array(11).fill(0); 
 
-    filteredMetrics.forEach((m: any) => {
+    metrics.forEach((m: any) => {
       if (m.started) startedCount++;
       if (m.clickedCTA) ctaClicks++;
       
@@ -121,7 +113,6 @@ export default function AdvancedAnalyticsDashboard() {
 
     return {
       totalSessions,
-      todayLeadsCount,
       startedCount,
       playRate,
       finalRetentionRate,
@@ -129,9 +120,17 @@ export default function AdvancedAnalyticsDashboard() {
       ctaClicks,
       funnelData,
       retentionData,
-      sortedMetrics: filteredMetrics
+      sortedMetrics: metrics
     };
-  }, [metrics, selectedDate]);
+  }, [metrics]);
+
+  const paginatedLeads = useMemo(() => {
+    if (!stats) return [];
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return stats.sortedMetrics.slice(start, start + ITEMS_PER_PAGE);
+  }, [stats, currentPage]);
+
+  const totalPages = stats ? Math.ceil(stats.totalSessions / ITEMS_PER_PAGE) : 0;
 
   if (!mounted) return null;
 
@@ -176,7 +175,10 @@ export default function AdvancedAnalyticsDashboard() {
               <Input 
                 type="date" 
                 value={selectedDate} 
-                onChange={(e) => setSelectedDate(e.target.value)}
+                onChange={(e) => {
+                  setSelectedDate(e.target.value);
+                  setCurrentPage(1);
+                }}
                 className="bg-zinc-900 border-zinc-800 pl-10 text-xs w-[180px] focus:ring-red-600"
               />
             </div>
@@ -190,32 +192,32 @@ export default function AdvancedAnalyticsDashboard() {
           <div className="py-20 text-center space-y-6 bg-zinc-900/10 rounded-3xl border border-dashed border-zinc-800">
             <Zap className="w-12 h-12 text-zinc-700 mx-auto" />
             <div className="space-y-2">
-              <h2 className="text-xl font-bold text-zinc-400">Nenhum lead encontrado nesta data</h2>
-              <p className="text-zinc-600 text-sm">Escolha outro dia ou gere tráfego para ver os dados.</p>
+              <h2 className="text-xl font-bold text-zinc-400">Nenhum lead encontrado em {selectedDate}</h2>
+              <p className="text-zinc-600 text-sm">Gere tráfego ou mude a data para ver os dados.</p>
             </div>
-            <Button onClick={() => setSelectedDate(new Date().toISOString().split('T')[0])} variant="link" className="text-red-600">Voltar para Hoje</Button>
+            <Button onClick={() => setSelectedDate(new Date().toISOString().split('T')[0])} variant="link" className="text-red-600">Ir para Hoje</Button>
           </div>
         ) : (
           <>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <KpiCard 
-                title="Hoje (Geral)" 
-                value={stats.todayLeadsCount} 
-                icon={<Activity className="text-red-600" />} 
-                subtitle="Leads que entraram hoje" 
+                title="Leads do Dia" 
+                value={stats.totalSessions} 
+                icon={<Users className="text-red-600" />} 
+                subtitle="Volume total na data" 
                 highlight 
               />
               <KpiCard 
-                title={`Leads em ${selectedDate.split('-').reverse().slice(0,2).join('/')}`} 
-                value={stats.totalSessions} 
-                icon={<Users className="text-zinc-400" />} 
-                subtitle="Filtro de data selecionada" 
+                title="Taxa de Play" 
+                value={`${stats.playRate}%`} 
+                icon={<Play className="text-zinc-400" />} 
+                subtitle={`${stats.startedCount} iniciaram`} 
               />
               <KpiCard 
                 title="Retenção Final" 
                 value={`${stats.finalRetentionRate}%`} 
                 icon={<CheckCircle2 className="text-zinc-400" />} 
-                subtitle={`${stats.startedCount} iniciaram o vídeo`} 
+                subtitle="Leads que viram tudo" 
               />
               <KpiCard 
                 title="Conv. Checkout" 
@@ -231,7 +233,7 @@ export default function AdvancedAnalyticsDashboard() {
                 <CardHeader>
                   <CardTitle className="text-base font-black uppercase tracking-wider text-zinc-300 flex items-center gap-2">
                     <Filter className="w-4 h-4 text-red-600" />
-                    Funil do Dia
+                    Funil de Conversão
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="h-[350px] pt-4">
@@ -257,7 +259,7 @@ export default function AdvancedAnalyticsDashboard() {
                 <CardHeader>
                   <CardTitle className="text-base font-black uppercase tracking-wider text-zinc-300 flex items-center gap-2">
                     <Activity className="w-4 h-4 text-red-600" />
-                    Curva de Retenção ({selectedDate})
+                    Curva de Retenção Detalhada
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="h-[350px] pt-4">
@@ -285,23 +287,49 @@ export default function AdvancedAnalyticsDashboard() {
 
             <Card className="bg-zinc-900/10 border-zinc-900 overflow-hidden">
               <CardHeader className="bg-zinc-950/40 p-4 border-b border-zinc-900 flex flex-row items-center justify-between">
-                <h3 className="text-xs font-black uppercase tracking-widest text-zinc-400">Leads de {selectedDate}</h3>
-                <span className="text-[10px] text-zinc-500 font-mono">{stats.sortedMetrics.length} registros</span>
+                <div>
+                  <h3 className="text-xs font-black uppercase tracking-widest text-zinc-400">Lista de Leads</h3>
+                  <p className="text-[10px] text-zinc-600 uppercase font-bold mt-1">Exibindo {paginatedLeads.length} de {stats.totalSessions} registros</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    className="h-8 w-8 bg-zinc-900 border-zinc-800"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(p => p - 1)}
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </Button>
+                  <span className="text-[10px] font-mono px-2">Pág {currentPage} de {totalPages}</span>
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    className="h-8 w-8 bg-zinc-900 border-zinc-800"
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage(p => p + 1)}
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </div>
               </CardHeader>
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead className="text-[10px] uppercase font-black tracking-widest text-zinc-500 border-b border-zinc-900 bg-zinc-950/20">
                     <tr>
-                      <th className="p-4">Visitante</th>
+                      <th className="p-4">ID Sessão</th>
                       <th className="p-4">Dispositivo</th>
                       <th className="p-4">Progresso</th>
-                      <th className="p-4 text-right">Resultado</th>
+                      <th className="p-4 text-right">Ação Final</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-900 bg-zinc-950/10">
-                    {stats.sortedMetrics.slice(0, 50).map((m: any, i: number) => (
+                    {paginatedLeads.map((m: any, i: number) => (
                       <tr key={i} className="hover:bg-zinc-900/30 transition-colors">
-                        <td className="p-4 font-mono text-zinc-400">{m.visitorId?.substring(0, 8)}...</td>
+                        <td className="p-4 font-mono text-zinc-400">
+                          {m.id?.substring(0, 12)}...
+                          {m.visitorId === localStorage.getItem('vsl_visitor_id') && <span className="ml-2 text-[8px] bg-red-600/20 text-red-500 px-1 rounded">VOCÊ</span>}
+                        </td>
                         <td className="p-4 uppercase text-[10px] font-bold text-zinc-500">
                           {m.device || 'N/A'}
                         </td>
@@ -315,11 +343,11 @@ export default function AdvancedAnalyticsDashboard() {
                         </td>
                         <td className="p-4 text-right">
                           {m.clickedCTA ? (
-                            <span className="text-green-500 font-black">CHECKOUT ✅</span>
+                            <span className="text-green-500 font-black">CLICK CHECKOUT ✅</span>
                           ) : m.completed ? (
-                            <span className="text-red-400">VIU TUDO</span>
+                            <span className="text-red-400">ASSISTIU TUDO</span>
                           ) : (
-                            <span className="text-zinc-600">DROP OFF</span>
+                            <span className="text-zinc-600 italic">ABANDONOU</span>
                           )}
                         </td>
                       </tr>

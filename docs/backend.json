@@ -8,6 +8,7 @@
       "properties": {
         "id": { "type": "string" },
         "visitorId": { "type": "string" },
+        "dateStr": { "type": "string", "description": "Data no formato YYYY-MM-DD para busca rápida" },
         "watchTime": { "type": "number", "description": "Segundos assistidos no vídeo" },
         "totalDuration": { "type": "number" },
         "percentage": { "type": "number" },
@@ -18,7 +19,7 @@
         "createdAt": { "type": "string", "format": "date-time" },
         "updatedAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["visitorId", "updatedAt"]
+      "required": ["visitorId", "dateStr", "updatedAt"]
     }
   },
   "auth": {
