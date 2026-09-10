@@ -36,7 +36,10 @@ import {
   Save,
   ShoppingCart,
   ArrowUpCircle,
-  LogOut
+  LogOut,
+  Database,
+  Wifi,
+  WifiOff
 } from 'lucide-react';
 import { firebaseConfig } from '@/firebase/config';
 import { Button } from '@/components/ui/button';
@@ -164,11 +167,11 @@ export default function AdvancedAnalyticsDashboard() {
     return query(
       collection(firestore, 'metrics'), 
       where('dateStr', '==', selectedDate),
-      limit(1000) // Reduzido para economizar cota
+      limit(500) // Limite reduzido para proteger a cota do Firebase
     );
   }, [firestore, isConfigured, selectedDate]);
 
-  const { data: metrics, loading } = useCollection(metricsQuery);
+  const { data: metrics, loading, error: metricsError } = useCollection(metricsQuery);
 
   const stats = useMemo(() => {
     if (!metrics || metrics.length === 0) return null;
@@ -241,17 +244,7 @@ export default function AdvancedAnalyticsDashboard() {
 
   if (!user) return null;
 
-  if (!isConfigured) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center p-6 text-white font-sans">
-        <div className="max-w-md w-full text-center bg-zinc-900 border border-zinc-800 p-10 rounded-[2rem]">
-          <AlertCircle className="w-16 h-16 text-red-600 mx-auto mb-6 animate-pulse" />
-          <h2 className="text-2xl font-black uppercase mb-4 tracking-tighter italic">FIREBASE DESCONECTADO</h2>
-          <p className="text-zinc-500 text-sm leading-relaxed">Configure as credenciais no arquivo <code className="text-red-500 bg-red-500/10 px-1 rounded">src/firebase/config.ts</code> para ativar o rastreamento em tempo real.</p>
-        </div>
-      </div>
-    );
-  }
+  const isQuotaExceeded = metricsError?.message?.includes('quota') || metricsError?.message?.includes('exhausted');
 
   return (
     <div className="min-h-screen bg-[#050505] text-zinc-100 p-4 lg:p-10 font-sans selection:bg-red-600/30">
@@ -259,9 +252,12 @@ export default function AdvancedAnalyticsDashboard() {
         
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-zinc-900 pb-8">
           <div className="space-y-2">
-            <div className="flex items-center gap-2 text-red-600">
-              <div className="w-2 h-2 bg-red-600 rounded-full animate-ping" />
-              <span className="text-[10px] font-black uppercase tracking-[0.3em]">VTURB PRO | Admin: {user.email}</span>
+            <div className="flex items-center gap-2">
+              <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full border ${isQuotaExceeded ? 'bg-red-600/10 border-red-600/20 text-red-500' : 'bg-green-600/10 border-green-600/20 text-green-500'}`}>
+                {isQuotaExceeded ? <WifiOff size={10} /> : <Wifi size={10} />}
+                <span className="text-[9px] font-black uppercase tracking-widest">{isQuotaExceeded ? 'COTA ESGOTADA' : 'SISTEMA ONLINE'}</span>
+              </div>
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-600">VTURB PRO | {user.email}</span>
             </div>
             <h1 className="text-5xl font-black italic uppercase tracking-tighter leading-none">
               DASHBOARD <span className="text-red-600">ANALYTICS</span>
@@ -274,9 +270,7 @@ export default function AdvancedAnalyticsDashboard() {
               <Input 
                 type="date" 
                 value={selectedDate} 
-                onChange={(e) => {
-                  setSelectedDate(e.target.value);
-                }}
+                onChange={(e) => setSelectedDate(e.target.value)}
                 className="bg-zinc-950 border-zinc-800 pl-10 text-xs w-[180px] h-10 focus:ring-red-600"
               />
             </div>
@@ -288,6 +282,16 @@ export default function AdvancedAnalyticsDashboard() {
             </Button>
           </div>
         </header>
+
+        {isQuotaExceeded && (
+          <div className="bg-red-600/10 border border-red-600/20 p-6 rounded-[2rem] flex flex-col md:flex-row items-center gap-6">
+            <AlertCircle className="w-12 h-12 text-red-600 shrink-0" />
+            <div className="space-y-1 text-center md:text-left">
+              <h3 className="text-lg font-black italic uppercase tracking-tighter text-red-600">Limite do Firebase Atingido</h3>
+              <p className="text-zinc-400 text-sm font-medium">Você atingiu as 50.000 leituras gratuitas diárias. O rastreamento continua funcionando, mas o dashboard só voltará a exibir dados amanhã ou se você mudar para o plano Blaze.</p>
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card className="bg-zinc-900/40 border-zinc-800 border-l-4 border-l-green-600 overflow-hidden">
@@ -347,10 +351,14 @@ export default function AdvancedAnalyticsDashboard() {
           <div className="py-32 text-center space-y-6 bg-zinc-950/50 rounded-[3rem] border-2 border-dashed border-zinc-900">
             {loading ? <Loader2 className="w-12 h-12 text-red-600 animate-spin mx-auto" /> : (
               <>
-                <Zap className="w-16 h-16 text-zinc-800 mx-auto" />
+                <Database className="w-16 h-16 text-zinc-800 mx-auto" />
                 <div className="space-y-2">
-                  <h2 className="text-2xl font-black text-zinc-500 uppercase italic tracking-tighter">Aguardando tráfego real</h2>
-                  <p className="text-zinc-700 text-sm max-w-xs mx-auto">Nenhum registro encontrado em {selectedDate}.</p>
+                  <h2 className="text-2xl font-black text-zinc-500 uppercase italic tracking-tighter">
+                    {isQuotaExceeded ? 'Dados Bloqueados por Cota' : 'Aguardando tráfego real'}
+                  </h2>
+                  <p className="text-zinc-700 text-sm max-w-xs mx-auto">
+                    {isQuotaExceeded ? 'O Firebase parou de enviar dados para este painel hoje.' : `Nenhum registro encontrado em ${selectedDate}.`}
+                  </p>
                 </div>
               </>
             )}
