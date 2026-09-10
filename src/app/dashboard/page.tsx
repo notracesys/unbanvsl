@@ -3,7 +3,7 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
 import { useFirestore, useCollection } from '@/firebase';
-import { collection, query, where, orderBy, limit } from 'firebase/firestore';
+import { collection, query, where, limit } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   AreaChart, 
@@ -54,15 +54,14 @@ export default function AdvancedAnalyticsDashboard() {
 
   const isConfigured = firebaseConfig.projectId && firebaseConfig.projectId !== "project-id";
 
-  // Query otimizada por data específica (dateStr)
-  // Nota: Se você receber um erro de índice no console, clique no link gerado para criá-lo.
+  // Query simplificada para evitar a necessidade de índices compostos manuais
+  // Ordenamos os dados no cliente dentro do useMemo(stats)
   const metricsQuery = useMemo(() => {
     if (!firestore || !isConfigured) return null;
     return query(
       collection(firestore, 'metrics'), 
       where('dateStr', '==', selectedDate),
-      orderBy('updatedAt', 'desc'),
-      limit(5000) // Carrega até 5k por dia para analytics, mas paginamos na UI
+      limit(5000) 
     );
   }, [firestore, isConfigured, selectedDate, manualReload]);
 
@@ -71,7 +70,14 @@ export default function AdvancedAnalyticsDashboard() {
   const stats = useMemo(() => {
     if (!metrics || metrics.length === 0) return null;
 
-    const totalSessions = metrics.length;
+    // Ordenação client-side para evitar erro de índice do Firestore
+    const sortedMetrics = [...metrics].sort((a: any, b: any) => {
+      const timeA = a.updatedAt?.seconds || 0;
+      const timeB = b.updatedAt?.seconds || 0;
+      return timeB - timeA;
+    });
+
+    const totalSessions = sortedMetrics.length;
     let startedCount = 0;
     let midRetentionCount = 0;
     let completedCount = 0;
@@ -79,7 +85,7 @@ export default function AdvancedAnalyticsDashboard() {
     
     const retentionBuckets = Array(11).fill(0); 
 
-    metrics.forEach((m: any) => {
+    sortedMetrics.forEach((m: any) => {
       if (m.started) startedCount++;
       if (m.clickedCTA) ctaClicks++;
       
@@ -120,7 +126,7 @@ export default function AdvancedAnalyticsDashboard() {
       ctaClicks,
       funnelData,
       retentionData,
-      sortedMetrics: metrics
+      sortedMetrics
     };
   }, [metrics]);
 
@@ -328,7 +334,7 @@ export default function AdvancedAnalyticsDashboard() {
                       <tr key={i} className="hover:bg-zinc-900/30 transition-colors">
                         <td className="p-4 font-mono text-zinc-400">
                           {m.id?.substring(0, 12)}...
-                          {m.visitorId === localStorage.getItem('vsl_visitor_id') && <span className="ml-2 text-[8px] bg-red-600/20 text-red-500 px-1 rounded">VOCÊ</span>}
+                          {m.visitorId === (typeof window !== 'undefined' ? localStorage.getItem('vsl_visitor_id') : '') && <span className="ml-2 text-[8px] bg-red-600/20 text-red-500 px-1 rounded">VOCÊ</span>}
                         </td>
                         <td className="p-4 uppercase text-[10px] font-bold text-zinc-500">
                           {m.device || 'N/A'}
