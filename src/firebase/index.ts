@@ -12,6 +12,7 @@ let auth: Auth;
 
 export function initializeFirebase() {
   if (typeof window !== 'undefined') {
+    // Inicialização segura e única (Singleton)
     if (!getApps().length) {
       app = initializeApp(firebaseConfig);
     } else {

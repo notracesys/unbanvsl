@@ -4,7 +4,7 @@
 import React, { useMemo } from 'react';
 import { useFirestore, useCollection } from '@/firebase';
 import { collection, query, orderBy, limit } from 'firebase/firestore';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { 
   AreaChart, 
   Area, 
@@ -22,7 +22,6 @@ import {
   Play, 
   TrendingUp, 
   Smartphone, 
-  Monitor, 
   Zap,
   Clock,
   Loader2,
@@ -33,16 +32,16 @@ import { firebaseConfig } from '@/firebase/config';
 export default function AnalyticsDashboard() {
   const firestore = useFirestore();
   
-  // Verificamos se as chaves ainda são as de placeholder
+  // Verifica se as chaves reais foram inseridas
   const isConfigured = firebaseConfig.projectId !== 'project-id';
 
-  // Memoizamos a query para ser 100% estável e evitar o loop de renderização
+  // Query memoizada para evitar o erro de Loop Infinito (Maximum Update Depth)
   const metricsQuery = useMemo(() => {
     if (!firestore || !isConfigured) return null;
     return query(
       collection(firestore, 'metrics'), 
       orderBy('createdAt', 'desc'), 
-      limit(500)
+      limit(1000)
     );
   }, [firestore, isConfigured]);
 
@@ -60,6 +59,7 @@ export default function AnalyticsDashboard() {
         visitorMap.set(m.visitorId, m.percentage);
       }
 
+      // Contagem única de dispositivos por visitante
       const devKey = m.visitorId + '_dev';
       if (!visitorMap.has(devKey)) {
         const dev = m.device || 'unknown';
@@ -112,9 +112,13 @@ export default function AnalyticsDashboard() {
           <div className="space-y-2">
             <h2 className="text-2xl font-black text-white uppercase italic tracking-tighter">Firebase Desconectado</h2>
             <p className="text-zinc-500 text-sm">
-              Você ainda não configurou as chaves reais do Firebase em <code className="text-red-500 font-mono">src/firebase/config.ts</code>. 
-              Sem isso, não conseguimos salvar ou ler os dados de retenção.
+              Você ainda não configurou as chaves reais do Firebase. O rastreio só funciona com um banco de dados ativo.
             </p>
+            <div className="pt-4 text-[10px] text-zinc-600 font-mono text-left bg-black/50 p-3 rounded-lg overflow-x-auto">
+              1. Vá ao console do Firebase<br/>
+              2. Crie um Firestore Database<br/>
+              3. Cole as chaves em src/firebase/config.ts
+            </div>
           </div>
         </div>
       </div>
@@ -162,7 +166,7 @@ export default function AnalyticsDashboard() {
           <div className="bg-zinc-900/50 border border-zinc-800 px-4 py-2 rounded-xl">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <span className="text-xs font-black uppercase tracking-widest">Analytics Ativo</span>
+              <span className="text-xs font-black uppercase tracking-widest text-white">VTURB ANALYTICS CLONE</span>
             </div>
           </div>
         </header>
@@ -170,14 +174,14 @@ export default function AnalyticsDashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <KpiCard title="Total de Leads" value={stats.totalPlays} icon={<Play className="text-red-600" />} />
           <KpiCard title="Retenção Média" value={`${stats.avgRetention}%`} icon={<Clock className="text-red-600" />} />
-          <KpiCard title="Engajamento" value="Alto" icon={<Zap className="text-red-600" />} />
+          <KpiCard title="Engajamento" value="Monitorando" icon={<Zap className="text-red-600" />} />
           <KpiCard title="Dispositivos" value={stats.deviceData.length} icon={<Smartphone className="text-red-600" />} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card className="lg:col-span-2 bg-zinc-900/20 border-zinc-800 overflow-hidden">
-            <CardHeader>
-              <h3 className="text-lg font-black uppercase italic tracking-tight">Curva de Retenção</h3>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <h3 className="text-lg font-black uppercase italic tracking-tight text-white">Curva de Retenção VTurb</h3>
             </CardHeader>
             <CardContent className="h-[350px] w-full pt-4">
               <ResponsiveContainer width="100%" height="100%">
@@ -203,7 +207,7 @@ export default function AnalyticsDashboard() {
 
           <Card className="bg-zinc-900/20 border-zinc-800">
             <CardHeader>
-              <h3 className="text-lg font-black uppercase italic tracking-tight">Device Mix</h3>
+              <h3 className="text-lg font-black uppercase italic tracking-tight text-white">Device Mix</h3>
             </CardHeader>
             <CardContent className="h-[350px]">
               <ResponsiveContainer width="100%" height="100%">
@@ -242,7 +246,7 @@ function KpiCard({ title, value, icon }: { title: string, value: string | number
         </div>
         <div className="space-y-1">
           <p className="text-[9px] font-black uppercase tracking-widest text-zinc-500">{title}</p>
-          <p className="text-2xl font-black italic tracking-tighter">{value}</p>
+          <p className="text-2xl font-black italic tracking-tighter text-white">{value}</p>
         </div>
       </CardContent>
     </Card>
