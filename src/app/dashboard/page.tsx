@@ -32,10 +32,7 @@ import {
   Users,
   CheckCircle2,
   Calendar as CalendarIcon,
-  ChevronLeft,
-  ChevronRight,
   Timer,
-  ExternalLink,
   Save,
   ShoppingCart,
   ArrowUpCircle,
@@ -48,7 +45,6 @@ import { useToast } from '@/hooks/use-toast';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 
-const ITEMS_PER_PAGE = 50;
 const VIDEO_DURATION_FIXED = 140; // 02:20 em segundos
 
 export default function AdvancedAnalyticsDashboard() {
@@ -59,7 +55,6 @@ export default function AdvancedAnalyticsDashboard() {
   const { toast } = useToast();
   
   const [mounted, setMounted] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
   const [selectedDate, setSelectedDate] = useState('');
   const [newCheckoutUrl, setNewCheckoutUrl] = useState('');
   const [newUpsellUrl, setNewUpsellUrl] = useState('');
@@ -169,7 +164,7 @@ export default function AdvancedAnalyticsDashboard() {
     return query(
       collection(firestore, 'metrics'), 
       where('dateStr', '==', selectedDate),
-      limit(2000) 
+      limit(1000) // Reduzido para economizar cota
     );
   }, [firestore, isConfigured, selectedDate]);
 
@@ -178,13 +173,7 @@ export default function AdvancedAnalyticsDashboard() {
   const stats = useMemo(() => {
     if (!metrics || metrics.length === 0) return null;
 
-    const sortedData = [...metrics].sort((a: any, b: any) => {
-      const timeA = a.updatedAt?.seconds || 0;
-      const timeB = b.updatedAt?.seconds || 0;
-      return timeB - timeA;
-    });
-
-    const totalSessions = sortedData.length;
+    const totalSessions = metrics.length;
     let startedCount = 0;
     let midRetentionCount = 0;
     let completedCount = 0;
@@ -198,7 +187,7 @@ export default function AdvancedAnalyticsDashboard() {
       intervals.push({ label: formatTime(s), sec: s, count: 0 });
     }
 
-    sortedData.forEach((m: any) => {
+    metrics.forEach((m: any) => {
       if (m.started) startedCount++;
       if (m.clickedCTA) ctaClicks++;
       
@@ -240,18 +229,9 @@ export default function AdvancedAnalyticsDashboard() {
       finalRetentionRate,
       conversionRate,
       funnelData,
-      timeline,
-      sortedData
+      timeline
     };
   }, [metrics]);
-
-  const paginatedLeads = useMemo(() => {
-    if (!stats) return [];
-    const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return stats.sortedData.slice(start, start + ITEMS_PER_PAGE);
-  }, [stats, currentPage]);
-
-  const totalPages = stats ? Math.ceil(stats.totalSessions / ITEMS_PER_PAGE) : 0;
 
   if (!mounted || authLoading) return (
     <div className="min-h-screen bg-black flex items-center justify-center">
@@ -296,7 +276,6 @@ export default function AdvancedAnalyticsDashboard() {
                 value={selectedDate} 
                 onChange={(e) => {
                   setSelectedDate(e.target.value);
-                  setCurrentPage(1);
                 }}
                 className="bg-zinc-950 border-zinc-800 pl-10 text-xs w-[180px] h-10 focus:ring-red-600"
               />
@@ -310,7 +289,6 @@ export default function AdvancedAnalyticsDashboard() {
           </div>
         </header>
 
-        {/* Gestor Global de Checkout */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card className="bg-zinc-900/40 border-zinc-800 border-l-4 border-l-green-600 overflow-hidden">
             <CardContent className="pt-6">
@@ -372,7 +350,7 @@ export default function AdvancedAnalyticsDashboard() {
                 <Zap className="w-16 h-16 text-zinc-800 mx-auto" />
                 <div className="space-y-2">
                   <h2 className="text-2xl font-black text-zinc-500 uppercase italic tracking-tighter">Aguardando tráfego real</h2>
-                  <p className="text-zinc-700 text-sm max-w-xs mx-auto">Nenhum registro encontrado em {selectedDate}. Os leads aparecerão aqui assim que derem o play.</p>
+                  <p className="text-zinc-700 text-sm max-w-xs mx-auto">Nenhum registro encontrado em {selectedDate}.</p>
                 </div>
               </>
             )}
@@ -461,82 +439,6 @@ export default function AdvancedAnalyticsDashboard() {
                 </CardContent>
               </Card>
             </div>
-
-            <Card className="bg-zinc-950/20 border-zinc-900 rounded-3xl overflow-hidden">
-              <div className="p-6 border-b border-zinc-900 bg-zinc-950/40 flex items-center justify-between">
-                <div>
-                  <h3 className="text-xs font-black uppercase tracking-widest text-zinc-500">Log de Visualizações Individuais</h3>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-8 w-8 hover:bg-zinc-900"
-                    disabled={currentPage === 1}
-                    onClick={() => setCurrentPage(p => p - 1)}
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </Button>
-                  <span className="text-[10px] font-black text-zinc-600">PÁGINA {currentPage} DE {totalPages}</span>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-8 w-8 hover:bg-zinc-900"
-                    disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage(p => p + 1)}
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead className="text-[10px] uppercase font-black tracking-widest text-zinc-600 bg-black/40">
-                    <tr>
-                      <th className="p-5">Lead ID</th>
-                      <th className="p-5">Device</th>
-                      <th className="p-5">Tempo Assistido</th>
-                      <th className="p-5 text-right">Ação Comercial</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-zinc-900">
-                    {paginatedLeads.map((m: any, i: number) => (
-                      <tr key={i} className="hover:bg-white/5 transition-colors">
-                        <td className="p-5 font-mono text-zinc-500 text-[10px]">
-                          {m.id?.substring(0, 16)}...
-                        </td>
-                        <td className="p-5 uppercase text-[9px] font-black text-zinc-600 tracking-tighter">
-                          {m.device || 'DESKTOP'}
-                        </td>
-                        <td className="p-5">
-                          <div className="flex items-center gap-4">
-                            <span className="font-mono text-zinc-300 bg-zinc-900 px-2 py-1 rounded text-[11px] font-bold border border-zinc-800">
-                              {formatTime(m.watchTime)} / 02:20
-                            </span>
-                            <div className="w-24 bg-zinc-900 h-1.5 rounded-full overflow-hidden border border-zinc-800">
-                              <div className="bg-red-600 h-full" style={{ width: `${Math.min((m.watchTime / 140) * 100, 100)}%` }} />
-                            </div>
-                          </div>
-                        </td>
-                        <td className="p-5 text-right">
-                          {m.clickedCTA ? (
-                            <span className="text-green-500 font-black tracking-tighter bg-green-500/10 border border-green-500/20 px-3 py-1.5 rounded-full text-[10px] uppercase">
-                              Comprou / Clicou ✅
-                            </span>
-                          ) : m.completed ? (
-                            <span className="text-red-500 font-black tracking-tighter bg-red-500/10 px-3 py-1.5 rounded-full text-[10px] uppercase">
-                              Assistiu Tudo
-                            </span>
-                          ) : (
-                            <span className="text-zinc-600 italic text-[10px]">Abandonou</span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </Card>
           </>
         )}
       </div>
