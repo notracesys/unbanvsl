@@ -1,11 +1,10 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import Image from 'next/image';
+import Image from 'next/next';
 import { Button } from '@/components/ui/button';
-import { Volume2, Lock, Play, AlertTriangle, RefreshCcw } from 'lucide-react';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { Volume2, Lock, Play, AlertTriangle, RefreshCcw, ArrowRight } from 'lucide-react';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { initializeFirebase } from '@/firebase';
 import MuxPlayer from '@mux/mux-player-react';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
@@ -19,18 +18,22 @@ export default function MobileSalesPage() {
   const [showCTA, setShowCTA] = useState(false);
   const playerRef = useRef<any>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
+  
   const visitorIdRef = useRef<string>('');
-  const trackedMilestones = useRef<Set<number>>(new Set());
-  const { firestore } = initializeFirebase();
+  const sessionIdRef = useRef<string>('');
+  const lastSavedTimeRef = useRef<number>(0);
+  const hasStartedRef = useRef<boolean>(false);
 
-  // Verificação de configuração
-  const isConfigured = firebaseConfig.projectId !== 'project-id';
+  const { firestore } = initializeFirebase();
+  const isConfigured = firebaseConfig.projectId && firebaseConfig.projectId !== 'project-id';
 
   useEffect(() => {
     setHasMounted(true);
-    // Garantimos que o ID do visitante e o User Agent só sejam acessados no cliente
     if (!visitorIdRef.current) {
       visitorIdRef.current = 'vis_' + Math.random().toString(36).substring(2, 11);
+    }
+    if (!sessionIdRef.current) {
+      sessionIdRef.current = 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
     }
     
     const interval = setInterval(() => {
@@ -47,21 +50,25 @@ export default function MobileSalesPage() {
     }
   }, [showCTA]);
 
-  const trackMetric = (milestone: number, currentTime: number = 0, duration: number = 0) => {
+  const trackMetric = (currentTime: number, duration: number, extra = {}) => {
     if (!firestore || !isConfigured) return;
     
     const device = /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop';
+    const progressPercentage = duration > 0 ? Math.floor((currentTime / duration) * 100) : 0;
 
-    addDoc(collection(firestore, 'metrics'), {
+    const docRef = doc(firestore, 'metrics', sessionIdRef.current);
+    setDoc(docRef, {
+      id: sessionIdRef.current,
       visitorId: visitorIdRef.current,
       watchTime: Math.floor(currentTime),
-      totalDuration: Math.floor(duration),
-      percentage: milestone,
+      totalDuration: Math.floor(duration || 180),
+      percentage: progressPercentage,
       device: device,
-      createdAt: serverTimestamp(),
-    }).catch((err) => {
-      // Falha silenciosa em produção
-    }); 
+      updatedAt: serverTimestamp(),
+      ...extra
+    }, { merge: true }).catch(() => {
+      // Silencioso em produção
+    });
   };
 
   const handlePlayVideo = (e?: React.MouseEvent) => {
@@ -70,9 +77,13 @@ export default function MobileSalesPage() {
       playerRef.current.play();
       setIsPlaying(true);
       setIsEnded(false);
-      if (!trackedMilestones.current.has(0)) {
-        trackedMilestones.current.add(0);
-        trackMetric(0);
+      
+      if (!hasStartedRef.current) {
+        hasStartedRef.current = true;
+        trackMetric(0, playerRef.current.duration || 0, {
+          createdAt: serverTimestamp(),
+          started: true
+        });
       }
     }
   };
@@ -93,9 +104,19 @@ export default function MobileSalesPage() {
       playerRef.current.pause();
       setIsPlaying(false);
     } else {
-      playerRef.current.play();
-      setIsPlaying(true);
+      handlePlayVideo();
     }
+  };
+
+  const handleCtaClick = () => {
+    if (firestore && isConfigured) {
+      const docRef = doc(firestore, 'metrics', sessionIdRef.current);
+      setDoc(docRef, {
+        clickedCTA: true,
+        clickedCtaAt: serverTimestamp()
+      }, { merge: true }).catch(() => {});
+    }
+    window.open('https://checkout.exemplo.com', '_blank');
   };
 
   if (!hasMounted) return null;
@@ -183,22 +204,23 @@ export default function MobileSalesPage() {
             onTimeUpdate={(e: any) => {
               const currentTime = e.target.currentTime;
               const duration = e.target.duration;
-              const progress = (currentTime / duration) * 100;
               
               if (currentTime >= 128 && !showCTA) {
                 setShowCTA(true);
               }
 
-              [25, 50, 75, 90, 100].forEach(m => {
-                if (progress >= m && !trackedMilestones.current.has(m)) {
-                  trackedMilestones.current.add(m);
-                  trackMetric(m, currentTime, duration);
-                }
-              });
+              // Salva a cada 4 segundos de progresso para métricas cirúrgicas e precisas
+              if (Math.abs(currentTime - lastSavedTimeRef.current) >= 4) {
+                lastSavedTimeRef.current = currentTime;
+                trackMetric(currentTime, duration);
+              }
             }}
             onEnded={() => {
               setIsPlaying(false);
               setIsEnded(true);
+              if (playerRef.current) {
+                trackMetric(playerRef.current.duration, playerRef.current.duration, { completed: true });
+              }
             }}
             onPlay={() => setIsPlaying(true)}
             onPause={() => setIsPlaying(false)}
@@ -219,10 +241,10 @@ export default function MobileSalesPage() {
           className="w-full max-w-[360px] mt-8 flex flex-col items-center animate-in fade-in slide-in-from-bottom-4 duration-1000"
         >
           <Button 
-            onClick={() => window.open('https://checkout.exemplo.com', '_blank')}
-            className="w-full h-16 text-xl font-black uppercase italic tracking-tighter bg-[#22c55e] hover:bg-[#16a34a] text-white rounded-2xl shadow-[0_8px_0_rgb(21,128,61)] active:translate-y-1 active:shadow-[0_4px_0_rgb(21,128,61)] transition-all duration-75 flex items-center justify-center leading-none button-pulse"
+            onClick={handleCtaClick}
+            className="w-full h-16 text-xl font-black uppercase italic tracking-tighter bg-[#22c55e] hover:bg-[#16a34a] text-white rounded-2xl shadow-[0_8px_0_rgb(21,128,61)] active:translate-y-1 active:shadow-[0_4px_0_rgb(21,128,61)] transition-all duration-75 flex items-center justify-center leading-none button-pulse gap-2"
           >
-            QUERO DESBANIR AGORA!
+            QUERO DESBANIR AGORA! <ArrowRight className="w-6 h-6" />
           </Button>
           
           <div className="mt-4 flex items-center gap-2 text-zinc-500">
@@ -292,13 +314,10 @@ function FeedbackCard({ img, name, text }: { img: string, name: string, text: st
   return (
     <div className="bg-zinc-900/50 border border-zinc-800 p-4 rounded-xl flex gap-3 transition-transform hover:scale-[1.02]">
       <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 border border-zinc-700 bg-zinc-800 relative">
-        <Image 
+        <img 
           src={img} 
           alt={name} 
-          width={48} 
-          height={48} 
-          className="object-cover" 
-          unoptimized 
+          className="w-full h-full object-cover" 
         />
       </div>
       <div className="flex flex-col">
