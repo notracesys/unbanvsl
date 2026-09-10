@@ -1,18 +1,27 @@
 
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth, useUser } from '@/firebase';
-import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Lock, LogIn, ShieldCheck } from 'lucide-react';
+import { Lock, LogIn, ShieldCheck, Loader2, AlertCircle } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 export default function LoginPage() {
   const auth = useAuth();
   const { user, loading } = useUser();
   const router = useRouter();
+  const { toast } = useToast();
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (!loading && user) {
@@ -20,21 +29,33 @@ export default function LoginPage() {
     }
   }, [user, loading, router]);
 
-  const handleLogin = async () => {
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!auth) return;
-    const provider = new GoogleAuthProvider();
+
+    setIsSubmitting(true);
+    setError('');
+
     try {
-      await signInWithPopup(auth, provider);
+      await signInWithEmailAndPassword(auth, email, password);
       router.push('/dashboard');
-    } catch (error) {
-      console.error("Login failed", error);
+    } catch (err: any) {
+      console.error("Login failed", err);
+      setError('Credenciais inválidas. Verifique o e-mail e a senha.');
+      toast({
+        variant: "destructive",
+        title: "Erro de Acesso",
+        description: "E-mail ou senha incorretos.",
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin" />
+        <Loader2 className="w-8 h-8 text-red-600 animate-spin" />
       </div>
     );
   }
@@ -48,31 +69,65 @@ export default function LoginPage() {
           <div className="mx-auto w-16 h-16 bg-red-600/10 rounded-2xl flex items-center justify-center border border-red-600/20">
             <Lock className="w-8 h-8 text-red-600" />
           </div>
-          <CardTitle className="text-3xl font-black italic uppercase tracking-tighter">
+          <CardTitle className="text-3xl font-black italic uppercase tracking-tighter text-white">
             ACESSO <span className="text-red-600">RESTRITO</span>
           </CardTitle>
           <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">Painel Administrativo VTURB PRO</p>
         </CardHeader>
         
         <CardContent className="pb-12 px-10">
-          <div className="space-y-6">
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">E-mail</Label>
+              <Input 
+                id="email"
+                type="email"
+                placeholder="admin@exemplo.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="bg-black border-zinc-800 h-12 rounded-xl focus:ring-red-600 text-sm"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-[10px] font-black uppercase tracking-widest text-zinc-500 ml-1">Senha</Label>
+              <Input 
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="bg-black border-zinc-800 h-12 rounded-xl focus:ring-red-600 text-sm"
+              />
+            </div>
+
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/20 p-3 rounded-xl flex items-center gap-2 text-red-500 text-[11px] font-bold">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                {error}
+              </div>
+            )}
+
             <div className="bg-black/40 border border-zinc-800 p-4 rounded-2xl flex items-center gap-3">
               <ShieldCheck className="w-5 h-5 text-green-500" />
-              <p className="text-[11px] text-zinc-400 font-medium">Autenticação segura via Google Workspace para administradores autorizados.</p>
+              <p className="text-[10px] text-zinc-400 font-medium">Autenticação criptografada. Apenas administradores autorizados.</p>
             </div>
 
             <Button 
-              onClick={handleLogin}
-              className="w-full h-14 bg-white hover:bg-zinc-200 text-black font-black uppercase italic tracking-tighter rounded-2xl flex items-center justify-center gap-3 transition-all active:scale-[0.98]"
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full h-14 bg-red-600 hover:bg-red-700 text-white font-black uppercase italic tracking-tighter rounded-2xl flex items-center justify-center gap-3 transition-all active:scale-[0.98] shadow-[0_0_20px_rgba(220,38,38,0.2)]"
             >
-              <LogIn className="w-5 h-5" />
-              Entrar com Google
+              {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <LogIn className="w-5 h-5" />}
+              Entrar no Painel
             </Button>
             
             <p className="text-center text-[9px] text-zinc-600 font-bold uppercase tracking-widest">
-              Somente e-mails autorizados possuem acesso aos dados.
+              Caso tenha esquecido sua senha, entre em contato com o suporte técnico.
             </p>
-          </div>
+          </form>
         </CardContent>
       </Card>
     </div>
