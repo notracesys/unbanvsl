@@ -1,11 +1,11 @@
 
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Volume2, Lock, Play, AlertTriangle, RefreshCcw, ArrowRight } from 'lucide-react';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { useFirestore } from '@/firebase';
+import { useFirestore, useDoc } from '@/firebase';
 import MuxPlayer from '@mux/mux-player-react';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { firebaseConfig } from '@/firebase/config';
@@ -27,7 +27,12 @@ export default function MobileSalesPage() {
   const firestore = useFirestore();
   const isConfigured = firebaseConfig.projectId && firebaseConfig.projectId !== 'project-id';
 
-  // Função auxiliar para pegar a data local YYYY-MM-DD
+  // Busca link de checkout dinâmico
+  const configRef = useMemo(() => firestore ? doc(firestore, 'config', 'sales') : null, [firestore]);
+  const { data: appConfig } = useDoc(configRef);
+
+  const checkoutUrl = appConfig?.checkoutUrl || 'https://checkout.exemplo.com';
+
   const getLocalDateString = () => {
     const date = new Date();
     const year = date.getFullYear();
@@ -39,7 +44,6 @@ export default function MobileSalesPage() {
   useEffect(() => {
     setHasMounted(true);
     
-    // Recupera ou cria ID persistente do visitante (longo prazo)
     const savedVisitorId = localStorage.getItem('vsl_visitor_id');
     if (savedVisitorId) {
       visitorIdRef.current = savedVisitorId;
@@ -49,7 +53,6 @@ export default function MobileSalesPage() {
       localStorage.setItem('vsl_visitor_id', newId);
     }
 
-    // ID Único para esta sessão (persiste ao F5, mas reseta ao fechar aba)
     let currentSessionId = sessionStorage.getItem('vsl_session_id');
     if (!currentSessionId) {
       currentSessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
@@ -57,7 +60,6 @@ export default function MobileSalesPage() {
     }
     sessionIdRef.current = currentSessionId;
     
-    // Evento inicial de "Lead Entrou na Página"
     const initTracking = async () => {
       if (firestore && isConfigured) {
         const todayStr = getLocalDateString();
@@ -90,14 +92,15 @@ export default function MobileSalesPage() {
   const trackMetric = (currentTime: number, duration: number, extra = {}) => {
     if (!firestore || !isConfigured) return;
     
-    const progressPercentage = duration > 0 ? Math.floor((currentTime / duration) * 100) : 0;
+    const videoDuration = duration || 140; // 02:20 solicitado
+    const progressPercentage = Math.floor((currentTime / videoDuration) * 100);
     const docRef = doc(firestore, 'metrics', sessionIdRef.current);
     const todayStr = getLocalDateString();
 
     setDoc(docRef, {
       watchTime: Math.floor(currentTime),
-      totalDuration: Math.floor(duration || 180),
-      percentage: progressPercentage,
+      totalDuration: Math.floor(videoDuration),
+      percentage: Math.min(progressPercentage, 100),
       dateStr: todayStr,
       updatedAt: serverTimestamp(),
       ...extra
@@ -113,7 +116,7 @@ export default function MobileSalesPage() {
       
       if (!hasStartedRef.current) {
         hasStartedRef.current = true;
-        trackMetric(0, playerRef.current.duration || 0, { started: true });
+        trackMetric(0, playerRef.current.duration || 140, { started: true });
       }
     }
   };
@@ -137,7 +140,7 @@ export default function MobileSalesPage() {
         updatedAt: serverTimestamp()
       }, { merge: true });
     }
-    window.open('https://checkout.exemplo.com', '_blank');
+    window.open(checkoutUrl, '_blank');
   };
 
   if (!hasMounted) return null;
@@ -185,9 +188,9 @@ export default function MobileSalesPage() {
                   
                   <div className="bg-white/5 border border-white/10 p-4 rounded-xl backdrop-blur-sm">
                     <p className="text-zinc-200 text-sm font-bold leading-tight">
-                      ESSE MACETE VAI SUMIR... <br />
+                      ESSE SEGREDO VAI SUMIR... <br />
                       <span className="text-zinc-400 text-[11px] font-normal mt-2 block">
-                        Se você parar agora, nunca mais terá acesso a este segredo. Continue assistindo.
+                        Se você parar agora, nunca mais terá acesso a este método. Continue assistindo.
                       </span>
                     </p>
                   </div>
@@ -227,13 +230,12 @@ export default function MobileSalesPage() {
             className="w-full h-full object-cover pointer-events-none"
             onTimeUpdate={(e: any) => {
               const currentTime = e.target.currentTime;
-              const duration = e.target.duration;
+              const duration = 140; // Forçamos 2:20 solicitado
               
-              if (currentTime >= 128 && !showCTA) {
+              if (currentTime >= 115 && !showCTA) { // CTA aparece aos 1:55 aprox
                 setShowCTA(true);
               }
 
-              // Salva a cada 5 segundos para precisão sem spam no banco
               if (Math.abs(currentTime - lastSavedTimeRef.current) >= 5) {
                 lastSavedTimeRef.current = currentTime;
                 trackMetric(currentTime, duration);
@@ -242,9 +244,7 @@ export default function MobileSalesPage() {
             onEnded={() => {
               setIsPlaying(false);
               setIsEnded(true);
-              if (playerRef.current) {
-                trackMetric(playerRef.current.duration, playerRef.current.duration, { completed: true });
-              }
+              trackMetric(140, 140, { completed: true });
             }}
             onPlay={() => setIsPlaying(true)}
             onPause={() => setIsPlaying(false)}

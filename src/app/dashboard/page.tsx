@@ -1,8 +1,9 @@
+
 'use client';
 
 import React, { useMemo, useState, useEffect } from 'react';
-import { useFirestore, useCollection } from '@/firebase';
-import { collection, query, where, limit } from 'firebase/firestore';
+import { useFirestore, useCollection, useDoc } from '@/firebase';
+import { collection, query, where, limit, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   AreaChart, 
@@ -32,23 +33,51 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock,
-  Timer
+  Timer,
+  ExternalLink,
+  Save
 } from 'lucide-react';
 import { firebaseConfig } from '@/firebase/config';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useToast } from '@/hooks/use-toast';
 
 const ITEMS_PER_PAGE = 50;
+const DEFAULT_VIDEO_DURATION = 140; // 02:20 solicitado
 
 export default function AdvancedAnalyticsDashboard() {
   const firestore = useFirestore();
+  const { toast } = useToast();
   const [mounted, setMounted] = useState(false);
   const [manualReload, setManualReload] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [visitorId, setVisitorId] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState('');
+  const [newCheckoutUrl, setNewCheckoutUrl] = useState('');
 
-  // Função auxiliar para formatar segundos em MM:SS
+  // Busca config de checkout
+  const configRef = useMemo(() => firestore ? doc(firestore, 'config', 'sales') : null, [firestore]);
+  const { data: appConfig } = useDoc(configRef);
+
+  useEffect(() => {
+    if (appConfig?.checkoutUrl) {
+      setNewCheckoutUrl(appConfig.checkoutUrl);
+    }
+  }, [appConfig]);
+
+  const handleSaveCheckout = () => {
+    if (!firestore || !newCheckoutUrl) return;
+    setDoc(doc(firestore, 'config', 'sales'), {
+      checkoutUrl: newCheckoutUrl,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+    
+    toast({
+      title: "Sucesso!",
+      description: "Link de checkout atualizado para todos os leads.",
+    });
+  };
+
   const formatTime = (seconds: number) => {
     if (seconds === null || seconds === undefined || isNaN(seconds)) return '00:00';
     const mins = Math.floor(seconds / 60);
@@ -56,7 +85,6 @@ export default function AdvancedAnalyticsDashboard() {
     return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   };
   
-  // Função auxiliar para pegar a data local YYYY-MM-DD
   const getLocalDateString = () => {
     const date = new Date();
     const year = date.getFullYear();
@@ -84,7 +112,7 @@ export default function AdvancedAnalyticsDashboard() {
     );
   }, [firestore, isConfigured, selectedDate, manualReload]);
 
-  const { data: metrics, loading, error } = useCollection(metricsQuery);
+  const { data: metrics, loading } = useCollection(metricsQuery);
 
   const stats = useMemo(() => {
     if (!metrics || metrics.length === 0) return null;
@@ -101,19 +129,14 @@ export default function AdvancedAnalyticsDashboard() {
     let completedCount = 0;
     let ctaClicks = 0;
     
-    // Identifica a maior duração encontrada nos leads para escalar o gráfico
-    const maxVideoDuration = Math.max(...sortedMetrics.map((m: any) => m.totalDuration || 0), 180);
+    // Precisão solicitada: 2:20 (140s)
+    const maxVideoDuration = DEFAULT_VIDEO_DURATION;
 
-    // Gera intervalos dinâmicos a cada 30 segundos até o fim do vídeo
     const timelineIntervals: { label: string; maxSec: number; count: number }[] = [];
-    const step = maxVideoDuration > 600 ? 60 : 30; // Se o vídeo > 10min, usa passos de 60s, senão 30s
+    const step = 10; // Passos de 10s para alta precisão em vídeo curto
     
     for (let s = 0; s <= maxVideoDuration; s += step) {
       timelineIntervals.push({ label: formatTime(s), maxSec: s, count: 0 });
-    }
-    // Garante que o último segundo exato apareça
-    if (maxVideoDuration % step !== 0) {
-      timelineIntervals.push({ label: formatTime(maxVideoDuration), maxSec: maxVideoDuration, count: 0 });
     }
 
     sortedMetrics.forEach((m: any) => {
@@ -126,7 +149,6 @@ export default function AdvancedAnalyticsDashboard() {
       if (pct >= 50) midRetentionCount++;
       if (pct >= 90 || m.completed) completedCount++;
 
-      // Agrupa na minutagem real
       timelineIntervals.forEach(interval => {
         if (wTime >= interval.maxSec) {
           interval.count++;
@@ -146,7 +168,6 @@ export default function AdvancedAnalyticsDashboard() {
       { name: 'Checkout Click', value: ctaClicks, fill: '#22c55e' }
     ];
 
-    // Converte dados da minutagem para o gráfico de linha do tempo real
     const preciseTimelineData = timelineIntervals.map(interval => ({
       tempo: interval.label,
       'Retidos': interval.count,
@@ -188,14 +209,6 @@ export default function AdvancedAnalyticsDashboard() {
     );
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
-        <Loader2 className="w-10 h-10 text-red-600 animate-spin" />
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-[#050505] text-zinc-100 p-4 lg:p-10 font-sans selection:bg-red-600/30">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -230,14 +243,42 @@ export default function AdvancedAnalyticsDashboard() {
           </div>
         </header>
 
+        {/* Gerenciador de Checkout */}
+        <Card className="bg-zinc-900/40 border-zinc-800 border-l-4 border-l-green-600">
+          <CardContent className="pt-6">
+            <div className="flex flex-col md:flex-row items-center gap-6">
+              <div className="flex-1 space-y-2">
+                <h3 className="text-sm font-black uppercase tracking-wider text-green-500 flex items-center gap-2">
+                  <ExternalLink className="w-4 h-4" /> Link de Checkout Ativo
+                </h3>
+                <p className="text-[10px] text-zinc-500 uppercase font-bold">Mude o link abaixo para atualizar o botão da VSL instantaneamente</p>
+                <div className="flex gap-2">
+                  <Input 
+                    value={newCheckoutUrl} 
+                    onChange={(e) => setNewCheckoutUrl(e.target.value)}
+                    placeholder="https://checkout.exemplo.com/pago"
+                    className="bg-zinc-950 border-zinc-800 text-xs font-mono h-11"
+                  />
+                  <Button onClick={handleSaveCheckout} className="bg-green-600 hover:bg-green-700 h-11 px-6">
+                    <Save className="w-4 h-4 mr-2" /> Salvar Link
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {(!stats || stats.totalSessions === 0) ? (
           <div className="py-20 text-center space-y-6 bg-zinc-900/10 rounded-3xl border border-dashed border-zinc-800">
-            <Zap className="w-12 h-12 text-zinc-700 mx-auto" />
-            <div className="space-y-2">
-              <h2 className="text-xl font-bold text-zinc-400">Nenhum lead encontrado em {selectedDate}</h2>
-              <p className="text-zinc-600 text-sm">Gere tráfego ou mude a data para ver os dados.</p>
-            </div>
-            <Button onClick={() => setSelectedDate(getLocalDateString())} variant="link" className="text-red-600">Ir para Hoje</Button>
+            {loading ? <Loader2 className="w-10 h-10 text-red-600 animate-spin mx-auto" /> : (
+              <>
+                <Zap className="w-12 h-12 text-zinc-700 mx-auto" />
+                <div className="space-y-2">
+                  <h2 className="text-xl font-bold text-zinc-400">Nenhum lead encontrado em {selectedDate}</h2>
+                  <p className="text-zinc-600 text-sm">Gere tráfego ou mude a data para ver os dados.</p>
+                </div>
+              </>
+            )}
           </div>
         ) : (
           <>
@@ -304,7 +345,7 @@ export default function AdvancedAnalyticsDashboard() {
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-base font-black uppercase tracking-wider text-zinc-300 flex items-center gap-2">
                     <Timer className="w-4 h-4 text-red-600" />
-                    Retenção Cirúrgica (Tempo Real do Vídeo)
+                    Retenção Real do Vídeo (00:00 - 02:20)
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="h-[350px] pt-4">
@@ -334,8 +375,8 @@ export default function AdvancedAnalyticsDashboard() {
             <Card className="bg-zinc-900/10 border-zinc-900 overflow-hidden">
               <CardHeader className="bg-zinc-950/40 p-4 border-b border-zinc-900 flex flex-row items-center justify-between">
                 <div>
-                  <h3 className="text-xs font-black uppercase tracking-widest text-zinc-400">Linha de Tempo Individual de Audiência</h3>
-                  <p className="text-[10px] text-zinc-600 uppercase font-bold mt-1">Exibindo {paginatedLeads.length} de {stats.totalSessions} registros na minutagem exata</p>
+                  <h3 className="text-xs font-black uppercase tracking-widest text-zinc-400">Linha de Tempo Individual</h3>
+                  <p className="text-[10px] text-zinc-600 uppercase font-bold mt-1">Exibindo {paginatedLeads.length} de {stats.totalSessions} registros</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <Button 
@@ -365,8 +406,8 @@ export default function AdvancedAnalyticsDashboard() {
                     <tr>
                       <th className="p-4">ID do Player</th>
                       <th className="p-4">Plataforma</th>
-                      <th className="p-4">Minutagem Precisa Assistida</th>
-                      <th className="p-4 text-right">Ação Comercial Final</th>
+                      <th className="p-4">Minutagem Assistida</th>
+                      <th className="p-4 text-right">Ação Final</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-900 bg-zinc-950/10">
@@ -398,7 +439,7 @@ export default function AdvancedAnalyticsDashboard() {
                           ) : m.completed ? (
                             <span className="text-red-400 font-bold bg-red-950/20 px-2 py-1 rounded text-[10px]">ASSISTIU ATÉ O FIM</span>
                           ) : (
-                            <span className="text-zinc-600 italic">ABANDONOU NO CAMINHO</span>
+                            <span className="text-zinc-600 italic">ABANDONOU</span>
                           )}
                         </td>
                       </tr>

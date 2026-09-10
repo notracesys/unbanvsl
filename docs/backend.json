@@ -20,6 +20,14 @@
         "updatedAt": { "type": "string", "format": "date-time" }
       },
       "required": ["visitorId", "dateStr", "updatedAt"]
+    },
+    "AppConfig": {
+      "title": "App Config",
+      "description": "Configurações dinâmicas do aplicativo.",
+      "type": "object",
+      "properties": {
+        "checkoutUrl": { "type": "string" }
+      }
     }
   },
   "auth": {
@@ -29,6 +37,10 @@
     "/metrics/{metricId}": {
       "schema": "VSLMetric",
       "description": "Coleção central de rastreamento de leads da VSL."
+    },
+    "/config/{configId}": {
+      "schema": "AppConfig",
+      "description": "Configurações globais como link de checkout."
     }
   }
 }
