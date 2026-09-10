@@ -221,15 +221,23 @@ export default function MobileSalesPage() {
 
           <ScrollArea className="h-[250px] w-full pr-4 border-y border-zinc-900 py-4">
             <div className="text-[11px] text-zinc-400 leading-relaxed font-medium space-y-4">
-              <p>Este site destina-se à prestação de serviços de análise técnica independente, orientação e suporte informativo, exclusivamente voltados para recursos administrativos de banimento.</p>
+              <p className="font-bold text-zinc-300">1. NATUREZA DO SERVIÇO</p>
+              <p>Este site destina-se à prestação de serviços de análise técnica independente, orientação e suporte informativo, exclusivamente voltados para recursos administrativos de banimento. O conteúdo apresentado visa instruir o usuário sobre procedimentos internos de plataformas terceiras de acordo com as normas públicas disponíveis.</p>
               
-              <p>O CLIENTE declara conhecimento inequívoco de que o CONTRATADO não possui qualquer vínculo, parceria ou filiação com a Garena, sendo todas as marcas mencionadas de propriedade exclusiva de seus respectivos titulares.</p>
+              <p className="font-bold text-zinc-300">2. INDEPENDÊNCIA E MARCAS</p>
+              <p>O CLIENTE declara conhecimento inequívoco de que o CONTRATADO não possui qualquer vínculo, parceria ou filiação com a Garena, sendo todas as marcas mencionadas de propriedade exclusiva de seus respectivos titulares. Nomes como "Free Fire" e "Garena" são usados apenas para fins descritivos do contexto dos serviços.</p>
               
-              <p>O CONTRATADO não realiza, sob hipótese alguma, acesso direto ou indireto a servidores internos da plataforma.</p>
+              <p className="font-bold text-zinc-300">3. LIMITES TÉCNICOS</p>
+              <p>O CONTRATADO não realiza, sob hipótese alguma, acesso direto ou indireto a servidores internos da plataforma, não utiliza ferramentas de invasão (hacking), não altera códigos-fonte e não infringe os Termos de Serviço de terceiros por meio de ações automáticas ilegais.</p>
               
-              <p>Ao utilizar este site ou contratar quaisquer serviços nele oferecidos, o CLIENTE declara ter lido, compreendido e concordado integralmente com estes termos.</p>
+              <p className="font-bold text-zinc-300">4. CONSENTIMENTO</p>
+              <p>Ao utilizar este site ou contratar quaisquer serviços nele oferecidos, o CLIENTE declara ter lido, compreendido e concordado integralmente com estes termos, aceitando os riscos inerentes à tentativa de recuperação administrativa.</p>
               
-              <p className="text-zinc-200 font-bold italic underline decoration-red-600/50">É expressamente reconhecido que o CONTRATADO não garante, promete ou assegura a reversão, desbloqueio, recuperação ou restabelecimentos de contas, itens virtuais, progressos, patentes ou quaisquer ativos digitais, visto que a decisão final e sovereign pertence exclusivamente à plataforma responsável (Garena).</p>
+              <div className="bg-red-600/5 p-4 rounded-xl border border-red-600/10 mt-6">
+                <p className="text-zinc-200 font-black italic underline decoration-red-600/50 leading-snug">
+                  É expressamente reconhecido que o CONTRATADO não garante, promete ou assegura a reversão, desbloqueio, recuperação ou restabelecimentos de contas, itens virtuais, progressos, patentes ou quaisquer ativos digitais, visto que a decisão final e sovereign pertence exclusivamente à plataforma responsável (Garena).
+                </p>
+              </div>
             </div>
           </ScrollArea>
 
