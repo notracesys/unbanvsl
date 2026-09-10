@@ -88,7 +88,7 @@ export default function MobileSalesPage() {
 
   return (
     <main className="min-h-screen bg-[#050505] flex flex-col items-center px-4 pt-4 pb-20 select-none overflow-x-hidden">
-      <header className="w-full max-w-[480px] text-center mb-10 space-y-2">
+      <header className="w-full max-w-[480px] text-center mb-10 space-y-4">
         <h1 className="text-white text-[1.4rem] font-black italic uppercase tracking-tighter leading-[1.1] mb-6">
           ESSE MACETE IRÁ <span className="text-red-600 text-[1.6rem] animate-pulse text-glow-red">SAIR DO AR A QUALQUER MOMENTO.</span>
         </h1>
@@ -212,10 +212,9 @@ export default function MobileSalesPage() {
         >
           <Button 
             onClick={() => window.open('https://checkout.exemplo.com', '_blank')}
-            className="w-full h-16 text-lg font-black uppercase italic tracking-tighter bg-[#22c55e] hover:bg-[#16a34a] text-white rounded-2xl shadow-[0_8px_0_rgb(21,128,61)] active:translate-y-1 active:shadow-[0_4px_0_rgb(21,128,61)] transition-all duration-75 flex flex-col leading-none button-pulse"
+            className="w-full h-16 text-lg font-black uppercase italic tracking-tighter bg-[#22c55e] hover:bg-[#16a34a] text-white rounded-2xl shadow-[0_8px_0_rgb(21,128,61)] active:translate-y-1 active:shadow-[0_4px_0_rgb(21,128,61)] transition-all duration-75 flex flex-col items-center justify-center leading-none button-pulse"
           >
             QUERO DESBANIR AGORA!
-            <span className="text-[10px] mt-1 not-italic tracking-normal">Acesso vitalício ao sistema bypass</span>
           </Button>
           
           <div className="mt-4 flex items-center gap-2 text-zinc-500">
