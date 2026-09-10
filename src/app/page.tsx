@@ -47,12 +47,10 @@ export default function MobileSalesPage() {
   useEffect(() => {
     setHasMounted(true);
     
-    // Detect TikTok Browser
     const ua = typeof window !== 'undefined' ? (navigator.userAgent || navigator.vendor || (window as any).opera) : '';
     const isTikTokBrowser = /TikTok|musical_ly/i.test(ua);
     setIsTikTok(isTikTokBrowser);
 
-    // Check Terms acceptance
     const termsAccepted = localStorage.getItem('vsl_terms_accepted') === 'true';
     setAcceptedTerms(termsAccepted);
 
@@ -167,7 +165,6 @@ export default function MobileSalesPage() {
 
   if (!hasMounted) return null;
 
-  // Bloqueio do TikTok
   if (isTikTok) {
     return (
       <div className="fixed inset-0 z-[9999] bg-black flex items-center justify-center p-6 text-center">
@@ -197,14 +194,12 @@ export default function MobileSalesPage() {
               </div>
             </div>
           </div>
-
           <p className="text-[9px] text-zinc-600 font-bold uppercase tracking-[0.2em] animate-bounce">Aguardando você trocar de navegador...</p>
         </div>
       </div>
     );
   }
 
-  // Gate de Termos de Uso
   if (!acceptedTerms) {
     return (
       <div className="fixed inset-0 z-[9998] bg-black flex flex-col items-center justify-center p-6 selection:bg-red-600/30">
@@ -214,28 +209,44 @@ export default function MobileSalesPage() {
               <ShieldCheck className="w-8 h-8 text-red-600" />
             </div>
             <h2 className="text-2xl font-black italic uppercase tracking-tighter text-white leading-none">
-              AVISO LEGAL <br /><span className="text-red-600 text-lg">& TERMOS DE USO</span>
+              AVISO LEGAL <br /><span className="text-red-600 text-lg">& TERMOS DE SERVIÇO</span>
             </h2>
-            <p className="text-[10px] text-zinc-500 font-black uppercase tracking-[0.2em]">LEIA COM ATENÇÃO ANTES DE CONTINUAR</p>
+            <p className="text-[10px] text-zinc-500 font-black uppercase tracking-[0.2em]">CONSENTIMENTO OBRIGATÓRIO PARA ACESSO</p>
           </div>
 
-          <ScrollArea className="h-[250px] w-full pr-4 border-y border-zinc-900 py-4">
-            <div className="text-[11px] text-zinc-400 leading-relaxed font-medium space-y-4">
-              <p className="font-bold text-zinc-300">1. NATUREZA DO SERVIÇO</p>
-              <p>Este site destina-se à prestação de serviços de análise técnica independente, orientação e suporte informativo, exclusivamente voltados para recursos administrativos de banimento. O conteúdo apresentado visa instruir o usuário sobre procedimentos internos de plataformas terceiras de acordo com as normas públicas disponíveis.</p>
-              
-              <p className="font-bold text-zinc-300">2. INDEPENDÊNCIA E MARCAS</p>
-              <p>O CLIENTE declara conhecimento inequívoco de que o CONTRATADO não possui qualquer vínculo, parceria ou filiação com a Garena, sendo todas as marcas mencionadas de propriedade exclusiva de seus respectivos titulares. Nomes como "Free Fire" e "Garena" são usados apenas para fins descritivos do contexto dos serviços.</p>
-              
-              <p className="font-bold text-zinc-300">3. LIMITES TÉCNICOS</p>
-              <p>O CONTRATADO não realiza, sob hipótese alguma, acesso direto ou indireto a servidores internos da plataforma, não utiliza ferramentas de invasão (hacking), não altera códigos-fonte e não infringe os Termos de Serviço de terceiros por meio de ações automáticas ilegais.</p>
-              
-              <p className="font-bold text-zinc-300">4. CONSENTIMENTO</p>
-              <p>Ao utilizar este site ou contratar quaisquer serviços nele oferecidos, o CLIENTE declara ter lido, compreendido e concordado integralmente com estes termos, aceitando os riscos inerentes à tentativa de recuperação administrativa.</p>
-              
-              <div className="bg-red-600/5 p-4 rounded-xl border border-red-600/10 mt-6">
-                <p className="text-zinc-200 font-black italic underline decoration-red-600/50 leading-snug">
-                  É expressamente reconhecido que o CONTRATADO não garante, promete ou assegura a reversão, desbloqueio, recuperação ou restabelecimentos de contas, itens virtuais, progressos, patentes ou quaisquer ativos digitais, visto que a decisão final e sovereign pertence exclusivamente à plataforma responsável (Garena).
+          <ScrollArea className="h-[280px] w-full pr-4 border-y border-zinc-900 py-4">
+            <div className="text-[11px] text-zinc-400 leading-relaxed font-medium space-y-5">
+              <section>
+                <p className="font-bold text-zinc-300 uppercase mb-2">1. OBJETO E NATUREZA TÉCNICA</p>
+                <p>O presente ambiente digital disponibiliza um método de consultoria técnica e estratégica para a elaboração de recursos administrativos. O serviço compreende a análise de procedimentos públicos de conformidade e a orientação sobre as melhores práticas de contestação baseadas em precedentes de termos de uso de plataformas digitais.</p>
+              </section>
+
+              <section>
+                <p className="font-bold text-zinc-300 uppercase mb-2">2. INDEPENDÊNCIA E PROPRIEDADE INTELECTUAL</p>
+                <p>É expressamente declarado que este domínio e seus administradores atuam de forma 100% INDEPENDENTE. Não possuímos qualquer vínculo societário, comercial, operacional ou de parceria com a Garena International. Os nomes "Free Fire", marcas nominativas e logotipos são de propriedade exclusiva de seus detentores legais, sendo utilizados aqui apenas em caráter descritivo para contextualizar o suporte oferecido ao usuário.</p>
+              </section>
+
+              <section>
+                <p className="font-bold text-zinc-300 uppercase mb-2">3. LIMITAÇÕES OPERACIONAIS E ÉTICA</p>
+                <p>Este serviço não utiliza, sob nenhuma circunstância, ferramentas de intrusão, exploração de vulnerabilidades (exploits), modificação de arquivos de sistema da desenvolvedora ou qualquer forma de hacking. Nossa atuação restringe-se ao campo da orientação estratégica e do suporte técnico especializado no preenchimento de formulários e procedimentos administrativos legítimos disponibilizados pela própria plataforma.</p>
+              </section>
+
+              <section>
+                <p className="font-bold text-zinc-300 uppercase mb-2">4. RESPONSABILIDADE E CONSENTIMENTO DO USUÁRIO</p>
+                <p>Ao prosseguir, o usuário declara estar ciente de que o sucesso de qualquer procedimento administrativo depende exclusivamente da análise interna da plataforma terceira. O usuário assume total responsabilidade pela veracidade das informações fornecidas durante os processos de contestação, isentando este serviço de qualquer consequência derivada de decisões soberanas de terceiros.</p>
+              </section>
+
+              <section>
+                <p className="font-bold text-zinc-300 uppercase mb-2">5. PROTEÇÃO DE DADOS E COOKIES</p>
+                <p>Utilizamos tecnologias de rastreamento de interação apenas para fins de melhoria da experiência de navegação e suporte técnico ao usuário, em conformidade com as diretrizes de privacidade de navegação segura.</p>
+              </section>
+
+              <div className="bg-red-600/10 p-5 rounded-2xl border border-red-600/20 mt-8 mb-4">
+                <p className="text-zinc-100 font-black italic uppercase tracking-tighter text-[10px] leading-tight text-center mb-2">
+                  CLÁUSULA DE ISENÇÃO FINAL
+                </p>
+                <p className="text-zinc-300 font-bold italic underline decoration-red-600/50 leading-relaxed text-justify">
+                  É expressamente reconhecido e aceito pelo usuário que o CONTRATADO não garante, promete, assegura ou afiança a efetiva reversão, desbloqueio, recuperação ou restabelecimento de contas, ativos digitais, progressos, patentes ou itens virtuais, visto que a decisão final, deliberativa e absoluta pertence exclusivamente à plataforma responsável (Garena), em conformidade com seus termos de serviço próprios.
                 </p>
               </div>
             </div>
@@ -249,7 +260,7 @@ export default function MobileSalesPage() {
               LI E CONCORDO COM OS TERMOS <CheckCircle2 className="w-5 h-5 group-hover:scale-110 transition-transform" />
             </Button>
             <p className="text-[8px] text-zinc-600 text-center uppercase font-bold tracking-widest leading-tight">
-              AO CLICAR NO BOTÃO ACIMA, VOCÊ CONFIRMA SUA CIÊNCIA SOBRE A NATUREZA DO SERVIÇO E A AUSÊNCIA DE VÍNCULO COM A GARENA.
+              AO CLICAR NO BOTÃO ACIMA, VOCÊ FORMALIZA SEU CONSENTIMENTO E CIÊNCIA SOBRE OS LIMITES TÉCNICOS E LEGAIS DO SERVIÇO.
             </p>
           </div>
         </div>
@@ -282,7 +293,6 @@ export default function MobileSalesPage() {
           className="aspect-[9/16] w-full bg-zinc-900 rounded-3xl overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.8)] border border-zinc-800 relative cursor-pointer no-zoom-touch"
           onClick={togglePlayPause}
         >
-          {/* Escudo Protetor contra interação nativa do navegador */}
           <div className="absolute inset-0 z-[50] bg-transparent" />
 
           {!isPlaying && !isEnded && (
@@ -347,7 +357,6 @@ export default function MobileSalesPage() {
             className="w-full h-full object-cover pointer-events-none"
             onTimeUpdate={(e: any) => {
               const currentTime = e.target.currentTime;
-              // Ajustado para 02:08 (128 segundos)
               if (currentTime >= 128 && !showCTA) {
                 setShowCTA(true);
               }
@@ -419,7 +428,6 @@ export default function MobileSalesPage() {
       <style dangerouslySetInnerHTML={{ __html: `
         .text-glow-red { text-shadow: 0 0 15px rgba(220, 38, 38, 0.7); }
         
-        /* Bloqueio de zoom por toque */
         .no-zoom-touch {
           touch-action: manipulation;
           -webkit-tap-highlight-color: transparent;
