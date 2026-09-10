@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { Volume2, Lock, Play, AlertTriangle, RefreshCcw, ArrowRight, MoreHorizontal, ExternalLink } from 'lucide-react';
+import { Volume2, Lock, Play, AlertTriangle, RefreshCcw, ArrowRight, MoreHorizontal, ExternalLink, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useFirestore, useDoc } from '@/firebase';
 import MuxPlayer from '@mux/mux-player-react';
@@ -10,10 +10,12 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { firebaseConfig } from '@/firebase/config';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export default function MobileSalesPage() {
   const [hasMounted, setHasMounted] = useState(false);
   const [isTikTok, setIsTikTok] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [recoveryCount, setRecoveryCount] = useState(2483);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isEnded, setIsEnded] = useState(false);
@@ -49,6 +51,10 @@ export default function MobileSalesPage() {
     const ua = typeof window !== 'undefined' ? (navigator.userAgent || navigator.vendor || (window as any).opera) : '';
     const isTikTokBrowser = /TikTok|musical_ly/i.test(ua);
     setIsTikTok(isTikTokBrowser);
+
+    // Check Terms acceptance
+    const termsAccepted = localStorage.getItem('vsl_terms_accepted') === 'true';
+    setAcceptedTerms(termsAccepted);
 
     let savedVisitorId = localStorage.getItem('vsl_visitor_id');
     if (!savedVisitorId) {
@@ -141,6 +147,12 @@ export default function MobileSalesPage() {
     }
   };
 
+  const handleAcceptTerms = () => {
+    localStorage.setItem('vsl_terms_accepted', 'true');
+    setAcceptedTerms(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const handleCtaClick = () => {
     if (firestore && isConfigured) {
       const docRef = doc(firestore, 'metrics', sessionIdRef.current);
@@ -187,6 +199,51 @@ export default function MobileSalesPage() {
           </div>
 
           <p className="text-[9px] text-zinc-600 font-bold uppercase tracking-[0.2em] animate-bounce">Aguardando você trocar de navegador...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Gate de Termos de Uso
+  if (!acceptedTerms) {
+    return (
+      <div className="fixed inset-0 z-[9998] bg-black flex flex-col items-center justify-center p-6 selection:bg-red-600/30">
+        <div className="w-full max-w-md bg-zinc-950 border border-zinc-900 rounded-[2.5rem] p-8 space-y-8 flex flex-col shadow-2xl">
+          <div className="flex flex-col items-center gap-4 text-center">
+            <div className="w-16 h-16 bg-red-600/10 rounded-2xl flex items-center justify-center border border-red-600/20">
+              <ShieldCheck className="w-8 h-8 text-red-600" />
+            </div>
+            <h2 className="text-2xl font-black italic uppercase tracking-tighter text-white leading-none">
+              AVISO LEGAL <br /><span className="text-red-600 text-lg">& TERMOS DE USO</span>
+            </h2>
+            <p className="text-[10px] text-zinc-500 font-black uppercase tracking-[0.2em]">LEIA COM ATENÇÃO ANTES DE CONTINUAR</p>
+          </div>
+
+          <ScrollArea className="h-[250px] w-full pr-4 border-y border-zinc-900 py-4">
+            <div className="text-[11px] text-zinc-400 leading-relaxed font-medium space-y-4">
+              <p>Este site destina-se à prestação de serviços de análise técnica independente, orientação e suporte informativo, exclusivamente voltados para recursos administrativos de banimento.</p>
+              
+              <p>O CLIENTE declara conhecimento inequívoco de que o CONTRATADO não possui qualquer vínculo, parceria ou filiação com a Garena, sendo todas as marcas mencionadas de propriedade exclusiva de seus respectivos titulares.</p>
+              
+              <p>O CONTRATADO não realiza, sob hipótese alguma, acesso direto ou indireto a servidores internos da plataforma.</p>
+              
+              <p>Ao utilizar este site ou contratar quaisquer serviços nele oferecidos, o CLIENTE declara ter lido, compreendido e concordado integralmente com estes termos.</p>
+              
+              <p className="text-zinc-200 font-bold italic underline decoration-red-600/50">É expressamente reconhecido que o CONTRATADO não garante, promete ou assegura a reversão, desbloqueio, recuperação ou restabelecimentos de contas, itens virtuais, progressos, patentes ou quaisquer ativos digitais, visto que a decisão final e sovereign pertence exclusivamente à plataforma responsável (Garena).</p>
+            </div>
+          </ScrollArea>
+
+          <div className="space-y-4">
+            <Button 
+              onClick={handleAcceptTerms}
+              className="w-full h-14 bg-red-600 hover:bg-red-700 text-white font-black uppercase italic tracking-tighter rounded-2xl shadow-[0_0_20px_rgba(220,38,38,0.2)] flex items-center justify-center gap-2 group transition-all active:scale-[0.98]"
+            >
+              LI E CONCORDO COM OS TERMOS <CheckCircle2 className="w-5 h-5 group-hover:scale-110 transition-transform" />
+            </Button>
+            <p className="text-[8px] text-zinc-600 text-center uppercase font-bold tracking-widest leading-tight">
+              AO CLICAR NO BOTÃO ACIMA, VOCÊ CONFIRMA SUA CIÊNCIA SOBRE A NATUREZA DO SERVIÇO E A AUSÊNCIA DE VÍNCULO COM A GARENA.
+            </p>
+          </div>
         </div>
       </div>
     );
