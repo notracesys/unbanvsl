@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -8,6 +7,7 @@ import { Volume2, Lock, Play, AlertTriangle, RefreshCcw } from 'lucide-react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { initializeFirebase } from '@/firebase';
 import MuxPlayer from '@mux/mux-player-react';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export default function MobileSalesPage() {
   const [hasMounted, setHasMounted] = useState(false);
@@ -23,7 +23,6 @@ export default function MobileSalesPage() {
 
   useEffect(() => {
     setHasMounted(true);
-    // Gerar ID de visitante persistente na sessão
     if (!visitorId.current) {
       visitorId.current = 'vis_' + Math.random().toString(36).substring(2, 11);
     }
@@ -45,7 +44,6 @@ export default function MobileSalesPage() {
   const trackMetric = (milestone: number, currentTime: number = 0, duration: number = 0) => {
     if (!firestore) return;
     
-    // Gravação não-bloqueante das métricas
     addDoc(collection(firestore, 'metrics'), {
       visitorId: visitorId.current,
       watchTime: Math.floor(currentTime),
@@ -53,7 +51,10 @@ export default function MobileSalesPage() {
       percentage: milestone,
       device: typeof navigator !== 'undefined' && /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop',
       createdAt: serverTimestamp(),
-    }).catch(() => {}); 
+    }).catch((err) => {
+      // Falha silenciosa em produção, mas importante para o dashboard
+      console.error("Erro ao gravar métrica:", err);
+    }); 
   };
 
   const handlePlayVideo = (e?: React.MouseEvent) => {
@@ -62,7 +63,6 @@ export default function MobileSalesPage() {
       playerRef.current.play();
       setIsPlaying(true);
       setIsEnded(false);
-      // Track Play (0%)
       if (!trackedMilestones.current.has(0)) {
         trackedMilestones.current.add(0);
         trackMetric(0);
@@ -93,18 +93,20 @@ export default function MobileSalesPage() {
 
   if (!hasMounted) return null;
 
+  const getImg = (id: string) => PlaceHolderImages.find(img => img.id === id);
+
   return (
     <main className="min-h-screen bg-[#050505] flex flex-col items-center px-4 pt-4 pb-20 select-none overflow-x-hidden">
-      <header className="w-full max-w-[480px] text-center mb-10 space-y-6">
-        <h1 className="text-white text-[1.4rem] font-black italic uppercase tracking-tighter leading-[1.1] text-glow-red">
+      <header className="w-full max-w-[480px] text-center mb-6 space-y-4">
+        <h1 className="text-white text-[1.4rem] font-black italic uppercase tracking-tighter leading-[1.1] text-glow-red mb-2">
           ESSE MACETE IRÁ <span className="text-red-600 text-[1.6rem] animate-pulse">SAIR DO AR A QUALQUER MOMENTO.</span>
         </h1>
-        <p className="text-zinc-300 text-[13px] font-medium leading-tight px-2 mt-4">
+        <p className="text-zinc-300 text-[13px] font-medium leading-tight px-2 mt-2">
           Já solicitaram a queda deste site. Aproveite enquanto há tempo para recuperar sua conta.
         </p>
       </header>
 
-      <section className="w-full relative group max-w-[320px] mb-8">
+      <section className="w-full relative group max-w-[320px] mb-12">
         <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-[110] bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-md shadow-xl flex items-center gap-2 whitespace-nowrap pointer-events-none">
           <div className="w-2 h-2 bg-red-600 rounded-full animate-ping" />
           <span className="text-white text-[10px] font-bold uppercase tracking-widest">
@@ -176,12 +178,10 @@ export default function MobileSalesPage() {
               const duration = e.target.duration;
               const progress = (currentTime / duration) * 100;
               
-              // CTA at 02:08 (128 seconds)
               if (currentTime >= 128 && !showCTA) {
                 setShowCTA(true);
               }
 
-              // Tracking milestones
               [25, 50, 75, 90, 100].forEach(m => {
                 if (progress >= m && !trackedMilestones.current.has(m)) {
                   trackedMilestones.current.add(m);
@@ -225,22 +225,22 @@ export default function MobileSalesPage() {
 
           <div className="mt-8 w-full space-y-4">
             <FeedbackCard 
-              img="/feedback1.jpg" 
+              img={getImg('feedback-1')?.imageUrl || '/feedback1.jpg'} 
               name="JOÃO S." 
               text="Funcionou na hr! Já recuperei minha conta com a Calça Angelical q tava banida faz 1 ano." 
             />
             <FeedbackCard 
-              img="/feedback2.jpg" 
+              img={getImg('feedback-2')?.imageUrl || '/feedback2.jpg'} 
               name="MATHEUS R." 
               text="Mlk do céu, deu certo memo! Minha conta lvl 70 de volta, achei q tinha perdido td kkkk vlw demais!" 
             />
             <FeedbackCard 
-              img="/feedback3.jpg" 
+              img={getImg('feedback-3')?.imageUrl || '/feedback3.jpg'} 
               name="LUCAS P." 
-              text="Top demais, o suporte ajudou na hr q deu erro no login. Já to jogando ranqueada dnv. Vc é o cara!" 
+              text="Top demais, o suporte ajudou na hr q deu erro no login. Já to jogar ranqueada dnv. Vc é o cara!" 
             />
             <FeedbackCard 
-              img="/feedback4.jpg" 
+              img={getImg('feedback-4')?.imageUrl || '/feedback4.jpg'} 
               name="GABRIELA F." 
               text="Caraca, a garena é mto safada msm, mas o macete salvou. Se vc fizer certinho volta na hr!" 
             />

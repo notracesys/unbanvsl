@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo } from 'react';
@@ -24,8 +23,7 @@ import {
   Smartphone, 
   Monitor, 
   Zap,
-  Clock,
-  ChevronDown
+  Clock
 } from 'lucide-react';
 
 export default function AnalyticsDashboard() {
@@ -72,7 +70,7 @@ export default function AnalyticsDashboard() {
       return acc;
     }, {});
     
-    const avgRetention = Object.values(lastMilestones).reduce((a: any, b: any) => a + b, 0) as number / totalPlays;
+    const avgRetention = (Object.values(lastMilestones).reduce((a: any, b: any) => a + b, 0) as number) / totalPlays;
 
     return {
       totalPlays,
