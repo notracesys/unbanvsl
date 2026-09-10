@@ -32,7 +32,7 @@
     }
   },
   "auth": {
-    "providers": ["anonymous"]
+    "providers": ["google", "anonymous"]
   },
   "firestore": {
     "/metrics/{metricId}": {

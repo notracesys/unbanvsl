@@ -2,8 +2,10 @@
 'use client';
 
 import React, { useMemo, useState, useEffect } from 'react';
-import { useFirestore, useCollection, useDoc } from '@/firebase';
+import { useFirestore, useCollection, useDoc, useUser, useAuth } from '@/firebase';
 import { collection, query, where, limit, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { signOut } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   AreaChart, 
@@ -36,7 +38,8 @@ import {
   ExternalLink,
   Save,
   ShoppingCart,
-  ArrowUpCircle
+  ArrowUpCircle,
+  LogOut
 } from 'lucide-react';
 import { firebaseConfig } from '@/firebase/config';
 import { Button } from '@/components/ui/button';
@@ -50,7 +53,11 @@ const VIDEO_DURATION_FIXED = 140; // 02:20 em segundos
 
 export default function AdvancedAnalyticsDashboard() {
   const firestore = useFirestore();
+  const auth = useAuth();
+  const { user, loading: authLoading } = useUser();
+  const router = useRouter();
   const { toast } = useToast();
+  
   const [mounted, setMounted] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedDate, setSelectedDate] = useState('');
@@ -58,6 +65,13 @@ export default function AdvancedAnalyticsDashboard() {
   const [newUpsellUrl, setNewUpsellUrl] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isSavingUpsell, setIsSavingUpsell] = useState(false);
+
+  // Proteção de Rota
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, authLoading, router]);
 
   const configRef = useMemo(() => firestore ? doc(firestore, 'config', 'sales') : null, [firestore]);
   const { data: appConfig } = useDoc(configRef);
@@ -70,6 +84,13 @@ export default function AdvancedAnalyticsDashboard() {
       setNewUpsellUrl(appConfig.upsellCheckoutUrl);
     }
   }, [appConfig]);
+
+  const handleLogout = async () => {
+    if (auth) {
+      await signOut(auth);
+      router.push('/login');
+    }
+  };
 
   const handleSaveCheckout = () => {
     if (!firestore || !newCheckoutUrl || !configRef) return;
@@ -232,7 +253,13 @@ export default function AdvancedAnalyticsDashboard() {
 
   const totalPages = stats ? Math.ceil(stats.totalSessions / ITEMS_PER_PAGE) : 0;
 
-  if (!mounted) return null;
+  if (!mounted || authLoading) return (
+    <div className="min-h-screen bg-black flex items-center justify-center">
+      <Loader2 className="w-8 h-8 text-red-600 animate-spin" />
+    </div>
+  );
+
+  if (!user) return null;
 
   if (!isConfigured) {
     return (
@@ -254,10 +281,10 @@ export default function AdvancedAnalyticsDashboard() {
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-red-600">
               <div className="w-2 h-2 bg-red-600 rounded-full animate-ping" />
-              <span className="text-[10px] font-black uppercase tracking-[0.3em]">Live Traffic Analytics</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.3em]">VTURB PRO | Admin: {user.email}</span>
             </div>
             <h1 className="text-5xl font-black italic uppercase tracking-tighter leading-none">
-              DASHBOARD <span className="text-red-600">VTURB PRO</span>
+              DASHBOARD <span className="text-red-600">ANALYTICS</span>
             </h1>
           </div>
           
@@ -276,6 +303,9 @@ export default function AdvancedAnalyticsDashboard() {
             </div>
             <Button variant="outline" className="h-10 bg-zinc-950 border-zinc-800 text-zinc-400 hover:text-white" onClick={() => window.location.reload()}>
               <RefreshCw className="w-4 h-4" />
+            </Button>
+            <Button variant="destructive" className="h-10 font-black uppercase italic tracking-tighter text-[10px]" onClick={handleLogout}>
+              <LogOut className="w-4 h-4 mr-2" /> Sair
             </Button>
           </div>
         </header>
@@ -406,7 +436,7 @@ export default function AdvancedAnalyticsDashboard() {
                 <CardHeader>
                   <CardTitle className="text-sm font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center gap-2">
                     <Timer className="w-4 h-4 text-red-600" />
-                    Curva de Retenção Exata (2:20)
+                    Curva de Retenção Exata (02:20)
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="h-[350px] pt-4">
