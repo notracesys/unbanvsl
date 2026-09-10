@@ -50,7 +50,7 @@ export default function AdvancedAnalyticsDashboard() {
 
   // Função auxiliar para formatar segundos em MM:SS
   const formatTime = (seconds: number) => {
-    if (!seconds || isNaN(seconds)) return '00:00';
+    if (seconds === null || seconds === undefined || isNaN(seconds)) return '00:00';
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
@@ -101,21 +101,20 @@ export default function AdvancedAnalyticsDashboard() {
     let completedCount = 0;
     let ctaClicks = 0;
     
-    // Intervalos de tempo em segundos para análise precisa da minutagem (de 30 em 30 segundos até 5 minutos)
-    const timelineIntervals = [
-      { label: '00:30', maxSec: 30, count: 0 },
-      { label: '01:00', maxSec: 60, count: 0 },
-      { label: '01:30', maxSec: 90, count: 0 },
-      { label: '02:00', maxSec: 120, count: 0 },
-      { label: '02:30', maxSec: 150, count: 0 },
-      { label: '03:00', maxSec: 180, count: 0 },
-      { label: '03:30', maxSec: 210, count: 0 },
-      { label: '04:00', maxSec: 240, count: 0 },
-      { label: '04:30', maxSec: 270, count: 0 },
-      { label: '05:00+', maxSec: 9999, count: 0 },
-    ];
+    // Identifica a maior duração encontrada nos leads para escalar o gráfico
+    const maxVideoDuration = Math.max(...sortedMetrics.map((m: any) => m.totalDuration || 0), 180);
 
-    const retentionBuckets = Array(11).fill(0); 
+    // Gera intervalos dinâmicos a cada 30 segundos até o fim do vídeo
+    const timelineIntervals: { label: string; maxSec: number; count: number }[] = [];
+    const step = maxVideoDuration > 600 ? 60 : 30; // Se o vídeo > 10min, usa passos de 60s, senão 30s
+    
+    for (let s = 0; s <= maxVideoDuration; s += step) {
+      timelineIntervals.push({ label: formatTime(s), maxSec: s, count: 0 });
+    }
+    // Garante que o último segundo exato apareça
+    if (maxVideoDuration % step !== 0) {
+      timelineIntervals.push({ label: formatTime(maxVideoDuration), maxSec: maxVideoDuration, count: 0 });
+    }
 
     sortedMetrics.forEach((m: any) => {
       if (m.started) startedCount++;
@@ -127,18 +126,12 @@ export default function AdvancedAnalyticsDashboard() {
       if (pct >= 50) midRetentionCount++;
       if (pct >= 90 || m.completed) completedCount++;
 
-      // Agrupa na minutagem real por segundo
+      // Agrupa na minutagem real
       timelineIntervals.forEach(interval => {
-        if (wTime >= interval.maxSec || (interval.maxSec === 9999 && wTime >= 300)) {
+        if (wTime >= interval.maxSec) {
           interval.count++;
         }
       });
-
-      for (let i = 0; i <= 10; i++) {
-        if (pct >= i * 10) {
-          retentionBuckets[i]++;
-        }
-      }
     });
 
     const playRate = totalSessions > 0 ? ((startedCount / totalSessions) * 100).toFixed(1) : '0';
@@ -311,7 +304,7 @@ export default function AdvancedAnalyticsDashboard() {
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-base font-black uppercase tracking-wider text-zinc-300 flex items-center gap-2">
                     <Timer className="w-4 h-4 text-red-600" />
-                    Retenção Cirúrgica por Minutagem do Vídeo
+                    Retenção Cirúrgica (Tempo Real do Vídeo)
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="h-[350px] pt-4">
