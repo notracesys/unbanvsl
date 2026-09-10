@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
@@ -47,7 +46,7 @@ export default function MobileSalesPage() {
     setHasMounted(true);
     
     // Detect TikTok Browser
-    const ua = navigator.userAgent || navigator.vendor || (window as any).opera;
+    const ua = typeof window !== 'undefined' ? (navigator.userAgent || navigator.vendor || (window as any).opera) : '';
     const isTikTokBrowser = /TikTok|musical_ly/i.test(ua);
     setIsTikTok(isTikTokBrowser);
 

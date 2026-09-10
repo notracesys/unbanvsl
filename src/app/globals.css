@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -26,4 +25,9 @@
 
 .button-pulse {
   animation: pulse-cta 2s infinite;
+}
+
+/* Otimização de toque mobile */
+* {
+  -webkit-tap-highlight-color: transparent;
 }
