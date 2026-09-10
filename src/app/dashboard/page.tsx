@@ -71,13 +71,13 @@ export default function AdvancedAnalyticsDashboard() {
   }, [user, authLoading, router]);
 
   const configRef = useMemo(() => firestore ? doc(firestore, 'config', 'sales') : null, [firestore]);
-  const { data: appConfig } = useDoc(configRef);
+  const { data: appConfig, error: configError } = useDoc(configRef);
 
   useEffect(() => {
-    if (appConfig?.checkoutUrl && !newCheckoutUrl) {
+    if (appConfig?.checkoutUrl) {
       setNewCheckoutUrl(appConfig.checkoutUrl);
     }
-    if (appConfig?.upsellCheckoutUrl && !newUpsellUrl) {
+    if (appConfig?.upsellCheckoutUrl) {
       setNewUpsellUrl(appConfig.upsellCheckoutUrl);
     }
   }, [appConfig]);
@@ -104,12 +104,12 @@ export default function AdvancedAnalyticsDashboard() {
       });
     })
     .catch(async (err) => {
-      const permsError = new FirestorePermissionError({
-        path: configRef.path,
-        operation: 'update',
-        requestResourceData: { checkoutUrl: newCheckoutUrl }
+      console.error(err);
+      toast({
+        variant: "destructive",
+        title: "Falha ao Salvar",
+        description: err.message.includes('quota') ? "Limite diário do Firebase esgotado." : "Verifique sua conexão.",
       });
-      errorEmitter.emit('permission-error', permsError);
     })
     .finally(() => setIsSaving(false));
   };
@@ -129,12 +129,12 @@ export default function AdvancedAnalyticsDashboard() {
       });
     })
     .catch(async (err) => {
-      const permsError = new FirestorePermissionError({
-        path: configRef.path,
-        operation: 'update',
-        requestResourceData: { upsellCheckoutUrl: newUpsellUrl }
+      console.error(err);
+      toast({
+        variant: "destructive",
+        title: "Falha ao Salvar",
+        description: err.message.includes('quota') ? "Limite diário do Firebase esgotado." : "Verifique sua conexão.",
       });
-      errorEmitter.emit('permission-error', permsError);
     })
     .finally(() => setIsSavingUpsell(false));
   };
@@ -166,7 +166,7 @@ export default function AdvancedAnalyticsDashboard() {
     return query(
       collection(firestore, 'metrics'), 
       where('dateStr', '==', selectedDate),
-      limit(500) // Limite reduzido para proteger a cota do Firebase
+      limit(500)
     );
   }, [firestore, isConfigured, selectedDate]);
 
@@ -243,7 +243,7 @@ export default function AdvancedAnalyticsDashboard() {
 
   if (!user) return null;
 
-  const isQuotaExceeded = metricsError?.message?.includes('quota') || metricsError?.message?.includes('exhausted');
+  const isQuotaExceeded = (metricsError?.message?.includes('quota') || configError?.message?.includes('quota'));
 
   return (
     <div className="min-h-screen bg-[#050505] text-zinc-100 p-4 lg:p-10 font-sans selection:bg-red-600/30">
@@ -287,7 +287,7 @@ export default function AdvancedAnalyticsDashboard() {
             <AlertCircle className="w-12 h-12 text-red-600 shrink-0" />
             <div className="space-y-1 text-center md:text-left">
               <h3 className="text-lg font-black italic uppercase tracking-tighter text-red-600">Limite do Firebase Atingido</h3>
-              <p className="text-zinc-400 text-sm font-medium">Você atingiu as 50.000 leituras gratuitas diárias. O rastreamento continua funcionando, mas o dashboard só voltará a exibir dados amanhã ou se você mudar para o plano Blaze.</p>
+              <p className="text-zinc-400 text-sm font-medium">O Firebase bloqueou leituras e escritas hoje. Seus links de checkout e métricas só voltarão a atualizar após o upgrade para o plano Blaze ou no reset diário.</p>
             </div>
           </div>
         )}
@@ -304,12 +304,12 @@ export default function AdvancedAnalyticsDashboard() {
                   <Input 
                     value={newCheckoutUrl} 
                     onChange={(e) => setNewCheckoutUrl(e.target.value)}
-                    placeholder="Link do checkout VSL..."
+                    placeholder="Carregando link..."
                     className="bg-black border-zinc-800 text-xs font-mono h-12"
                   />
                   <Button 
                     onClick={handleSaveCheckout} 
-                    disabled={isSaving}
+                    disabled={isSaving || isQuotaExceeded}
                     className="bg-green-600 hover:bg-green-700 h-12 px-6 font-black uppercase italic tracking-tighter"
                   >
                     {isSaving ? <Loader2 className="animate-spin" /> : <Save className="w-4 h-4" />}
@@ -330,12 +330,12 @@ export default function AdvancedAnalyticsDashboard() {
                   <Input 
                     value={newUpsellUrl} 
                     onChange={(e) => setNewUpsellUrl(e.target.value)}
-                    placeholder="Link do checkout Upsell..."
+                    placeholder="Carregando link..."
                     className="bg-black border-zinc-800 text-xs font-mono h-12"
                   />
                   <Button 
                     onClick={handleSaveUpsell} 
-                    disabled={isSavingUpsell}
+                    disabled={isSavingUpsell || isQuotaExceeded}
                     className="bg-orange-600 hover:bg-orange-700 h-12 px-6 font-black uppercase italic tracking-tighter"
                   >
                     {isSavingUpsell ? <Loader2 className="animate-spin" /> : <Save className="w-4 h-4" />}
@@ -356,7 +356,7 @@ export default function AdvancedAnalyticsDashboard() {
                     {isQuotaExceeded ? 'Dados Bloqueados por Cota' : 'Aguardando tráfego real'}
                   </h2>
                   <p className="text-zinc-700 text-sm max-w-xs mx-auto">
-                    {isQuotaExceeded ? 'O Firebase parou de enviar dados para este painel hoje.' : `Nenhum registro encontrado em ${selectedDate}.`}
+                    {isQuotaExceeded ? 'O Firebase atingiu o limite de leituras gratuitas hoje.' : `Nenhum registro encontrado em ${selectedDate}.`}
                   </p>
                 </div>
               </>
