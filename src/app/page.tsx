@@ -24,8 +24,7 @@ export default function MobileSalesPage() {
   
   const visitorIdRef = useRef<string>('');
   const sessionIdRef = useRef<string>('');
-  const hasStartedRef = useRef<boolean>(false);
-  const lastTrackedTimeRef = useRef<number>(0);
+  const trackedMilestones = useRef<Set<number>>(new Set());
 
   const firestore = useFirestore();
   const isConfigured = firebaseConfig.projectId && firebaseConfig.projectId !== 'project-id';
@@ -33,7 +32,6 @@ export default function MobileSalesPage() {
   const configRef = useMemo(() => firestore ? doc(firestore, 'config', 'sales') : null, [firestore]);
   const { data: appConfig } = useDoc(configRef);
 
-  // Links forçados como fallback caso o Firestore esteja fora da cota
   const checkoutUrl = appConfig?.checkoutUrl || 'https://comprasseguras.org.ua/c/c9f3270011';
 
   const getLocalDateString = () => {
@@ -66,17 +64,15 @@ export default function MobileSalesPage() {
     sessionIdRef.current = currentSessionId;
     
     if (firestore && isConfigured) {
-      const initTracking = async () => {
-        const docRef = doc(firestore, 'metrics', sessionIdRef.current);
-        setDoc(docRef, {
-          id: sessionIdRef.current,
-          visitorId: visitorIdRef.current,
-          dateStr: getLocalDateString(),
-          device: /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop',
-          updatedAt: serverTimestamp()
-        }, { merge: true }).catch(() => {});
-      };
-      initTracking();
+      const docRef = doc(firestore, 'metrics', sessionIdRef.current);
+      setDoc(docRef, {
+        id: sessionIdRef.current,
+        visitorId: visitorIdRef.current,
+        dateStr: getLocalDateString(),
+        device: /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop',
+        updatedAt: serverTimestamp(),
+        started: true
+      }, { merge: true }).catch(() => {});
     }
 
     const interval = setInterval(() => {
@@ -93,15 +89,11 @@ export default function MobileSalesPage() {
     }
   }, [showCTA]);
 
-  const trackMetric = (currentTime: number, extra = {}) => {
+  const trackMetric = (percentage: number, extra = {}) => {
     if (!firestore || !isConfigured) return;
-    
-    const videoDuration = 140; // 02:20 aprox
     const docRef = doc(firestore, 'metrics', sessionIdRef.current);
-
     setDoc(docRef, {
-      watchTime: Math.floor(currentTime),
-      percentage: Math.min(Math.floor((currentTime / videoDuration) * 100), 100),
+      percentage,
       updatedAt: serverTimestamp(),
       ...extra
     }, { merge: true }).catch(() => {});
@@ -113,11 +105,6 @@ export default function MobileSalesPage() {
       playerRef.current.play();
       setIsPlaying(true);
       setIsEnded(false);
-      
-      if (!hasStartedRef.current) {
-        hasStartedRef.current = true;
-        trackMetric(0, { started: true });
-      }
     }
   };
 
@@ -140,10 +127,7 @@ export default function MobileSalesPage() {
   const handleCtaClick = () => {
     if (firestore && isConfigured) {
       const docRef = doc(firestore, 'metrics', sessionIdRef.current);
-      setDoc(docRef, {
-        clickedCTA: true,
-        updatedAt: serverTimestamp()
-      }, { merge: true }).catch(() => {});
+      setDoc(docRef, { clickedCTA: true, updatedAt: serverTimestamp() }, { merge: true }).catch(() => {});
     }
     window.open(checkoutUrl, '_blank');
   };
@@ -165,21 +149,19 @@ export default function MobileSalesPage() {
               O navegador do TikTok não suporta nosso sistema de segurança de alta velocidade.
             </p>
           </div>
-          
           <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 space-y-6">
             <p className="text-white text-xs font-bold uppercase tracking-widest">Siga os passos abaixo:</p>
             <div className="flex flex-col gap-4 text-left">
               <div className="flex items-start gap-4">
                 <div className="w-6 h-6 rounded-full bg-red-600 flex items-center justify-center text-[10px] font-black shrink-0">1</div>
-                <p className="text-zinc-300 text-[11px] leading-tight font-medium uppercase italic">Clique nos <span className="text-white font-bold inline-flex items-center gap-1 bg-white/10 px-1 rounded"><MoreHorizontal className="w-3 h-3"/> três pontos</span> no topo da tela.</p>
+                <p className="text-zinc-300 text-[11px] leading-tight font-medium uppercase italic">Clique nos <MoreHorizontal className="w-3 h-3 inline"/> três pontos no topo da tela.</p>
               </div>
               <div className="flex items-start gap-4">
                 <div className="w-6 h-6 rounded-full bg-red-600 flex items-center justify-center text-[10px] font-black shrink-0">2</div>
-                <p className="text-zinc-300 text-[11px] leading-tight font-medium uppercase italic">Selecione <span className="text-white font-bold inline-flex items-center gap-1 bg-white/10 px-1 rounded"><ExternalLink className="w-3 h-3"/> Abrir no Navegador</span> (Chrome ou Safari).</p>
+                <p className="text-zinc-300 text-[11px] leading-tight font-medium uppercase italic">Selecione <ExternalLink className="w-3 h-3 inline"/> Abrir no Navegador.</p>
               </div>
             </div>
           </div>
-          <p className="text-[9px] text-zinc-600 font-bold uppercase tracking-[0.2em] animate-bounce">Aguardando você trocar de navegador...</p>
         </div>
       </div>
     );
@@ -187,51 +169,29 @@ export default function MobileSalesPage() {
 
   if (!acceptedTerms) {
     return (
-      <div className="fixed inset-0 z-[9998] bg-black flex flex-col items-center justify-center p-6 selection:bg-red-600/30">
+      <div className="fixed inset-0 z-[9998] bg-black flex flex-col items-center justify-center p-6">
         <div className="w-full max-w-md bg-zinc-950 border border-zinc-900 rounded-[2.5rem] p-8 space-y-8 flex flex-col shadow-2xl">
           <div className="flex flex-col items-center gap-4 text-center">
             <div className="w-16 h-16 bg-red-600/10 rounded-2xl flex items-center justify-center border border-red-600/20">
               <ShieldCheck className="w-8 h-8 text-red-600" />
             </div>
-            <h2 className="text-2xl font-black italic uppercase tracking-tighter text-white leading-none">
-              AVISO LEGAL <br /><span className="text-red-600 text-lg">& TERMOS DE SERVIÇO</span>
-            </h2>
-            <p className="text-[10px] text-zinc-500 font-black uppercase tracking-[0.2em]">CONSENTIMENTO OBRIGATÓRIO PARA ACESSO</p>
+            <h2 className="text-2xl font-black italic uppercase tracking-tighter text-white">AVISO LEGAL</h2>
           </div>
-
           <ScrollArea className="h-[280px] w-full pr-4 border-y border-zinc-900 py-4">
             <div className="text-[11px] text-zinc-400 leading-relaxed font-medium space-y-5">
-              <section>
-                <p className="font-bold text-zinc-300 uppercase mb-2">1. OBJETO E NATUREZA TÉCNICA</p>
-                <p>O presente ambiente digital disponibiliza um método de consultoria técnica e estratégica para a elaboração de recursos administrativos. O serviço compreende a análise de procedimentos públicos de conformidade e a orientação sobre as melhores práticas de contestação baseadas em precedentes de termos de uso de plataformas digitais.</p>
-              </section>
-
-              <section>
-                <p className="font-bold text-zinc-300 uppercase mb-2">2. INDEPENDÊNCIA E PROPRIEDADE INTELECTUAL</p>
-                <p>É expressamente declarado que este domínio e seus administradores atuam de forma 100% INDEPENDENTE. Não possuímos qualquer vínculo societário, comercial, operacional ou de parceria com a Garena International.</p>
-              </section>
-
-              <section>
-                <p className="font-bold text-zinc-300 uppercase mb-2">3. LIMITAÇÕES OPERACIONAIS E ÉTICA</p>
-                <p>Este serviço não utiliza ferramentas de intrusão, exploits ou modificação de arquivos de sistema. Nossa atuação restringe-se à orientação estratégica e suporte técnico especializado.</p>
-              </section>
-
-              <div className="bg-red-600/10 p-5 rounded-2xl border border-red-600/20 mt-8 mb-4">
-                <p className="text-zinc-100 font-black italic uppercase tracking-tighter text-[10px] leading-tight text-center mb-2">
-                  CLÁUSULA DE ISENÇÃO FINAL
-                </p>
+              <p>Este site destina-se à prestação de serviços de análise técnica independente, orientação e suporte informativo, exclusivamente voltados para recursos administrativos de banimento.</p>
+              <p>O CLIENTE declara conhecimento inequívoco de que o CONTRATADO não possui qualquer vínculo, parceria ou filiação com a Garena, sendo todas as marcas mencionadas de propriedade exclusiva de seus respectivos titulares.</p>
+              <p>O CONTRATADO não realiza, sob hipótese alguma, acesso direto ou indireto a servidores internos da plataforma.</p>
+              <p>Ao utilizar este site ou contratar quaisquer serviços nele oferecidos, o CLIENTE declara ter lido, compreendido e concordado integralmente com estes termos.</p>
+              <div className="bg-red-600/10 p-5 rounded-2xl border border-red-600/20 mt-8">
                 <p className="text-zinc-300 font-bold italic underline decoration-red-600/50 leading-relaxed text-justify">
-                  É expressamente reconhecido e aceito pelo usuário que o CONTRATADO não garante, promete, assegura ou afiança a efetiva reversão, desbloqueio, recuperação ou restabelecimentos de contas, ativos digitais, progressos, patentes ou itens virtuais, visto que a decisão final, deliberativa e absoluta pertence exclusivamente à plataforma responsável (Garena), em conformidade com seus termos de serviço próprios.
+                  É expressamente reconhecido que o CONTRATADO não garante, promete ou assegura a reversão, desbloqueio, recuperação ou restabelecimentos de contas, itens virtuais, progressos, patentes ou quaisquer ativos digitais, visto que a decisão final e sovereign pertence exclusivamente à plataforma responsável (Garena).
                 </p>
               </div>
             </div>
           </ScrollArea>
-
-          <Button 
-            onClick={handleAcceptTerms}
-            className="w-full h-14 bg-red-600 hover:bg-red-700 text-white font-black uppercase italic tracking-tighter rounded-2xl shadow-[0_0_20px_rgba(220,38,38,0.2)] flex items-center justify-center gap-2 group transition-all active:scale-[0.98]"
-          >
-            LI E CONCORDO COM OS TERMOS <CheckCircle2 className="w-5 h-5 group-hover:scale-110 transition-transform" />
+          <Button onClick={handleAcceptTerms} className="w-full h-14 bg-red-600 hover:bg-red-700 text-white font-black uppercase italic tracking-tighter rounded-2xl">
+            LI E CONCORDO COM OS TERMOS <CheckCircle2 className="w-5 h-5 ml-2" />
           </Button>
         </div>
       </div>
@@ -243,33 +203,23 @@ export default function MobileSalesPage() {
   return (
     <main className="min-h-screen bg-[#050505] flex flex-col items-center px-4 pt-4 pb-20 select-none overflow-x-hidden font-sans">
       <header className="w-full max-w-[480px] text-center mb-6 space-y-4">
-        <h1 className="text-white text-[1.4rem] font-black italic uppercase tracking-tighter leading-[1.1] text-glow-red">
+        <h1 className="text-white text-[1.4rem] font-black italic uppercase tracking-tighter leading-[1.1]">
           ESSE MACETE IRÁ <span className="text-red-600 text-[1.6rem] animate-pulse">SAIR DO AR A QUALQUER MOMENTO.</span>
         </h1>
       </header>
 
       <section className="w-full relative group max-w-[320px] mb-12">
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-[110] bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-md shadow-xl flex items-center gap-2 whitespace-nowrap pointer-events-none">
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-[110] bg-zinc-900 border border-zinc-800 px-3 py-1 rounded-md shadow-xl flex items-center gap-2 whitespace-nowrap">
           <div className="w-2 h-2 bg-red-600 rounded-full animate-ping" />
-          <span className="text-white text-[10px] font-bold uppercase tracking-widest">
-            {recoveryCount} JOGADORES RECUPERANDO AGORA
-          </span>
+          <span className="text-white text-[10px] font-bold uppercase tracking-widest">{recoveryCount} JOGADORES RECUPERANDO AGORA</span>
         </div>
 
-        <div className="absolute inset-0 z-[120] pointer-events-auto" onClick={togglePlayPause} />
-
-        <div className="aspect-[9/16] w-full bg-zinc-900 rounded-3xl overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.8)] border border-zinc-800 relative cursor-pointer no-zoom-touch" onClick={togglePlayPause}>
+        <div className="aspect-[9/16] w-full bg-zinc-900 rounded-3xl overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.8)] border border-zinc-800 relative cursor-pointer" onClick={togglePlayPause}>
           {!isPlaying && !isEnded && (
-            <div className="absolute inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md transition-all duration-300">
-              <div onClick={handlePlayVideo} className="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(220,38,38,0.8)] animate-pulse border-4 border-white/20 cursor-pointer">
+            <div className="absolute inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md">
+              <div className="w-20 h-20 bg-red-600 rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(220,38,38,0.8)] animate-pulse">
                 <Play className="w-10 h-10 text-white fill-current ml-1" />
               </div>
-            </div>
-          )}
-
-          {isEnded && (
-            <div className="absolute inset-0 z-[100] flex items-center justify-center cursor-pointer bg-black/90 backdrop-blur-lg" onClick={() => { if (playerRef.current) { playerRef.current.currentTime = 0; handlePlayVideo(); } }}>
-              <RefreshCcw className="w-10 h-10 text-white" />
             </div>
           )}
           
@@ -277,33 +227,34 @@ export default function MobileSalesPage() {
             ref={playerRef}
             playbackId="QDJSIlmrorxXFDYyElAGNofuG8lo01zgwpEdRNl8RgKw"
             playsInline
-            autoPlay={false}
-            className="w-full h-full object-cover pointer-events-none"
+            className="w-full h-full object-cover"
             onTimeUpdate={(e: any) => {
               const currentTime = e.target.currentTime;
+              const duration = e.target.duration || 140;
+              const pct = Math.floor((currentTime / duration) * 100);
               
-              // Mostrar botão exatamente aos 02:08 (128s)
               if (currentTime >= 128 && !showCTA) setShowCTA(true);
               
-              // Rastrear a cada 10 segundos para maior precisão no dashboard
-              if (Math.floor(currentTime) % 10 === 0 && Math.floor(currentTime) !== lastTrackedTimeRef.current) {
-                lastTrackedTimeRef.current = Math.floor(currentTime);
-                trackMetric(currentTime);
-              }
+              [25, 50, 75, 90].forEach(m => {
+                if (pct >= m && !trackedMilestones.current.has(m)) {
+                  trackedMilestones.current.add(m);
+                  trackMetric(m);
+                }
+              });
             }}
-            onEnded={() => { setIsPlaying(false); setIsEnded(true); trackMetric(140, { completed: true }); }}
+            onEnded={() => { setIsPlaying(false); setIsEnded(true); trackMetric(100, { completed: true }); }}
           />
         </div>
       </section>
 
       {showCTA && (
-        <section ref={ctaRef} className="w-full max-w-[360px] mt-8 flex flex-col items-center animate-in fade-in slide-in-from-bottom-4 duration-1000">
-          <Button onClick={handleCtaClick} className="w-full h-16 text-xl font-black uppercase italic tracking-tighter bg-[#22c55e] hover:bg-[#16a34a] text-white rounded-2xl shadow-[0_8px_0_rgb(21,128,61)] button-pulse gap-2">
+        <section ref={ctaRef} className="w-full max-w-[360px] mt-8 flex flex-col items-center animate-in fade-in slide-in-from-bottom-4">
+          <Button onClick={handleCtaClick} className="w-full h-16 text-xl font-black uppercase italic tracking-tighter bg-[#22c55e] hover:bg-[#16a34a] text-white rounded-2xl button-pulse gap-2">
             QUERO DESBANIR AGORA! <ArrowRight className="w-6 h-6" />
           </Button>
           
           <div className="mt-8 w-full space-y-4">
-            <FeedbackCard img={getImg('feedback-1')?.imageUrl || '/feedback1.jpg'} name="JOÃO S." text="Funcionou na hora! Já recuperei minha conta com a Calça Angelical." />
+            <FeedbackCard img={getImg('feedback-1')?.imageUrl || '/feedback1.jpg'} name="JOÃO S." text="Funcionou na hora! Já recuperei minha conta." />
             <FeedbackCard img={getImg('feedback-2')?.imageUrl || '/feedback2.jpg'} name="MATHEUS R." text="Moleque do céu, deu certo mesmo! Minha conta lvl 70 de volta." />
           </div>
         </section>
@@ -314,10 +265,9 @@ export default function MobileSalesPage() {
       </footer>
 
       <style dangerouslySetInnerHTML={{ __html: `
-        .text-glow-red { text-shadow: 0 0 15px rgba(220, 38, 38, 0.7); }
-        .no-zoom-touch { touch-action: manipulation; }
+        .button-pulse { animation: pulse-cta 2s infinite; }
+        @keyframes pulse-cta { 0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6); } 70% { box-shadow: 0 0 0 15px rgba(34, 197, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
         mux-player::part(control-bar), mux-player::part(play-button), mux-player::part(center-controls) { display: none !important; }
-        mux-player::part(time-range) { display: block !important; position: absolute !important; bottom: 0 !important; height: 3px !important; --media-range-thumb-display: none !important; }
         mux-player { --media-range-bar-color: #dc2626; }
       `}} />
     </main>
