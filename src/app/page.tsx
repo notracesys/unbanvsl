@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { Volume2, Lock, Play, AlertTriangle, RefreshCcw, ArrowRight, MoreHorizontal, ExternalLink, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { Volume2, Lock, Play, AlertTriangle, RefreshCcw, ArrowRight, MoreHorizontal, ExternalLink, ShieldCheck, CheckCircle2, Users } from 'lucide-react';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useFirestore, useDoc } from '@/firebase';
 import MuxPlayer from '@mux/mux-player-react';
@@ -147,7 +147,7 @@ export default function MobileSalesPage() {
               NAVEGADOR <span className="text-red-600">INCOMPATÍVEL</span>
             </h2>
             <p className="text-zinc-400 text-sm leading-relaxed font-medium italic">
-              O navegador do TikTok não suporta nosso sistema de segurança de alta velocidade.
+              O navegador do TikTok não suporta nosso system de segurança de alta velocidade.
             </p>
           </div>
           <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 space-y-6">
@@ -282,10 +282,15 @@ export default function MobileSalesPage() {
             <FeedbackCard img={getImg('feedback-3')?.imageUrl || '/feedback3.jpg'} name="Vitinho" text="Mano real oficial minha conta voltou ontem a noite vlw msm ravena" />
             <FeedbackCard img={getImg('feedback-4')?.imageUrl || '/feedback4.jpg'} name="Carol_FF" text="Eu tava morrendo de medo de ser golpe mas deu super certo! Recomendo dms" />
           </div>
+
+          <div className="mt-8 flex items-center justify-center gap-2 bg-zinc-900/40 border border-zinc-800/80 px-6 py-3 rounded-full">
+            <Users className="w-4 h-4 text-green-500 animate-pulse" />
+            <span className="text-white text-[11px] font-black uppercase tracking-wider italic">+1000 jogadores satisfeitos</span>
+          </div>
         </section>
       )}
 
-      <footer className="mt-8 text-[8px] text-zinc-600 text-center uppercase font-bold tracking-widest">
+      <footer className="mt-12 text-[8px] text-zinc-600 text-center uppercase font-bold tracking-widest">
         Este site não possui vínculo com a Garena Free Fire.
       </footer>
 
