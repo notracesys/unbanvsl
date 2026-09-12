@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
@@ -84,11 +85,10 @@ export default function MobileSalesPage() {
 
   useEffect(() => {
     if (showCTA && ctaRef.current) {
-      // Ajuste manual de rolagem para que a tela não desça demais
       setTimeout(() => {
         const element = ctaRef.current;
         if (element) {
-          const yOffset = -60; // Offset para deixar o botão um pouco mais alto na visão
+          const yOffset = -60;
           const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
           window.scrollTo({ top: y, behavior: 'smooth' });
         }
