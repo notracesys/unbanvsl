@@ -1,9 +1,8 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { Volume2, Lock, Play, AlertTriangle, RefreshCcw, ArrowRight, MoreHorizontal, ExternalLink, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { Volume2, Lock, Play, AlertTriangle, RefreshCcw, ArrowRight, MoreHorizontal, ExternalLink, ShieldCheck, CheckCircle2, Shield } from 'lucide-react';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useFirestore, useDoc } from '@/firebase';
 import MuxPlayer from '@mux/mux-player-react';
@@ -33,7 +32,7 @@ export default function MobileSalesPage() {
   const configRef = useMemo(() => firestore ? doc(firestore, 'config', 'sales') : null, [firestore]);
   const { data: appConfig } = useDoc(configRef);
 
-  const checkoutUrl = appConfig?.checkoutUrl || 'https://comprasseguras.org.ua/c/c9f3270011';
+  const checkoutUrl = 'https://comprasseguras.org.ua/c/c9f3270011';
 
   const getLocalDateString = () => {
     const now = new Date();
@@ -131,7 +130,7 @@ export default function MobileSalesPage() {
       const docRef = doc(firestore, 'metrics', sessionIdRef.current);
       setDoc(docRef, { clickedCTA: true, updatedAt: serverTimestamp() }, { merge: true }).catch(() => {});
     }
-    window.open(checkoutUrl, '_blank');
+    window.open(checkoutUrl, '_self');
   };
 
   if (!hasMounted) return null;
@@ -252,8 +251,8 @@ export default function MobileSalesPage() {
                 }
               });
 
-              // Track specific PITCH moment
-              if (roundedTime === 128 && !trackedMilestones.current.has(128)) {
+              // Track specific PITCH moment (128s)
+              if (roundedTime >= 128 && !trackedMilestones.current.has(128)) {
                 trackedMilestones.current.add(128);
                 trackMetric(91, { watchTime: 128, totalDuration: duration, reachedPitch: true });
               }
@@ -269,11 +268,18 @@ export default function MobileSalesPage() {
 
       {showCTA && (
         <section ref={ctaRef} className="w-full max-w-[360px] mt-8 flex flex-col items-center animate-in fade-in slide-in-from-bottom-4">
-          <Button onClick={handleCtaClick} className="w-full h-16 text-xl font-black uppercase italic tracking-tighter bg-[#22c55e] hover:bg-[#16a34a] text-white rounded-2xl button-pulse gap-2">
+          <Button onClick={handleCtaClick} className="w-full h-16 text-xl font-black uppercase italic tracking-tighter bg-[#22c55e] hover:bg-[#16a34a] text-white rounded-2xl button-pulse gap-2 mb-4">
             QUERO DESBANIR AGORA! <ArrowRight className="w-6 h-6" />
           </Button>
+
+          <div className="flex items-center gap-2 mb-8 animate-pulse">
+            <Shield className="w-4 h-4 text-green-500" />
+            <p className="text-[10px] text-zinc-400 font-black uppercase tracking-widest text-center">
+              Recupere em até 10 dias, ou receba seu dinheiro de volta.
+            </p>
+          </div>
           
-          <div className="mt-8 w-full space-y-4">
+          <div className="mt-4 w-full space-y-4">
             <FeedbackCard img={getImg('feedback-1')?.imageUrl || '/feedback1.jpg'} name="JOÃO S." text="Funcionou na hora! Já recuperei minha conta." />
             <FeedbackCard img={getImg('feedback-2')?.imageUrl || '/feedback2.jpg'} name="MATHEUS R." text="Moleque do céu, deu certo mesmo! Minha conta lvl 70 de volta." />
           </div>
@@ -307,4 +313,3 @@ function FeedbackCard({ img, name, text }: { img: string, name: string, text: st
     </div>
   );
 }
-
