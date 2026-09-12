@@ -278,7 +278,7 @@ export default function MobileSalesPage() {
           </p>
 
           <div className="mt-4 w-full space-y-4">
-            <FeedbackCard img={getImg('feedback-1')?.imageUrl || '/feedback1.jpg'} name="JOÃO S." text="Funcionou na hora! Já recuperei minha conta." />
+            <FeedbackCard img={getImg('feedback-1')?.imageUrl || '/feedback1.jpg'} name="Rdzinn" text="tmj ravena, vc é braba pkrl" />
             <FeedbackCard img={getImg('feedback-2')?.imageUrl || '/feedback2.jpg'} name="MATHEUS R." text="Moleque do céu, deu certo mesmo! Minha conta lvl 70 de volta." />
           </div>
         </section>
