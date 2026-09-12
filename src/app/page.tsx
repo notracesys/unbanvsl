@@ -32,7 +32,6 @@ export default function MobileSalesPage() {
   const configRef = useMemo(() => firestore ? doc(firestore, 'config', 'sales') : null, [firestore]);
   const { data: appConfig } = useDoc(configRef);
 
-  // Utiliza o link inserido no dashboard ou o link padrão caso não exista
   const checkoutUrl = appConfig?.checkoutUrl || 'https://comprasseguras.org.ua/c/c9f3270011';
 
   const getLocalDateString = () => {
@@ -279,7 +278,7 @@ export default function MobileSalesPage() {
 
           <div className="mt-4 w-full space-y-4">
             <FeedbackCard img={getImg('feedback-1')?.imageUrl || '/feedback1.jpg'} name="Rdzinn" text="tmj ravena, vc é braba pkrl" />
-            <FeedbackCard img={getImg('feedback-2')?.imageUrl || '/feedback2.jpg'} name="MATHEUS R." text="Moleque do céu, deu certo mesmo! Minha conta lvl 70 de volta." />
+            <FeedbackCard img={getImg('feedback-2')?.imageUrl || '/feedback2.jpg'} name="yuri7x" text="tou chorando muito ravena, muito obrigado de verdade mesmo, ja tinha gastado muito dinheiro nela" />
           </div>
         </section>
       )}
