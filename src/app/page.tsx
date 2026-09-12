@@ -32,7 +32,8 @@ export default function MobileSalesPage() {
   const configRef = useMemo(() => firestore ? doc(firestore, 'config', 'sales') : null, [firestore]);
   const { data: appConfig } = useDoc(configRef);
 
-  const checkoutUrl = 'https://comprasseguras.org.ua/c/c9f3270011';
+  // Utiliza o link inserido no dashboard ou o link padrão caso não exista
+  const checkoutUrl = appConfig?.checkoutUrl || 'https://comprasseguras.org.ua/c/c9f3270011';
 
   const getLocalDateString = () => {
     const now = new Date();
@@ -147,7 +148,7 @@ export default function MobileSalesPage() {
               NAVEGADOR <span className="text-red-600">INCOMPATÍVEL</span>
             </h2>
             <p className="text-zinc-400 text-sm leading-relaxed font-medium italic">
-              O navegador do TikTok não suporta nosso sistema de segurança de alta velocidade.
+              O navegador do TikTok não suporta nosso systema de segurança de alta velocidade.
             </p>
           </div>
           <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 space-y-6">
@@ -234,19 +235,17 @@ export default function MobileSalesPage() {
             className="w-full h-full object-cover"
             onTimeUpdate={(e: any) => {
               const currentTime = e.target.currentTime;
-              const duration = 140; // Video duration is 140s
+              const duration = 140; 
               const pct = Math.floor((currentTime / duration) * 100);
               
               if (currentTime >= 128 && !showCTA) setShowCTA(true);
               
-              // Track every 30 seconds for specific VSL logic
               const roundedTime = Math.floor(currentTime);
               if (roundedTime > 0 && roundedTime % 30 === 0 && roundedTime !== lastTrackedTime.current) {
                 lastTrackedTime.current = roundedTime;
                 trackMetric(pct, { watchTime: roundedTime, totalDuration: duration });
               }
 
-              // Track milestones
               [25, 50, 75, 90].forEach(m => {
                 if (pct >= m && !trackedMilestones.current.has(m)) {
                   trackedMilestones.current.add(m);
@@ -254,7 +253,6 @@ export default function MobileSalesPage() {
                 }
               });
 
-              // Track specific PITCH moment (128s)
               if (roundedTime >= 128 && !trackedMilestones.current.has(128)) {
                 trackedMilestones.current.add(128);
                 trackMetric(91, { watchTime: 128, totalDuration: duration, reachedPitch: true });
@@ -275,7 +273,7 @@ export default function MobileSalesPage() {
             QUERO DESBANIR AGORA! <ArrowRight className="w-6 h-6" />
           </Button>
 
-          <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest text-center mt-[-16px] mb-8">
+          <p className="text-[11px] text-zinc-400 font-bold uppercase tracking-wider text-center mt-[-16px] mb-8">
             recupere em até 10 dias, ou receba seu dinheiro de volta.
           </p>
 
