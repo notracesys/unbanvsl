@@ -84,10 +84,15 @@ export default function MobileSalesPage() {
 
   useEffect(() => {
     if (showCTA && ctaRef.current) {
-      // Ajustado para 'center' para que o botão fique no foco principal da tela
+      // Ajuste manual de rolagem para que a tela não desça demais
       setTimeout(() => {
-        ctaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 300);
+        const element = ctaRef.current;
+        if (element) {
+          const yOffset = -60; // Offset para deixar o botão um pouco mais alto na visão
+          const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+      }, 400);
     }
   }, [showCTA]);
 
