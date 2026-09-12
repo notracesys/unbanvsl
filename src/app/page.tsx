@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { Volume2, Lock, Play, AlertTriangle, RefreshCcw, ArrowRight, MoreHorizontal, ExternalLink, ShieldCheck, CheckCircle2, Shield } from 'lucide-react';
+import { Volume2, Lock, Play, AlertTriangle, RefreshCcw, ArrowRight, MoreHorizontal, ExternalLink, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useFirestore, useDoc } from '@/firebase';
 import MuxPlayer from '@mux/mux-player-react';
@@ -147,7 +147,7 @@ export default function MobileSalesPage() {
               NAVEGADOR <span className="text-red-600">INCOMPATÍVEL</span>
             </h2>
             <p className="text-zinc-400 text-sm leading-relaxed font-medium italic">
-              O navegador do TikTok não suporta nosso systema de segurança de alta velocidade.
+              O navegador do TikTok não suporta nosso sistema de segurança de alta velocidade.
             </p>
           </div>
           <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 space-y-6">
@@ -186,7 +186,7 @@ export default function MobileSalesPage() {
               <p>Ao utilizar este site ou contratar quaisquer serviços nele oferecidos, o CLIENTE declara ter lido, compreendido e concordado integralmente com estes termos.</p>
               <div className="bg-red-600/10 p-5 rounded-2xl border border-red-600/20 mt-8">
                 <p className="text-zinc-300 font-bold italic underline decoration-red-600/50 leading-relaxed text-justify">
-                  É expressamente reconhecido que o CONTRATADO não garante, promete ou assegura a reversão, desbloqueio, recuperação ou restabelecimentos de contas, itens virtuais, progressos, patentes ou quaisquer ativos digitais, visto que a decisão final e sovereign pertence exclusivamente à plataforma responsável (Garena).
+                  É expressamente reconhecido que o CONTRATADO não garante, promete ou assegura a reversão, desbloqueio, recuperação ou restabelecimentos de contas, itens virtuais, progressos, patentes ou quaisquer ativos digitais, visto que a decisão final e soberana pertence exclusivamente à plataforma responsável (Garena).
                 </p>
               </div>
             </div>
@@ -279,6 +279,8 @@ export default function MobileSalesPage() {
           <div className="mt-4 w-full space-y-4">
             <FeedbackCard img={getImg('feedback-1')?.imageUrl || '/feedback1.jpg'} name="Rdzinn" text="tmj ravena, vc é braba pkrl" />
             <FeedbackCard img={getImg('feedback-2')?.imageUrl || '/feedback2.jpg'} name="yuri7x" text="tou chorando muito ravena, muito obrigado de verdade mesmo, ja tinha gastado muito dinheiro nela" />
+            <FeedbackCard img={getImg('feedback-3')?.imageUrl || '/feedback3.jpg'} name="Vitinho" text="Mano real oficial minha conta voltou ontem a noite vlw msm ravena" />
+            <FeedbackCard img={getImg('feedback-4')?.imageUrl || '/feedback4.jpg'} name="Carol_FF" text="Eu tava morrendo de medo de ser golpe mas deu super certo! Recomendo dms" />
           </div>
         </section>
       )}
