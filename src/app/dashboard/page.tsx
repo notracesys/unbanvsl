@@ -6,14 +6,14 @@ import { useFirestore, useCollection, useDoc, useUser, useAuth } from '@/firebas
 import { collection, query, limit, doc, setDoc, serverTimestamp, where } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, 
-  Cell, AreaChart, Area, CartesianGrid, LabelList 
+  AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, 
+  CartesianGrid 
 } from 'recharts';
 import { 
-  LogOut, Save, Loader2, AlertCircle, Play, 
-  CheckCircle2, Clock, Zap, Target, MousePointer2, TrendingDown, Users, Flame
+  LogOut, Loader2, AlertCircle, Play, 
+  Zap, Target, MousePointer2, TrendingDown, Users, Flame, ChevronRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -61,14 +61,13 @@ export default function VSLAnalyticsDashboard() {
   const stats = useMemo(() => {
     if (!rawMetrics || rawMetrics.length === 0) return null;
     
-    let started = 0, cta = 0, reachedPitch = 0, reachedHook = 0;
+    let started = 0, cta = 0, reachedPitch = 0;
     
     const milestones = [
       { label: '0s', time: 0, count: 0 },
       { label: '30s', time: 30, count: 0 },
       { label: '60s', time: 60, count: 0 },
       { label: '90s', time: 90, count: 0 },
-      { label: '120s', time: 120, count: 0 },
       { label: 'PITCH', time: 128, count: 0 },
       { label: 'FIM', time: 140, count: 0 }
     ];
@@ -78,33 +77,29 @@ export default function VSLAnalyticsDashboard() {
       if (m.started) {
         started++;
         milestones.forEach(milestone => {
-          if (wt >= milestone.time) {
-            milestone.count++;
-            if (milestone.time === 30) reachedHook++;
-          }
+          if (wt >= milestone.time) milestone.count++;
         });
         if (wt >= 128 || m.reachedPitch) reachedPitch++;
       }
       if (m.clickedCTA) cta++;
     });
 
-    const hookRate = started > 0 ? ((reachedHook / started) * 100).toFixed(1) : '0';
     const playToPitch = started > 0 ? ((reachedPitch / started) * 100).toFixed(1) : '0';
     const pitchToCta = reachedPitch > 0 ? ((cta / reachedPitch) * 100).toFixed(1) : '0';
+    const globalConv = started > 0 ? ((cta / started) * 100).toFixed(2) : '0';
 
     return {
-      total: rawMetrics.length,
       started,
-      hookRate,
       reachedPitch,
       ctaClicks: cta,
       playToPitch,
       pitchToCta,
+      globalConv,
       retentionData: milestones,
       funnel: [
-        { name: 'Plays', value: started, label: 'Visualizações', fill: '#18181b' },
-        { name: 'Pitch', value: reachedPitch, label: 'Oferta (128s)', fill: '#ef4444' },
-        { name: 'CTA', value: cta, label: 'Cliques', fill: '#22c55e' }
+        { label: 'Total Plays', value: started, fill: '#18181b' },
+        { label: 'Viram a Oferta', value: reachedPitch, fill: '#ef4444' },
+        { label: 'Clicaram no Botão', value: cta, fill: '#22c55e' }
       ]
     };
   }, [rawMetrics]);
@@ -117,10 +112,9 @@ export default function VSLAnalyticsDashboard() {
     if (!firestore || !configRef) return;
     setIsSaving(true);
     setDoc(configRef, { [field]: value, updatedAt: serverTimestamp() }, { merge: true })
-      .then(() => toast({ title: "Atualizado", description: "Link salvo com sucesso." }))
+      .then(() => toast({ title: "Sucesso", description: "Link atualizado no banco de dados." }))
       .catch((e) => {
-        console.error("Firestore Save Error:", e);
-        toast({ variant: "destructive", title: "Erro de Cota", description: "O limite diário do Google foi atingido. Tente novamente amanhã." });
+        toast({ variant: "destructive", title: "Erro de Permissão", description: "Cota do Google Cloud excedida ou sem permissão." });
       })
       .finally(() => setIsSaving(false));
   };
@@ -137,9 +131,9 @@ export default function VSLAnalyticsDashboard() {
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-zinc-900 pb-8 gap-6">
           <div className="space-y-1">
             <h1 className="text-2xl font-black italic uppercase tracking-tighter flex items-center gap-2">
-              <Zap className="text-red-600 fill-current w-6 h-6" /> VSL<span className="text-red-600">.TRACKER</span>
+              <Zap className="text-red-600 fill-current w-6 h-6" /> VSL<span className="text-red-600">.METRICS</span>
             </h1>
-            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Monitoramento Cirúrgico (Pitch 128s)</p>
+            <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Monitoramento Profissional (Pitch 128s)</p>
           </div>
           
           <div className="flex gap-3 w-full md:w-auto">
@@ -158,34 +152,32 @@ export default function VSLAnalyticsDashboard() {
         {isQuotaExceeded && (
           <div className="bg-red-600/10 border border-red-600/20 p-4 rounded-2xl flex items-center gap-4">
             <AlertCircle className="w-5 h-5 text-red-600" />
-            <p className="text-xs font-bold uppercase text-red-500">Google Cloud: Cota de Leitura Excedida. Ative o plano Blaze.</p>
+            <p className="text-xs font-bold uppercase text-red-500">Atenção: Cota de Leitura do Firebase Excedida. Dados podem estar desatualizados.</p>
           </div>
         )}
 
         <Tabs defaultValue="stats" className="w-full space-y-6">
           <TabsList className="bg-zinc-900 border border-zinc-800 p-1 rounded-xl">
-            <TabsTrigger value="stats" className="rounded-lg font-bold text-[10px] uppercase tracking-widest px-6">Análise VSL</TabsTrigger>
-            <TabsTrigger value="config" className="rounded-lg font-bold text-[10px] uppercase tracking-widest px-6">Configurar Links</TabsTrigger>
+            <TabsTrigger value="stats" className="rounded-lg font-bold text-[10px] uppercase tracking-widest px-6 data-[state=active]:bg-red-600">Desempenho</TabsTrigger>
+            <TabsTrigger value="config" className="rounded-lg font-bold text-[10px] uppercase tracking-widest px-6 data-[state=active]:bg-red-600">Checkout</TabsTrigger>
           </TabsList>
 
           <TabsContent value="stats" className="space-y-6">
             {stats ? (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <StatCard title="Retenção Hook" value={`${stats.hookRate}%`} sub="Primeiros 30s" icon={<Flame className="text-orange-500" />} />
-                  <StatCard title="Play to Pitch" value={`${stats.playToPitch}%`} sub="Até a Oferta" icon={<Target className="text-red-600" />} />
-                  <StatCard title="Cliques CTA" value={stats.ctaClicks} sub="Vendas Iniciadas" icon={<MousePointer2 className="text-green-500" />} />
-                  <StatCard title="Conversão Pitch" value={`${stats.pitchToCta}%`} sub="Eficiência Oferta" icon={<Zap className="text-yellow-500" />} highlight />
+                  <StatCard title="Total Plays" value={stats.started} sub="Leads Únicos" icon={<Play className="text-zinc-500" />} />
+                  <StatCard title="Play to Pitch" value={`${stats.playToPitch}%`} sub="Retenção até Oferta" icon={<Target className="text-orange-500" />} />
+                  <StatCard title="Cliques CTA" value={stats.ctaClicks} sub="Botão de Compra" icon={<MousePointer2 className="text-green-500" />} />
+                  <StatCard title="Conversão Pitch" value={`${stats.pitchToCta}%`} sub="Poder da Oferta" icon={<Zap className="text-yellow-500" />} highlight />
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  {/* Gráfico de Retenção Cirúrgica */}
+                  {/* Gráfico de Retenção */}
                   <Card className="lg:col-span-2 bg-zinc-900/40 border-zinc-800 rounded-[2.5rem] overflow-hidden">
-                    <CardHeader className="p-8 pb-2">
-                      <div className="flex justify-between items-center">
-                        <CardTitle className="text-xs font-black uppercase tracking-widest text-zinc-500">Curva de Retenção Acumulada</CardTitle>
-                        <Badge className="bg-red-600/20 text-red-500 text-[8px] border-none">128s = Pitch</Badge>
-                      </div>
+                    <CardHeader className="p-8 pb-2 flex flex-row items-center justify-between">
+                      <CardTitle className="text-xs font-black uppercase tracking-widest text-zinc-500">Curva de Retenção Acumulada</CardTitle>
+                      <span className="text-[8px] font-black bg-red-600/20 text-red-500 px-2 py-1 rounded">OFERTA AOS 128S</span>
                     </CardHeader>
                     <CardContent className="h-[350px] p-8 pt-4">
                       <ResponsiveContainer width="100%" height="100%">
@@ -204,16 +196,16 @@ export default function VSLAnalyticsDashboard() {
                             itemStyle={{ color: '#fff', fontSize: '10px', fontWeight: 'bold' }}
                             labelStyle={{ color: '#ef4444', fontWeight: '900', marginBottom: '4px' }}
                           />
-                          <Area type="monotone" dataKey="count" stroke="#ef4444" strokeWidth={4} fill="url(#vslGradient)" animationDuration={1500} />
+                          <Area type="monotone" dataKey="count" stroke="#ef4444" strokeWidth={4} fill="url(#vslGradient)" animationDuration={1000} />
                         </AreaChart>
                       </ResponsiveContainer>
                     </CardContent>
                   </Card>
 
-                  {/* Funil de Drop-off */}
+                  {/* Funil de Drop-off Cirúrgico */}
                   <Card className="bg-zinc-900/40 border-zinc-800 rounded-[2.5rem] overflow-hidden flex flex-col">
                     <CardHeader className="p-8 pb-2">
-                      <CardTitle className="text-xs font-black uppercase tracking-widest text-zinc-500">Funil de Quebra</CardTitle>
+                      <CardTitle className="text-xs font-black uppercase tracking-widest text-zinc-500">Eficiência do Funil</CardTitle>
                     </CardHeader>
                     <CardContent className="flex-1 p-8 space-y-8">
                       {stats.funnel.map((step, i) => (
@@ -222,7 +214,7 @@ export default function VSLAnalyticsDashboard() {
                             <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">{step.label}</span>
                             <span className="text-xl font-black italic">{step.value}</span>
                           </div>
-                          <div className="h-5 bg-black rounded-full overflow-hidden border border-zinc-800 relative">
+                          <div className="h-4 bg-black rounded-full overflow-hidden border border-zinc-800 relative">
                             <div 
                               className="h-full transition-all duration-1000 ease-out"
                               style={{ 
@@ -232,19 +224,17 @@ export default function VSLAnalyticsDashboard() {
                             />
                           </div>
                           {i > 0 && (
-                            <div className="flex items-center gap-2 text-[9px] font-bold text-zinc-600 uppercase bg-zinc-950/50 p-2 rounded-lg border border-zinc-900/50">
+                            <div className="flex items-center gap-2 text-[9px] font-bold text-zinc-600 uppercase">
                               <TrendingDown className="w-3 h-3 text-red-600" />
-                              <span>{((step.value / stats.funnel[i-1].value) * 100).toFixed(1)}% de eficiência da etapa anterior</span>
+                              <span>{((step.value / stats.funnel[i-1].value) * 100).toFixed(1)}% chegaram aqui da etapa anterior</span>
                             </div>
                           )}
                         </div>
                       ))}
                       
-                      <div className="mt-4 p-5 bg-gradient-to-br from-zinc-900 to-black border border-zinc-800 rounded-3xl">
-                        <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1 text-center">Conversão Global (Play -> CTA)</p>
-                        <p className="text-3xl font-black italic text-center text-green-500">
-                          {((stats.ctaClicks / stats.started) * 100).toFixed(2)}%
-                        </p>
+                      <div className="mt-8 p-6 bg-gradient-to-br from-zinc-900 to-black border border-zinc-800 rounded-3xl text-center">
+                        <p className="text-[9px] font-black text-zinc-500 uppercase tracking-widest mb-1">Conversão Global (Play -> CTA)</p>
+                        <p className="text-3xl font-black italic text-green-500">{stats.globalConv}%</p>
                       </div>
                     </CardContent>
                   </Card>
@@ -253,30 +243,28 @@ export default function VSLAnalyticsDashboard() {
             ) : (
               <div className="h-96 flex flex-col items-center justify-center border-2 border-dashed border-zinc-900 rounded-[3rem] bg-zinc-950/20">
                 <Users className="w-12 h-12 text-zinc-800 mb-4" />
-                <p className="text-zinc-600 font-black uppercase tracking-widest text-[10px]">Aguardando dados de visualização para {selectedDate}...</p>
+                <p className="text-zinc-600 font-black uppercase tracking-widest text-[10px]">Aguardando dados de visualização para hoje...</p>
               </div>
             )}
           </TabsContent>
 
           <TabsContent value="config" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <ConfigItem 
+              <ConfigCard 
                 title="Checkout Principal" 
-                desc="Link do botão que aparece aos 128s"
+                desc="Aparece aos 128s da VSL"
                 value={newCheckoutUrl} 
                 setValue={setNewCheckoutUrl} 
                 onSave={() => handleSave('checkoutUrl', newCheckoutUrl)}
                 isSaving={isSaving}
-                isDisabled={isQuotaExceeded}
               />
-              <ConfigItem 
+              <ConfigCard 
                 title="Checkout Upsell" 
-                desc="Link da oferta secundária"
+                desc="Página após a compra principal"
                 value={newUpsellUrl} 
                 setValue={setNewUpsellUrl} 
                 onSave={() => handleSave('upsellCheckoutUrl', newUpsellUrl)}
                 isSaving={isSaving}
-                isDisabled={isQuotaExceeded}
               />
             </div>
           </TabsContent>
@@ -299,7 +287,7 @@ function StatCard({ title, value, sub, icon, highlight = false }: any) {
   );
 }
 
-function ConfigItem({ title, desc, value, setValue, onSave, isSaving, isDisabled }: any) {
+function ConfigCard({ title, desc, value, setValue, onSave, isSaving }: any) {
   return (
     <Card className="bg-zinc-900/40 border-zinc-800 rounded-[2.5rem] p-10 space-y-6 shadow-xl">
       <div>
@@ -309,27 +297,15 @@ function ConfigItem({ title, desc, value, setValue, onSave, isSaving, isDisabled
       <Input 
         value={value} 
         onChange={(e) => setValue(e.target.value)} 
-        disabled={isDisabled}
-        className="bg-black border-zinc-800 h-16 rounded-2xl text-xs font-mono focus:ring-red-600 disabled:opacity-50"
+        className="bg-black border-zinc-800 h-16 rounded-2xl text-xs font-mono focus:ring-red-600"
       />
       <Button 
         onClick={onSave} 
-        disabled={isSaving || isDisabled} 
-        className="w-full h-16 bg-white text-black hover:bg-zinc-200 font-black uppercase italic rounded-2xl transition-all shadow-[0_4px_20px_rgba(255,255,255,0.1)]"
+        disabled={isSaving} 
+        className="w-full h-16 bg-white text-black hover:bg-zinc-200 font-black uppercase italic rounded-2xl transition-all"
       >
         {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Atualizar Link'}
       </Button>
-      {isDisabled && (
-        <p className="text-[9px] text-red-500 font-black uppercase text-center">Cota Excedida: Salvamento desabilitado pelo Google.</p>
-      )}
     </Card>
-  );
-}
-
-function Badge({ children, className }: { children: React.ReactNode, className?: string }) {
-  return (
-    <span className={`px-2 py-0.5 rounded font-black uppercase tracking-widest ${className}`}>
-      {children}
-    </span>
   );
 }
