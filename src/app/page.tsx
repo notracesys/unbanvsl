@@ -268,17 +268,10 @@ export default function MobileSalesPage() {
 
       {showCTA && (
         <section ref={ctaRef} className="w-full max-w-[360px] mt-8 flex flex-col items-center animate-in fade-in slide-in-from-bottom-4">
-          <Button onClick={handleCtaClick} className="w-full h-16 text-xl font-black uppercase italic tracking-tighter bg-[#22c55e] hover:bg-[#16a34a] text-white rounded-2xl button-pulse gap-2 mb-4">
+          <Button onClick={handleCtaClick} className="w-full h-16 text-xl font-black uppercase italic tracking-tighter bg-[#22c55e] hover:bg-[#16a34a] text-white rounded-2xl button-pulse gap-2 mb-8">
             QUERO DESBANIR AGORA! <ArrowRight className="w-6 h-6" />
           </Button>
 
-          <div className="flex items-center gap-2 mb-8 animate-pulse">
-            <Shield className="w-4 h-4 text-green-500" />
-            <p className="text-[10px] text-zinc-400 font-black uppercase tracking-widest text-center">
-              Recupere em até 10 dias, ou receba seu dinheiro de volta.
-            </p>
-          </div>
-          
           <div className="mt-4 w-full space-y-4">
             <FeedbackCard img={getImg('feedback-1')?.imageUrl || '/feedback1.jpg'} name="JOÃO S." text="Funcionou na hora! Já recuperei minha conta." />
             <FeedbackCard img={getImg('feedback-2')?.imageUrl || '/feedback2.jpg'} name="MATHEUS R." text="Moleque do céu, deu certo mesmo! Minha conta lvl 70 de volta." />
