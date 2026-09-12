@@ -207,6 +207,9 @@ export default function MobileSalesPage() {
         <h1 className="text-white text-[1.4rem] font-black italic uppercase tracking-tighter leading-[1.1]">
           ESSE MACETE IRÁ <span className="text-red-600 text-[1.6rem] animate-pulse">SAIR DO AR A QUALQUER MOMENTO.</span>
         </h1>
+        <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest px-4 leading-tight">
+          já solicitaram a queda do site, então aproveite enquanto há tempo
+        </p>
       </header>
 
       <section className="w-full relative group max-w-[320px] mb-12">
