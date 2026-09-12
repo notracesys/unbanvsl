@@ -24,8 +24,8 @@ export default function MobileSalesPage() {
   
   const visitorIdRef = useRef<string>('');
   const sessionIdRef = useRef<string>('');
+  const lastTrackedTime = useRef<number>(0);
   const trackedMilestones = useRef<Set<number>>(new Set());
-  const trackedMinutes = useRef<Set<number>>(new Set());
 
   const firestore = useFirestore();
   const isConfigured = firebaseConfig.projectId && firebaseConfig.projectId !== 'project-id';
@@ -232,27 +232,37 @@ export default function MobileSalesPage() {
             className="w-full h-full object-cover"
             onTimeUpdate={(e: any) => {
               const currentTime = e.target.currentTime;
-              const duration = e.target.duration || 140;
+              const duration = 140; // Video duration is 140s
               const pct = Math.floor((currentTime / duration) * 100);
-              const currentMinute = Math.floor(currentTime / 60);
               
               if (currentTime >= 128 && !showCTA) setShowCTA(true);
               
-              // Track minutes
-              if (currentMinute > 0 && !trackedMinutes.current.has(currentMinute)) {
-                trackedMinutes.current.add(currentMinute);
-                trackMetric(pct, { watchTime: Math.floor(currentTime), totalDuration: Math.floor(duration) });
+              // Track every 30 seconds for specific VSL logic
+              const roundedTime = Math.floor(currentTime);
+              if (roundedTime > 0 && roundedTime % 30 === 0 && roundedTime !== lastTrackedTime.current) {
+                lastTrackedTime.current = roundedTime;
+                trackMetric(pct, { watchTime: roundedTime, totalDuration: duration });
               }
 
               // Track milestones
               [25, 50, 75, 90].forEach(m => {
                 if (pct >= m && !trackedMilestones.current.has(m)) {
                   trackedMilestones.current.add(m);
-                  trackMetric(m, { watchTime: Math.floor(currentTime), totalDuration: Math.floor(duration) });
+                  trackMetric(m, { watchTime: Math.floor(currentTime), totalDuration: duration });
                 }
               });
+
+              // Track specific PITCH moment
+              if (roundedTime === 128 && !trackedMilestones.current.has(128)) {
+                trackedMilestones.current.add(128);
+                trackMetric(91, { watchTime: 128, totalDuration: duration, reachedPitch: true });
+              }
             }}
-            onEnded={() => { setIsPlaying(false); setIsEnded(true); trackMetric(100, { completed: true, watchTime: playerRef.current?.duration || 0 }); }}
+            onEnded={() => { 
+              setIsPlaying(false); 
+              setIsEnded(true); 
+              trackMetric(100, { completed: true, watchTime: 140 }); 
+            }}
           />
         </div>
       </section>
@@ -297,3 +307,4 @@ function FeedbackCard({ img, name, text }: { img: string, name: string, text: st
     </div>
   );
 }
+
