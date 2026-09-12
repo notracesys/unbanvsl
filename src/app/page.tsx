@@ -272,6 +272,10 @@ export default function MobileSalesPage() {
             QUERO DESBANIR AGORA! <ArrowRight className="w-6 h-6" />
           </Button>
 
+          <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest text-center mt-[-16px] mb-8">
+            recupere em até 10 dias, ou receba seu dinheiro de volta.
+          </p>
+
           <div className="mt-4 w-full space-y-4">
             <FeedbackCard img={getImg('feedback-1')?.imageUrl || '/feedback1.jpg'} name="JOÃO S." text="Funcionou na hora! Já recuperei minha conta." />
             <FeedbackCard img={getImg('feedback-2')?.imageUrl || '/feedback2.jpg'} name="MATHEUS R." text="Moleque do céu, deu certo mesmo! Minha conta lvl 70 de volta." />
