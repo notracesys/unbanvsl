@@ -71,7 +71,8 @@ export default function MobileSalesPage() {
         dateStr: getLocalDateString(),
         device: /Mobi|Android/i.test(navigator.userAgent) ? 'mobile' : 'desktop',
         updatedAt: serverTimestamp(),
-        started: true
+        started: true,
+        watchTime: 0
       }, { merge: true }).catch(() => {});
     }
 
@@ -238,11 +239,11 @@ export default function MobileSalesPage() {
               [25, 50, 75, 90].forEach(m => {
                 if (pct >= m && !trackedMilestones.current.has(m)) {
                   trackedMilestones.current.add(m);
-                  trackMetric(m);
+                  trackMetric(m, { watchTime: Math.floor(currentTime), totalDuration: Math.floor(duration) });
                 }
               });
             }}
-            onEnded={() => { setIsPlaying(false); setIsEnded(true); trackMetric(100, { completed: true }); }}
+            onEnded={() => { setIsPlaying(false); setIsEnded(true); trackMetric(100, { completed: true, watchTime: playerRef.current?.duration || 0 }); }}
           />
         </div>
       </section>
