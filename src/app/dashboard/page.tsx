@@ -64,13 +64,26 @@ export default function VSLAnalyticsDashboard() {
     
     let started = 0, p25 = 0, p50 = 0, p75 = 0, p90 = 0, p100 = 0, cta = 0;
     let totalWatchTime = 0;
-    let earlyExit = 0; // Saiu antes de 30 segundos
+    let earlyExit = 0;
     
-    // Buckets de tempo (Minutos)
-    const minuteBuckets: Record<string, number> = {};
+    // Calcular a retenção por minuto (quantas pessoas alcançaram pelo menos X minutos)
+    const maxMinute = 20; // Limite visual do gráfico
+    const minuteCounts = new Array(maxMinute + 1).fill(0);
 
     rawMetrics.forEach((m: any) => {
-      if (m.started) started++;
+      if (m.started) {
+        started++;
+        // Incrementa todos os minutos que o usuário assistiu
+        const watchMinutes = Math.floor((m.watchTime || 0) / 60);
+        for (let i = 0; i <= Math.min(watchMinutes, maxMinute); i++) {
+          minuteCounts[i]++;
+        }
+      }
+      
+      if (earlyExit < 1) { // Só conta saída precoce se começou e parou antes de 30s
+        if (m.started && (m.watchTime || 0) < 30) earlyExit++;
+      }
+      
       if (m.percentage >= 25) p25++;
       if (m.percentage >= 50) p50++;
       if (m.percentage >= 75) p75++;
@@ -78,26 +91,19 @@ export default function VSLAnalyticsDashboard() {
       if (m.percentage >= 100 || m.completed) p100++;
       if (m.clickedCTA) cta++;
       
-      const watchTime = m.watchTime || 0;
-      totalWatchTime += watchTime;
-      if (watchTime < 30 && m.started) earlyExit++;
-
-      // Agrupar por minuto
-      const minute = Math.floor(watchTime / 60);
-      const label = `${minute}m`;
-      minuteBuckets[label] = (minuteBuckets[label] || 0) + 1;
+      totalWatchTime += (m.watchTime || 0);
     });
 
     const avgWatchTime = started > 0 ? Math.floor(totalWatchTime / started) : 0;
     
-    // Formatar buckets para o gráfico
-    const watchTimeData = Object.keys(minuteBuckets)
-      .sort((a, b) => parseInt(a) - parseInt(b))
-      .map(key => ({
-        minute: key,
-        count: minuteBuckets[key],
+    // Formatar buckets para o gráfico de barras (Minutos)
+    const watchTimeData = minuteCounts
+      .map((count, minute) => ({
+        minute: `${minute}m`,
+        count,
         fill: '#ef4444'
-      }));
+      }))
+      .filter(d => d.count > 0 || parseInt(d.minute) < 5); // Mostra até o minuto 5 mesmo que vazio
 
     return {
       total: rawMetrics.length,
@@ -213,7 +219,8 @@ export default function VSLAnalyticsDashboard() {
                   {/* Gráfico de Retenção */}
                   <Card className="lg:col-span-7 bg-zinc-900/20 border-zinc-800 rounded-[2.5rem]">
                     <CardHeader className="p-8">
-                      <CardTitle className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Curva de Retenção (%)</CardTitle>
+                      <CardTitle className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Fluxo de Marcos (%)</CardTitle>
+                      <CardDescription className="text-zinc-500 text-xs mt-1">Percentual do vídeo assistido</CardDescription>
                     </CardHeader>
                     <CardContent className="h-[350px]">
                       <ResponsiveContainer width="100%" height="100%">
@@ -234,18 +241,19 @@ export default function VSLAnalyticsDashboard() {
                     </CardContent>
                   </Card>
 
-                  {/* Visualização até Minutos */}
+                  {/* Visualização por Minuto (Retenção Real) */}
                   <Card className="lg:col-span-5 bg-zinc-900/20 border-zinc-800 rounded-[2.5rem]">
                     <CardHeader className="p-8">
-                      <CardTitle className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Retenção por Minuto</CardTitle>
-                      <CardDescription className="text-zinc-500 text-xs mt-1">Quantas pessoas chegaram até qual minuto do vídeo</CardDescription>
+                      <CardTitle className="text-[10px] font-black uppercase tracking-[0.3em] text-zinc-500">Retenção Acumulada (Leads)</CardTitle>
+                      <CardDescription className="text-zinc-500 text-xs mt-1">Quantos leads alcançaram cada minuto do vídeo</CardDescription>
                     </CardHeader>
                     <CardContent className="h-[350px]">
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={stats.watchTimeData}>
                           <XAxis dataKey="minute" axisLine={false} tickLine={false} tick={{ fill: '#71717a', fontSize: 10 }} />
+                          <Tooltip contentStyle={{ backgroundColor: '#09090b', border: '1px solid #27272a', borderRadius: '16px' }} />
                           <Bar dataKey="count" radius={[8, 8, 0, 0]}>
-                            {stats.watchTimeData.map((entry, index) => <Cell key={index} fill="#ef4444" fillOpacity={1 - (index * 0.1)} />)}
+                            {stats.watchTimeData.map((entry, index) => <Cell key={index} fill="#ef4444" fillOpacity={Math.max(0.3, 1 - (index * 0.05))} />)}
                             <LabelList dataKey="count" position="top" fill="#71717a" style={{ fontSize: 10 }} />
                           </Bar>
                         </BarChart>

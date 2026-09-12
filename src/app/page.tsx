@@ -25,6 +25,7 @@ export default function MobileSalesPage() {
   const visitorIdRef = useRef<string>('');
   const sessionIdRef = useRef<string>('');
   const trackedMilestones = useRef<Set<number>>(new Set());
+  const trackedMinutes = useRef<Set<number>>(new Set());
 
   const firestore = useFirestore();
   const isConfigured = firebaseConfig.projectId && firebaseConfig.projectId !== 'project-id';
@@ -233,9 +234,17 @@ export default function MobileSalesPage() {
               const currentTime = e.target.currentTime;
               const duration = e.target.duration || 140;
               const pct = Math.floor((currentTime / duration) * 100);
+              const currentMinute = Math.floor(currentTime / 60);
               
               if (currentTime >= 128 && !showCTA) setShowCTA(true);
               
+              // Track minutes
+              if (currentMinute > 0 && !trackedMinutes.current.has(currentMinute)) {
+                trackedMinutes.current.add(currentMinute);
+                trackMetric(pct, { watchTime: Math.floor(currentTime), totalDuration: Math.floor(duration) });
+              }
+
+              // Track milestones
               [25, 50, 75, 90].forEach(m => {
                 if (pct >= m && !trackedMilestones.current.has(m)) {
                   trackedMilestones.current.add(m);
