@@ -84,9 +84,10 @@ export default function MobileSalesPage() {
 
   useEffect(() => {
     if (showCTA && ctaRef.current) {
+      // Ajustado para 'center' para que o botão fique no foco principal da tela
       setTimeout(() => {
-        ctaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 100);
+        ctaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 300);
     }
   }, [showCTA]);
 
