@@ -22,8 +22,8 @@ export default function AdvancedAnalyticsDashboard() {
   
   const [mounted, setMounted] = useState(false);
   const [selectedDate, setSelectedDate] = useState('');
-  const [newCheckoutUrl, setNewCheckoutUrl] = useState('https://comprasseguras.org.ua/c/c9f3270011');
-  const [newUpsellUrl, setNewUpsellUrl] = useState('https://comprasseguras.org.ua/c/f901da2ee5');
+  const [newCheckoutUrl, setNewCheckoutUrl] = useState('');
+  const [newUpsellUrl, setNewUpsellUrl] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -111,7 +111,7 @@ export default function AdvancedAnalyticsDashboard() {
         <header className="flex flex-col md:flex-row justify-between border-b border-zinc-900 pb-8 gap-4">
           <div className="space-y-1">
             <h1 className="text-4xl font-black italic uppercase tracking-tighter">VTURB <span className="text-red-600">ANALYTICS</span></h1>
-            <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Painel de Controle</p>
+            <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Painel de Controle Estratégico</p>
           </div>
           <div className="flex gap-3">
             <input 
@@ -138,7 +138,7 @@ export default function AdvancedAnalyticsDashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card className="bg-zinc-900/30 border-zinc-800 rounded-[2rem]">
-            <CardHeader><CardTitle className="text-xs font-black uppercase tracking-widest text-zinc-500">Checkout Principal</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Checkout Principal</CardTitle></CardHeader>
             <CardContent className="flex gap-2">
               <Input 
                 value={newCheckoutUrl} 
@@ -148,14 +148,14 @@ export default function AdvancedAnalyticsDashboard() {
               <Button 
                 onClick={() => handleSave('checkoutUrl', newCheckoutUrl)} 
                 disabled={isSaving} 
-                className="bg-green-600 h-12 px-6 rounded-xl"
+                className="bg-green-600 h-10 px-4 rounded-xl"
               >
                 <Save className="w-4 h-4"/>
               </Button>
             </CardContent>
           </Card>
           <Card className="bg-zinc-900/30 border-zinc-800 rounded-[2rem]">
-            <CardHeader><CardTitle className="text-xs font-black uppercase tracking-widest text-zinc-500">Checkout Upsell</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Checkout Upsell</CardTitle></CardHeader>
             <CardContent className="flex gap-2">
               <Input 
                 value={newUpsellUrl} 
@@ -165,7 +165,7 @@ export default function AdvancedAnalyticsDashboard() {
               <Button 
                 onClick={() => handleSave('upsellCheckoutUrl', newUpsellUrl)} 
                 disabled={isSaving} 
-                className="bg-orange-600 h-12 px-6 rounded-xl"
+                className="bg-orange-600 h-10 px-4 rounded-xl"
               >
                 <Save className="w-4 h-4"/>
               </Button>
@@ -173,78 +173,81 @@ export default function AdvancedAnalyticsDashboard() {
           </Card>
         </div>
 
-        {stats && (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard icon={<Users className="w-4 h-4 text-blue-500" />} label="Visitas" value={stats.total} />
-            <StatCard icon={<Play className="w-4 h-4 text-zinc-100" />} label="Taxa Play" value={`${stats.playRate}%`} />
-            <StatCard icon={<Activity className="w-4 h-4 text-red-500" />} label="Retenção 90%" value={`${stats.retention}%`} />
-            <StatCard icon={<CheckCircle2 className="w-4 h-4 text-green-500" />} label="Conversão" value={`${stats.conv}%`} highlight />
+        {stats ? (
+          <>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <StatCard icon={<Users className="w-4 h-4 text-blue-500" />} label="Visitas Totais" value={stats.total} />
+              <StatCard icon={<Play className="w-4 h-4 text-zinc-100" />} label="Taxa de Play" value={`${stats.playRate}%`} />
+              <StatCard icon={<Activity className="w-4 h-4 text-red-500" />} label="Retenção 90%" value={`${stats.retention}%`} />
+              <StatCard icon={<CheckCircle2 className="w-4 h-4 text-green-500" />} label="Conversão Final" value={`${stats.conv}%`} highlight />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <Card className="lg:col-span-1 bg-zinc-900/30 border-zinc-800 rounded-[2rem] h-[400px]">
+                <CardHeader><CardTitle className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Funil de Vendas</CardTitle></CardHeader>
+                <CardContent className="h-full pb-12">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={stats.funnel} layout="vertical" margin={{ left: -20 }}>
+                      <XAxis type="number" hide />
+                      <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#71717a', fontSize: 10, fontWeight: 'bold' }} />
+                      <Bar dataKey="value" radius={[0, 10, 10, 0]} barSize={40}>
+                        {stats.funnel.map((entry, index) => <Cell key={index} fill={entry.fill} />)}
+                        <LabelList dataKey="value" position="right" fill="#fff" style={{ fontSize: 10, fontWeight: 'black' }} />
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+
+              <Card className="lg:col-span-2 bg-zinc-900/30 border-zinc-800 rounded-[2rem] h-[400px]">
+                <CardHeader>
+                  <CardTitle className="text-[10px] font-black uppercase tracking-widest text-zinc-500">Curva de Retenção do Vídeo (%)</CardTitle>
+                </CardHeader>
+                <CardContent className="h-full pb-12">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={stats.retentionCurve} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/>
+                          <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#18181b" vertical={false} />
+                      <XAxis 
+                        dataKey="name" 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{ fill: '#71717a', fontSize: 10, fontWeight: 'bold' }} 
+                      />
+                      <YAxis 
+                        axisLine={false} 
+                        tickLine={false} 
+                        tick={{ fill: '#71717a', fontSize: 10 }} 
+                      />
+                      <Tooltip 
+                        contentStyle={{ backgroundColor: '#09090b', border: '1px solid #27272a', borderRadius: '12px' }}
+                        itemStyle={{ color: '#fff', fontSize: '12px', fontWeight: 'bold' }}
+                      />
+                      <Area 
+                        type="monotone" 
+                        dataKey="value" 
+                        stroke="#ef4444" 
+                        strokeWidth={4}
+                        fillOpacity={1} 
+                        fill="url(#colorValue)" 
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            </div>
+          </>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-64 border border-dashed border-zinc-800 rounded-[2rem]">
+            <Activity className="w-12 h-12 text-zinc-800 mb-4 animate-pulse" />
+            <p className="text-zinc-500 font-bold uppercase tracking-widest text-xs">Aguardando tráfego real...</p>
           </div>
         )}
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <Card className="lg:col-span-1 bg-zinc-900/30 border-zinc-800 rounded-[2rem] h-[450px]">
-            <CardHeader><CardTitle className="text-xs font-black uppercase tracking-widest text-zinc-500">Funil de Vendas</CardTitle></CardHeader>
-            <CardContent className="h-full pb-12">
-              {stats && (
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={stats.funnel} layout="vertical" margin={{ left: -20 }}>
-                    <XAxis type="number" hide />
-                    <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#71717a', fontSize: 10, fontWeight: 'bold' }} />
-                    <Bar dataKey="value" radius={[0, 10, 10, 0]} barSize={40}>
-                      {stats.funnel.map((entry, index) => <Cell key={index} fill={entry.fill} />)}
-                      <LabelList dataKey="value" position="right" fill="#fff" style={{ fontSize: 10, fontWeight: 'black' }} />
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card className="lg:col-span-2 bg-zinc-900/30 border-zinc-800 rounded-[2rem] h-[450px]">
-            <CardHeader>
-              <CardTitle className="text-xs font-black uppercase tracking-widest text-zinc-500">Curva de Retenção do Vídeo</CardTitle>
-            </CardHeader>
-            <CardContent className="h-full pb-12">
-              {stats && (
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={stats.retentionCurve} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#18181b" vertical={false} />
-                    <XAxis 
-                      dataKey="name" 
-                      axisLine={false} 
-                      tickLine={false} 
-                      tick={{ fill: '#71717a', fontSize: 10, fontWeight: 'bold' }} 
-                    />
-                    <YAxis 
-                      axisLine={false} 
-                      tickLine={false} 
-                      tick={{ fill: '#71717a', fontSize: 10 }} 
-                    />
-                    <Tooltip 
-                      contentStyle={{ backgroundColor: '#09090b', border: '1px solid #27272a', borderRadius: '12px' }}
-                      itemStyle={{ color: '#fff', fontSize: '12px', fontWeight: 'bold' }}
-                    />
-                    <Area 
-                      type="monotone" 
-                      dataKey="value" 
-                      stroke="#ef4444" 
-                      strokeWidth={4}
-                      fillOpacity={1} 
-                      fill="url(#colorValue)" 
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              )}
-            </CardContent>
-          </Card>
-        </div>
       </div>
     </div>
   );
